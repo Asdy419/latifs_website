@@ -10,7 +10,7 @@ the folder name). Landscape phones are a primary target: **mobile performance an
 - `npm run typecheck`: TypeScript check only
 - `npm run build`: typecheck + production build to `dist/`; `npm run preview` serves it
 
-Git repo, pushed to https://github.com/Asdy419/portfolio (public, branch `main`). Commit before large changes.
+Git repo, pushed to https://github.com/Asdy419/latifs_website (public, branch `main`). Commit before large changes.
 
 ## Layout
 
