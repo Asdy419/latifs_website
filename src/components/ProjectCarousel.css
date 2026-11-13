@@ -9,7 +9,7 @@
  * divider, then the 86 × 93 picture panel. Boxes sit 108 apart (12px gaps).
  */
 .project-carousel {
-  --px: min(calc(100vw / 424), calc(var(--screen-h) / 240));
+  --px: var(--art-px);
   position: absolute;
   left: 0;
   right: 0;
@@ -61,26 +61,29 @@
   padding: calc(5 * var(--px));
   background: #000; /* the frame */
   box-shadow: calc(4 * var(--px)) calc(4 * var(--px)) 0 rgb(0 0 0 / 0.25);
+  will-change: transform; /* its own layer, for Safari (see ButtonMenu.css) */
 }
 
 /* ── Selected: the main menu's highlight (see ButtonMenu.css) ────────────────
-   A red copy of the box stays put behind it while the box lifts up-left, so
-   the red shows along the bottom and right; the copy pulses red ↔ pink.
-   Offsets are the menu's 1vw / 2.6vw / 1.1vw, in art px (1vw ≈ 4.24px). */
+   A red copy of the box sits 2px down-right while the box lifts 2px up-left,
+   so the red shows along the bottom and right; the copy pulses red ↔ pink.
+   The jump when it's selected is utils/selectJump.ts, as on the menu. */
 .project-card.selected .project-card-box {
-  transform: translate(calc(-4 * var(--px)), calc(-4 * var(--px)));
+  transform: translate(calc(-2 * var(--px)), calc(-2 * var(--px)));
   box-shadow: none; /* the highlight takes the shadow's place */
 }
 
 .project-card-highlight {
   position: absolute;
   inset: 0;
-  background: #b0020b;
+  background: #b00206;
   opacity: 0;
+  will-change: transform, opacity;
 }
 
 .project-card.selected .project-card-highlight {
   opacity: 1;
+  transform: translate(calc(2 * var(--px)), calc(2 * var(--px)));
 }
 
 /* the pulse: a pink layer fading in and out over the red (compositor-only, like the menu) */
@@ -88,39 +91,17 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: #e2b4e7;
+  background: #e8ace7;
   opacity: 0;
 }
 
 .project-card.selected .project-card-highlight::after {
-  animation: card-highlight-pulse 0.3s linear infinite alternate;
+  animation: card-highlight-pulse 0.267s linear infinite alternate;
 }
 
 @keyframes card-highlight-pulse {
   from { opacity: 0; }
   to   { opacity: 1; }
-}
-
-/* The menu's "split" bounce when a box becomes selected: the box jumps up-left
-   while its highlight dips down-right, then both settle */
-.project-card.splitting .project-card-box {
-  animation: card-split-over 0.18s ease both;
-}
-
-.project-card.splitting .project-card-highlight {
-  animation: card-split-under 0.18s ease both;
-}
-
-@keyframes card-split-over {
-  0%   { transform: translate(calc(-4 * var(--px)), calc(-4 * var(--px))); }
-  45%  { transform: translate(calc(-11 * var(--px)), calc(-11 * var(--px))); }
-  100% { transform: translate(calc(-4 * var(--px)), calc(-4 * var(--px))); }
-}
-
-@keyframes card-split-under {
-  0%   { transform: translate(0, 0); }
-  45%  { transform: translate(calc(5 * var(--px)), calc(5 * var(--px))); }
-  100% { transform: translate(0, 0); }
 }
 
 .project-card-banner {
@@ -140,7 +121,10 @@
   height: calc(12 * var(--px));
 }
 
+/* The picture panel (86×93): the project's own picture, and its languages in
+   the bottom-right corner */
 .project-card-picture {
+  position: relative;
   flex: 1;
   min-height: 0;
   overflow: hidden;
@@ -148,19 +132,46 @@
   box-shadow: inset calc(3 * var(--px)) calc(3 * var(--px)) 0 rgb(0 0 0 / 0.15);
 }
 
-.project-card-picture img {
-  display: block;
-  width: 100%;
-  height: 100%;
+/* The project's picture (Project.image): most of the panel, 78×70 art px,
+   fitted without cropping (the language logos tuck into the corner below) */
+.project-card-image {
+  position: absolute;
+  left: calc(4 * var(--px));
+  top: calc(4 * var(--px));
+  width: calc(78 * var(--px));
+  height: calc(70 * var(--px));
   object-fit: contain;
+}
+
+.project-card-image[hidden] {
+  display: none;
+}
+
+/* Language logos: 16×16 pixel art at 1 art px per pixel, in the bottom-right
+   corner. With more than one they stack diagonally, each overlapping the one
+   before it (up-left to down-right), the last one in front. */
+.project-card-logos {
+  position: absolute;
+  right: calc(2 * var(--px));
+  bottom: calc(2 * var(--px));
+  display: flex;
+}
+
+.project-card-logo {
+  display: block;
+  width: calc(16 * var(--px));
+  height: calc(16 * var(--px));
+  image-rendering: pixelated;
+  filter: drop-shadow(calc(1 * var(--px)) calc(1 * var(--px)) 0 rgb(0 0 0 / 0.25));
+}
+
+.project-card-logo + .project-card-logo {
+  margin-left: calc(-9 * var(--px));
+  margin-top: calc(7 * var(--px)); /* the earlier logo sits up-left, behind */
 }
 
 @media (prefers-reduced-motion: reduce) {
   .project-track {
     transition: none;
-  }
-  .project-card.splitting .project-card-box,
-  .project-card.splitting .project-card-highlight {
-    animation: none;
   }
 }

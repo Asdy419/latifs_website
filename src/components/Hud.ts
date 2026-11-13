@@ -1,20 +1,16 @@
 import backIcon from '../assets/shared/back_btn.png'
-import backLabel from '../assets/shared/back_txt.png'
 import muteIcon from '../assets/menu/mute.png'
-import muteLabel from '../assets/menu/mute_btn.png'
-import unmuteLabel from '../assets/menu/unmute_btn.png'
 import confirmIcon from '../assets/menu/confirm.png'
-import confirmLabel from '../assets/menu/confirm_btn.png'
 import { HudButton } from './HudButton'
 import { showNowPlaying } from './NowPlaying'
 import { isMuted, toggleMute } from '../utils/audio'
 import { startMusic, pauseMusic } from '../utils/music'
 
-/** Every HUD image, for preloading. */
-export const HUD_IMAGES = [backIcon, backLabel, muteIcon, muteLabel, unmuteLabel, confirmIcon, confirmLabel]
+/** Every HUD image, for preloading (the labels are drawn in code). */
+export const HUD_IMAGES = [backIcon, muteIcon, confirmIcon]
 
 /** The label for the action available right now: MUTE while music plays, UNMUTE while muted. */
-const muteLabelNow = () => (isMuted() ? unmuteLabel : muteLabel)
+const muteLabelNow = () => (isMuted() ? 'UNMUTE' : 'MUTE')
 
 interface HudActions {
   /** [B] BACK, the B key or Escape. */
@@ -36,9 +32,9 @@ interface HudActions {
  * `labelLeft` is where each icon's bar starts (% of the cropped icon's width).
  */
 export class Hud {
-  readonly back    = new HudButton({ id: 'back-btn',    icon: backIcon,    label: backLabel,      labelLeft: 19.86 })
+  readonly back    = new HudButton({ id: 'back-btn',    icon: backIcon,    label: 'BACK',         labelLeft: 19.86 })
   readonly mute    = new HudButton({ id: 'mute-btn',    icon: muteIcon,    label: muteLabelNow(), labelLeft: 20 })
-  readonly confirm = new HudButton({ id: 'confirm-btn', icon: confirmIcon, label: confirmLabel,   labelLeft: 31.84 })
+  readonly confirm = new HudButton({ id: 'confirm-btn', icon: confirmIcon, label: 'CONFIRM',      labelLeft: 31.84 })
 
   markup(): string {
     return `
@@ -48,6 +44,7 @@ export class Hud {
   }
 
   mount({ onBack, onConfirm, enterConfirms = false }: HudActions, signal?: AbortSignal): void {
+    for (const badge of [this.back, this.mute, this.confirm]) badge.attach()
     this.back.onClick(onBack, signal)
     if (onConfirm) this.confirm.onClick(onConfirm, signal)
     this.mute.onClick(() => this.toggleMusic(signal), signal)

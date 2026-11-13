@@ -24,6 +24,10 @@ export class ProjectCarousel {
   readonly cards: ProjectCard[]
   private readonly track = document.createElement('ul')
   private index = 0
+  /** Tapping/clicking the box that's already selected (e.g. open its details). */
+  onConfirm: (() => void) | null = null
+  /** Off while something covers the row (the details pop-up): input is ignored. */
+  enabled = true
 
   // swipe state
   private pointerId: number | null = null
@@ -58,6 +62,7 @@ export class ProjectCarousel {
   mount(parent: HTMLElement, signal?: AbortSignal): void {
     parent.append(this.element)
     document.addEventListener('keydown', e => {
+      if (!this.enabled) return
       if (e.key === 'ArrowLeft') { e.preventDefault(); this.move(-1) }
       else if (e.key === 'ArrowRight') { e.preventDefault(); this.move(1) }
     }, { signal })
@@ -81,6 +86,7 @@ export class ProjectCarousel {
     const next = Math.max(0, Math.min(this.cards.length - 1, index))
     if (next !== this.index && !quiet) {
       playSfx(sfx.bleep)
+      this.cards[this.index].stopBounce() // the box being left drops straight back
       this.cards[next].bounce()
     }
     this.cards[this.index].selected = false
@@ -97,7 +103,7 @@ export class ProjectCarousel {
   }
 
   private pointerDown(e: PointerEvent): void {
-    if (e.button !== 0 || this.pointerId !== null) return
+    if (!this.enabled || e.button !== 0 || this.pointerId !== null) return
     this.pointerId = e.pointerId
     this.startX = e.clientX
     this.dragging = false
@@ -125,11 +131,12 @@ export class ProjectCarousel {
     if (e.pointerId !== this.pointerId) return
     this.pointerId = null
 
-    if (!this.dragging) { // a tap: select the box under it
+    if (!this.dragging) { // a tap: select the box under it, or confirm it if it's already selected
       if (cancelled) return
       const box = (e.target as Element).closest('.project-card')
       const i = this.cards.findIndex(card => card.element === box)
-      if (i >= 0) this.select(i)
+      if (i === this.index) this.onConfirm?.()
+      else if (i >= 0) this.select(i)
       return
     }
 
@@ -145,6 +152,7 @@ export class ProjectCarousel {
   }
 
   private handleWheel(e: WheelEvent): void {
+    if (!this.enabled) return
     const now = performance.now()
     if (now - this.lastWheelEvent > 300) this.wheelTotal = 0 // a new scroll gesture
     this.lastWheelEvent = now

@@ -8,36 +8,31 @@
 /* The logo (#menu-logo) is a .page-banner: base.css places it, like every page's
    banner, and drops "Now Playing" just below it */
 
+/* The TV, sized and placed like the reference menu's (art px, base.css): its
+   screen from row 63 to 224, its slanted right edge passing (295, 63) at 45°.
+   (tv_overlay.png's frame fills rows 5.9%–94.1% of the image, its top-right
+   corner at 99.2% across.) */
 #tv-wrap {
   position: absolute;
-  left: -3.5%;
-  top: 60%;
-  transform: translateY(-50%);
-  width: 70vw;
+  left: calc(-39.2 * var(--art-px));
+  top: calc(52.1 * var(--art-px));
+  width: calc(336.9 * var(--art-px));
   z-index: 2;
 }
 
+/* The button stack (ButtonMenu.css) hangs off this point: the selected
+   button's slot, where the reference menu puts it on its 424×240 screen
+   (x 205, y 190). Measured from the right and bottom edges, so on screens
+   wider than 16:9 (phones) the buttons stay to the right of the TV. */
 #menu-buttons {
   position: absolute;
-  right: 2vw;
-  bottom: -14vw;
-  width: 55vw;
+  left: calc(100% - 219 * var(--art-px));
+  top: calc(100% - 50 * var(--art-px));
+  width: 0;
+  height: 0;
   z-index: 1;
 }
 
-/* Corner badges (BACK / MUTE / CONFIRM) are laid out by HudButton.css */
-
-/* ── Short landscape screens (phones) ──────────────────────────────────── */
-
-@media (orientation: landscape) and (max-height: 500px) {
-  #tv-wrap {
-    width: 50vw;
-    top: 60%;
-    left: -3%;
-  }
-
-  #menu-buttons {
-    bottom: -18vw;
-    width: 40vw;
-  }
-}
+/* Corner badges (BACK / MUTE / CONFIRM) are laid out by HudButton.css.
+   Everything here is in art pixels, which scale with the screen's height on
+   phones (wider than 16:9), so no separate phone layout is needed. */

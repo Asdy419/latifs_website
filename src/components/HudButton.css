@@ -63,16 +63,19 @@
   width: auto;
 }
 
-/* Label image on the bar. All label PNGs share the same canvas height and
-   margins (215px tall, letters starting 34px in, 35px down), so one size rule
-   fits them all; each badge sets `left` to where its icon's bar starts. */
-.hud-btn-label {
+/* The label on the bar, drawn in the prompt font (utils/hudArt.ts), where the
+   old label images' letters were: 18.8% down the badge and 60.2% of its height
+   tall (66.2% with the text's 1px shadow). Each badge sets `left` (Hud.ts). */
+.hud-btn-text {
   position: absolute;
-  top: 0;
-  height: 91.8%;
-  width: auto;
+  top: 18.8%;
+  height: 66.2%;
   pointer-events: none;
-  user-select: none;
+}
+
+.hud-btn-text .pixel-canvas {
+  width: auto; /* from the height and the text's aspect-ratio (HudButton.ts) */
+  height: 100%;
 }
 
 /* Keep the "Now Playing" pop-up clear of the top-right badge (CONFIRM).

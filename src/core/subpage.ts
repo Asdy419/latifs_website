@@ -9,6 +9,11 @@ import { startMusic, stopMusic } from '../utils/music'
 interface SubpageOptions {
   /** What [↵] CONFIRM / Enter does on this page (nothing by default). */
   onConfirm?: () => void
+  /**
+   * Runs first when [B] BACK / B / Escape is pressed. Return true if the page
+   * handled it (e.g. closed a pop-up) to stay; otherwise it goes back to the menu.
+   */
+  onBack?: () => boolean
 }
 
 /**
@@ -19,7 +24,7 @@ interface SubpageOptions {
  *  - the corner HUD: [B] BACK (or B / Escape) returns to the main menu,
  *    [M] MUTE, and [↵] CONFIRM (see `onConfirm`)
  */
-export function startSubpage(id: SubpageId, { onConfirm }: SubpageOptions = {}): HTMLDivElement {
+export function startSubpage(id: SubpageId, { onConfirm, onBack }: SubpageOptions = {}): HTMLDivElement {
   const { background, banner, label } = subpage(id)
   const app = startPage({ background, reveal: false })
   const hud = new Hud()
@@ -36,6 +41,7 @@ export function startSubpage(id: SubpageId, { onConfirm }: SubpageOptions = {}):
 
   hud.mount({
     onBack: () => {
+      if (onBack?.()) return // the page dealt with it
       playSfx(sfx.accept)
       stopMusic() // fades out under the wipe
       navigateTo(MENU_URL, { replace: true })

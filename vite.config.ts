@@ -1,6 +1,6 @@
 import { defineConfig, type HtmlTagDescriptor, type Plugin } from 'vite'
 import { imagetools, type TransformFactory } from 'vite-imagetools'
-import { readdirSync } from 'node:fs'
+import { readdirSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 
 // Multi-page site: every .html file in the project root is a page.
@@ -36,11 +36,32 @@ function sharedHead(): Plugin {
     injectTo: 'head-prepend',
   }
 
+  // The panels' CSS goes inline in <head> (not in the bundle) so they're styled
+  // in the very first paint, before any stylesheet or script loads.
+  const wipeCssFile = resolve(import.meta.dirname, 'src/core/pageTransition.css')
+  const wipeCss = (): HtmlTagDescriptor => ({
+    tag: 'style',
+    children: readFileSync(wipeCssFile, 'utf8')
+      .replace(/\/\*[\s\S]*?\*\//g, '') // comments
+      .replace(/\s+/g, ' ')
+      .replace(/\s*([{}:;,])\s*/g, '$1')
+      .trim(),
+    injectTo: 'head',
+  })
+
   return {
     name: 'shared-head',
+    configureServer(server) {
+      // not imported anywhere, so the dev server doesn't watch it by itself
+      server.watcher.add(wipeCssFile)
+      server.watcher.on('change', file => {
+        if (resolve(file) === wipeCssFile) server.ws.send({ type: 'full-reload' })
+      })
+    },
     transformIndexHtml: (_html, ctx) => {
       const isHome = ctx.path === '/' || ctx.path.endsWith('/index.html')
       return [
+        wipeCss(),
         ...(isHome ? [homeFromPage, coverPanels('home-cover')] : [coverPanels()]),
         tag('meta', {
           name: 'viewport',
@@ -49,7 +70,10 @@ function sharedHead(): Plugin {
         tag('meta', { name: 'mobile-web-app-capable', content: 'yes' }),
         tag('meta', { name: 'apple-mobile-web-app-capable', content: 'yes' }),
         tag('meta', { name: 'apple-mobile-web-app-status-bar-style', content: 'black-translucent' }),
-        tag('link', { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' }),
+        // tab / home-screen icons, made from src/assets/shared/site_icon.png
+        tag('link', { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/icons/favicon-32.png' }),
+        tag('link', { rel: 'icon', type: 'image/png', sizes: '48x48', href: '/icons/favicon-48.png' }),
+        tag('link', { rel: 'apple-touch-icon', href: '/icons/apple-touch-icon.png' }),
         tag('link', { rel: 'manifest', href: '/manifest.json' }),
       ]
     },

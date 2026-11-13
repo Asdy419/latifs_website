@@ -31,8 +31,8 @@ export class TitleScreen extends Scene {
       // Start the menu music right here, inside the key press/tap: iOS only
       // lets audio start from a user gesture. It fades in under the transition.
       startMusic()
-      // Fade in for as long as the confirm sound plays
-      transitionTo(new Menu(), durationOf(sfx.accept, 1.5), 2)
+      // Fade out for as long as the confirm sound plays, then the menu fades in
+      transitionTo(new Menu(), durationOf(sfx.accept, 0.67))
     }
 
     document.addEventListener('keydown', start, { signal: this.signal })

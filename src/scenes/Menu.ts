@@ -1,7 +1,5 @@
 import './Menu.css'
 import menuLogo from '../assets/menu/menu_logo.png'
-import exitLabel from '../assets/menu/exit_btn.png'
-import buttonBase from '../assets/menu/button_base.png'
 import tvOverlay from '../assets/menu/tv_overlay.png'
 import staticVideo from '../assets/menu/static.mp4'
 import { SUBPAGES } from '../config'
@@ -30,7 +28,7 @@ export class Menu extends Scene {
    */
   static preload(): void {
     if (preloaded.length) return
-    const images = [menuLogo, buttonBase, tvOverlay, exitLabel, ...HUD_IMAGES, ...SUBPAGES.map(page => page.labelImage)]
+    const images = [menuLogo, tvOverlay, ...HUD_IMAGES] // the menu buttons are drawn in code
     const decoded = images.map(src => {
       const img = new Image()
       img.decoding = 'async'
@@ -49,13 +47,12 @@ export class Menu extends Scene {
   private readonly buttons = new ButtonMenu([
     ...SUBPAGES.map(page => ({
       label: page.label,
-      labelImage: page.labelImage,
       onSelect: () => {
         stopMusic() // fades out under the page wipe; the page starts its own track
         navigateTo(`/${page.id}.html`)
       },
     })),
-    { label: 'Exit', labelImage: exitLabel, onSelect: () => this.exitToTitle() },
+    { label: 'Exit', onSelect: () => this.exitToTitle() },
   ])
 
   protected render(): string {
@@ -87,7 +84,7 @@ export class Menu extends Scene {
       onConfirm: () => this.buttons.confirmSelection(),
     }, signal)
     // CONFIRM hides while a menu button slides over it
-    this.hud.confirm.hideWhenCovered(this.buttons.buttonImages, list, signal)
+    this.hud.confirm.hideWhenCovered(this.buttons.coverShapes, list, signal)
 
     // Music started on the title screen's key press (see TitleScreen); show
     // "Now Playing" once the fade into the menu has mostly cleared.
@@ -98,7 +95,7 @@ export class Menu extends Scene {
 
   private exitToTitle(): void {
     stopMusic()
-    transitionTo(new TitleScreen(), 1.5, 2)
+    transitionTo(new TitleScreen())
   }
 
   /** Start/resume the music and pop up "Now Playing" (unless muted or the menu has gone). */

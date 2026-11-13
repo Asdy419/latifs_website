@@ -10,8 +10,9 @@ import './CircleAnimation.css'
  *
  * Rendering: a tiny WebGL fragment shader tests every pixel against the exact
  * ring shapes, so a frame costs a few uniforms and one draw call instead of
- * re-laying-out and re-painting two full-screen SVGs. The hard pixel test
- * gives the same aliased edges as the SVGs' shape-rendering="crispEdges".
+ * re-laying-out and re-painting two full-screen SVGs. It renders at the
+ * reference clip's resolution (one pixel per art pixel, scaled up with hard
+ * edges), so the rings are chunky pixel art like the clip's, and cheap.
  * Where WebGL is missing or would be software-rendered (slow), it falls back
  * to the SVG version. Either way the loop stops when the rings leave the page.
  * One instance per page.
@@ -94,22 +95,26 @@ export class CircleAnimation {
     const uSpin   = gl.getUniformLocation(program, 'uSpin')
     const uGap    = gl.getUniformLocation(program, 'uGap')
 
-    // Match the canvas to the screen in device pixels (only when the size changes)
+    // Draw at the reference menu's resolution, one canvas pixel per art pixel
+    // (a 424×240 screen, like --art-px in base.css), and let CSS scale it up
+    // with hard pixel edges, so the rings look like the clip's pixel art.
+    // (Only when the size changes.)
     let needsResize = true
     const onResize = () => { needsResize = true }
     window.addEventListener('resize', onResize)
     const resize = () => {
       needsResize = false
-      const dpr = window.devicePixelRatio || 1
-      const w = Math.round(host.clientWidth * dpr)
-      const h = Math.round(host.clientHeight * dpr)
+      const cssW = host.clientWidth, cssH = host.clientHeight
+      const perCssPx = Math.max(424 / cssW, 240 / cssH) // canvas px per CSS px = 1 / --art-px
+      const w = Math.max(1, Math.round(cssW * perCssPx))
+      const h = Math.max(1, Math.round(cssH * perCssPx))
       if (canvas.width !== w || canvas.height !== h) {
         canvas.width = w
         canvas.height = h
       }
       gl.viewport(0, 0, w, h)
-      // centre (device px, y down), device px per SVG unit, canvas height (to flip y)
-      gl.uniform4f(uView, w / 2, h / 2, (Math.min(host.clientWidth, host.clientHeight) / 400) * dpr, h)
+      // centre (canvas px, y down), canvas px per SVG unit, canvas height (to flip y)
+      gl.uniform4f(uView, w / 2, h / 2, (Math.min(cssW, cssH) / 400) * perCssPx, h)
     }
 
     const cleanup = () => {

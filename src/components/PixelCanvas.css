@@ -1,0 +1,8 @@
+/* PixelCanvas: fills its parent unless sized otherwise; object-fit keeps the art's shape */
+.pixel-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  image-rendering: pixelated;
+}

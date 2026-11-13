@@ -8,11 +8,14 @@
   pointer-events: none;
 }
 
-/* WebGL renderer: the shader handles the spin and pulse itself */
+/* WebGL renderer: the shader handles the spin and pulse itself. It draws at
+   the reference's 424×240-ish resolution; this scales it up with hard pixel
+   edges (chunky pixel-art rings, like the clip). */
 .circles-canvas {
   display: block;
   width: 100%;
   height: 100%;
+  image-rendering: pixelated;
 }
 
 /* SVG fallback (no usable WebGL): CSS spins each ring layer */

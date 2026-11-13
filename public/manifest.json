@@ -1,18 +1,14 @@
 {
-  "name": "Ahmed's Portfolio",
+  "name": "Latif's Portfolio",
   "short_name": "Portfolio",
-  "description": "Ahmed's interactive portfolio",
+  "description": "Latif's interactive portfolio",
   "start_url": "/",
   "display": "standalone",
   "orientation": "landscape",
   "background_color": "#efc400",
   "theme_color": "#efc400",
   "icons": [
-    {
-      "src": "/favicon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any"
-    }
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
   ]
 }

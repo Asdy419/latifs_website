@@ -1,4 +1,12 @@
+/*
+  This file isn't imported: vite.config.ts inlines it into every page's <head>,
+  so the cover is drawn in the very first paint, before any script or
+  stylesheet has loaded (otherwise the bare background colour flashes first,
+  especially on the dev server, where CSS arrives through JavaScript).
+  For the same reason it can't rely on base.css: --wipe-px is --art-px.
+*/
 #panel-transition {
+  --wipe-px: min(calc(100vw / 424), calc(var(--vh, 1dvh) * 100 / 240)); /* = --art-px (base.css) */
   position: fixed;
   inset: 0;
   z-index: 9999;
@@ -7,87 +15,153 @@
 }
 
 /*
-  Three slanted parallelogram columns, all with the same / slant (parallel seams).
+  The page wipe, copied from the reference clip (0:26, opening Encore Mode),
+  measured frame by frame on its 424×240 screen:
 
-  Technique: each panel is an OVERSIZED rectangle that is skewed with skewX(-45deg).
-  Because the slant comes from a skew (not a clip-path) everything stays in px/vw,
-  so the seam is a true 45° in screen space AND the diagonal slide (also 45°) runs
-  exactly parallel to the seam.
+  - Three bands that never move: orange top-left, blue in the middle, pink
+    bottom-right, split by two parallel 45° seams (/) that cross the screen's
+    middle row 119.5 art px either side of centre. Their seams are pixel-art
+    stairs, one art pixel per step.
+  - Each band appears or disappears behind a straight horizontal edge sweeping
+    the screen at a constant 60 art px per 1/30s: the full height in 133ms,
+    no easing.
+  - Cover: orange sweeps down from the top, blue up from the bottom 67ms later,
+    pink down from the top 67ms after that (done in 267ms).
+  - Reveal (on the next page): orange and pink sweep away downwards together,
+    blue up and away 67ms later (done in 200ms).
 
-  - top/height make every panel taller than the viewport, so the flat top & bottom
-    edges are always off-screen.
-  - `left` sets where a panel's seam sits at the vertical centre of the viewport;
-    `width` sets the band thickness. The left-most (orange) and right-most (pink)
-    panels run far past the screen edges, so their outer vertical edges are NEVER
-    visible — only the slanted seams show.
-  - #panel-transition has overflow:hidden, which trims everything to the viewport.
+  Each .trans-panel is a full-screen window (overflow: hidden) that slides;
+  its ::before is the band, sliding the other way by the same amount, so the
+  band stays put while the window's edge sweeps across it. Both are transforms
+  (cheap, on the compositor).
 
-  Seam at viewport centre:  orange|blue = 22vw,  blue|pink = 67vw.
-  Travel: orange + pink come from top-right (↙); blue comes from bottom-left (↗).
-  ENTER order (staggered): orange → blue → pink.
-  REVEAL order: orange + pink first, then blue.
+  Keep the bands no bigger than the screen area they cover: each is its own
+  GPU layer, and oversized ones (they were once 4 screens wide and 2 tall)
+  flicker on phones while they move.
 */
 .trans-panel {
   position: absolute;
-  top: -50vh;
-  height: 200vh;
+  inset: 0;
+  overflow: hidden;
+}
+
+.trans-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  height: 100%;
   transform: skewX(-45deg);
-  transform-origin: center center; /* pivot row = viewport centre */
+  transform-origin: center center; /* the seam's position is set at the middle row */
+  /*
+    Stair-stepped seams: before the skew, each side edge gets a sawtooth one
+    art pixel deep, every art pixel down; the skew turns each tooth into a 1×1
+    art-pixel step. The toothed strips sit just OUTSIDE the band's own edges
+    (the padding), so where two bands meet, one's teeth always lie over the
+    other's solid colour: nothing shows through.
+  */
+  --step: var(--wipe-px);
+  box-sizing: content-box;
+  padding: 0 var(--step);
+  margin-left: calc(-1 * var(--step));
+  -webkit-mask:
+    linear-gradient(to top right, transparent 50%, #000 50%) left top / var(--step) var(--step) repeat-y,
+    linear-gradient(#000, #000) var(--step) 0 / calc(100% - 2 * var(--step)) 100% no-repeat,
+    linear-gradient(to top right, #000 50%, transparent 50%) right top / var(--step) var(--step) repeat-y;
+  mask:
+    linear-gradient(to top right, transparent 50%, #000 50%) left top / var(--step) var(--step) repeat-y,
+    linear-gradient(#000, #000) var(--step) 0 / calc(100% - 2 * var(--step)) 100% no-repeat,
+    linear-gradient(to top right, #000 50%, transparent 50%) right top / var(--step) var(--step) repeat-y;
 }
 
-.trans-panel-0 {
-  left: -200vw;
-  width: 222vw; /* right seam at centre = 22vw */
-  background: #e89020;
-  z-index: 1;
+/*
+  The skew slides each seam up to half the screen's height sideways at the top
+  and bottom rows, so the side bands reach that far past the screen's edges
+  (plus a little): --reach.
+*/
+.trans-panel-0::before,
+.trans-panel-2::before {
+  --reach: calc(50vh + 4 * var(--wipe-px));
+  width: calc(50% - 119.5 * var(--wipe-px) + var(--reach));
 }
 
-.trans-panel-1 {
-  left: 22vw;
-  width: 45vw; /* seams 22vw → 67vw */
-  background: #2288e8;
-  z-index: 3;
+/* orange: everything left of the first seam */
+.trans-panel-0::before {
+  left: calc(-1 * var(--reach));
+  background: #e98d00;
 }
 
-.trans-panel-2 {
-  left: 67vw;
-  width: 233vw; /* right edge at centre = 300vw, far off-screen */
-  background: #e83070;
-  z-index: 2;
+/* blue: between the seams, 239 art px wide */
+.trans-panel-1::before {
+  left: calc(50% - 119.5 * var(--wipe-px));
+  width: calc(239 * var(--wipe-px));
+  background: #1689f5;
+}
+
+/* pink: everything right of the second seam */
+.trans-panel-2::before {
+  left: calc(50% + 119.5 * var(--wipe-px));
+  background: #ee275c;
 }
 
 /* COVERING — static, fully covering (pages arrived at by a wipe start like this,
    see vite.config.ts). The home page only shows its copy when arriving from BACK. */
-.covering .trans-panel-2 { z-index: 5; }
 .home-cover { display: none; }
 .from-page .home-cover { display: block; }
 
-/* ENTER — panels slide in to cover the screen */
-.entering .trans-panel-0 { animation: panel-in-tr 0.625s cubic-bezier(0.2, 0.8, 0.2, 1) 0s    both; }
-.entering .trans-panel-1 { animation: panel-in-bl 0.625s cubic-bezier(0.2, 0.8, 0.2, 1) 0.14s both; }
-.entering .trans-panel-2 { animation: panel-in-tr 0.625s cubic-bezier(0.2, 0.8, 0.2, 1) 0.28s both; }
+/* ENTER — cover the screen: orange ↓, blue ↑ (+67ms), pink ↓ (+133ms) */
+.entering .trans-panel-0         { animation: wipe-window-from-top    0.133s linear 0s     both; }
+.entering .trans-panel-0::before { animation: wipe-band-from-top      0.133s linear 0s     both; }
+.entering .trans-panel-1         { animation: wipe-window-from-bottom 0.133s linear 0.067s both; }
+.entering .trans-panel-1::before { animation: wipe-band-from-bottom   0.133s linear 0.067s both; }
+.entering .trans-panel-2         { animation: wipe-window-from-top    0.133s linear 0.133s both; }
+.entering .trans-panel-2::before { animation: wipe-band-from-top      0.133s linear 0.133s both; }
 
-/* REVEAL — panels exit continuing their travel direction */
-.revealing .trans-panel-0 { animation: panel-out-bl 0.9s cubic-bezier(0.7, 0, 0.3, 1) 0s   both; }
-.revealing .trans-panel-1 { animation: panel-out-tr 0.9s cubic-bezier(0.7, 0, 0.3, 1) 0.1s both; }
-.revealing .trans-panel-2 { animation: panel-out-bl 0.9s cubic-bezier(0.7, 0, 0.3, 1) 0s   both; z-index: 5; }
+/* REVEAL — uncover: orange and pink away downwards, blue up and away (+67ms) */
+.revealing .trans-panel-0         { animation: wipe-window-out-down 0.133s linear 0s     both; }
+.revealing .trans-panel-0::before { animation: wipe-band-out-down   0.133s linear 0s     both; }
+.revealing .trans-panel-2         { animation: wipe-window-out-down 0.133s linear 0s     both; }
+.revealing .trans-panel-2::before { animation: wipe-band-out-down   0.133s linear 0s     both; }
+.revealing .trans-panel-1         { animation: wipe-window-out-up   0.133s linear 0.067s both; }
+.revealing .trans-panel-1::before { animation: wipe-band-out-up     0.133s linear 0.067s both; }
 
-@keyframes panel-in-tr {
-  from { transform: translate(100vw, -100vw) skewX(-45deg); }
-  to   { transform: translate(0, 0) skewX(-45deg); }
+/* The window slides one screen; the band slides back by the same distance
+   (100% of its own height = one window), so it never moves on screen. */
+@keyframes wipe-window-from-top {
+  from { transform: translateY(-100%); }
+  to   { transform: translateY(0); }
 }
 
-@keyframes panel-in-bl {
-  from { transform: translate(-100vw, 100vw) skewX(-45deg); }
-  to   { transform: translate(0, 0) skewX(-45deg); }
+@keyframes wipe-band-from-top {
+  from { transform: translateY(100%) skewX(-45deg); }
+  to   { transform: translateY(0) skewX(-45deg); }
 }
 
-@keyframes panel-out-bl {
-  from { transform: translate(0, 0) skewX(-45deg); }
-  to   { transform: translate(-100vw, 100vw) skewX(-45deg); }
+@keyframes wipe-window-from-bottom {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
 }
 
-@keyframes panel-out-tr {
-  from { transform: translate(0, 0) skewX(-45deg); }
-  to   { transform: translate(100vw, -100vw) skewX(-45deg); }
+@keyframes wipe-band-from-bottom {
+  from { transform: translateY(-100%) skewX(-45deg); }
+  to   { transform: translateY(0) skewX(-45deg); }
+}
+
+@keyframes wipe-window-out-down {
+  from { transform: translateY(0); }
+  to   { transform: translateY(100%); }
+}
+
+@keyframes wipe-band-out-down {
+  from { transform: translateY(0) skewX(-45deg); }
+  to   { transform: translateY(-100%) skewX(-45deg); }
+}
+
+@keyframes wipe-window-out-up {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-100%); }
+}
+
+@keyframes wipe-band-out-up {
+  from { transform: translateY(0) skewX(-45deg); }
+  to   { transform: translateY(100%) skewX(-45deg); }
 }

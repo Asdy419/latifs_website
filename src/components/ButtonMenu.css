@@ -1,182 +1,126 @@
+/*
+ * The main menu's buttons (ButtonMenu.ts). Everything is in art pixels
+ * (--art-px: one pixel of a 424×240 screen) and copies the reference menu clip,
+ * measured frame by frame:
+ *   - each button sits at its slot: 36px left and 36px down from the one before
+ *   - the stack slides along that diagonal so the selected slot stays put,
+ *     easing like the game: a quarter of the remaining distance every 1/60s
+ *   - the selected bar (and its label) rests 2px up-left of its slot, with
+ *     the highlight 2px down-right of it, pulsing red ↔ pink
+ *   - on selection the bar jumps a further 5px up-left and the highlight dips
+ *     4px, while the label hops 7px higher still: it rises first and lands last
+ * The <ul> itself is a zero-size point: the selected slot (see Menu.css).
+ */
 .button-menu {
-  list-style: none;
   margin: 0;
   padding: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0;
-  transition: transform 0.15s ease;
-}
-
-.menu-btn {
-  position: relative;
-  cursor: default;
-  user-select: none;
   list-style: none;
-  width: fit-content;
-  margin-bottom: -14.5vw;
+  transform: translate(calc(36 * var(--sel, 0) * var(--art-px)), calc(-36 * var(--sel, 0) * var(--art-px)));
+  /* 0.34s and this curve follow the game's 25%-per-frame easing to within 0.4%.
+     Browsers show a change a frame after the key press, the game on the very
+     next frame, so start a frame (17ms) in. */
+  transition: transform 0.34s cubic-bezier(0.16, 0.94, 0.38, 1) -17ms;
+  will-change: transform;
 }
 
-/* ── Background image ──────────────────────────────────────────────────── */
-
-.menu-btn-bg {
-  display: block;
-  width: 45vw;
-  height: auto;
-  position: relative;
-  z-index: 1;
-}
-
-.menu-btn.selected .menu-btn-bg {
-  transform: translate(-1vw, -1vw);
-}
-
-/* ── Highlight (coloured copy of the button shape behind the selected one) ─ */
-
-.menu-btn-highlight-wrap {
+/* A button's slot: the bottom-left corner of its bar */
+.menu-btn {
   position: absolute;
-  transform: translate(0px, 0px);
-  opacity: 0;
-  pointer-events: none;
-  z-index: 0;
+  left: calc(-36 * var(--i) * var(--art-px));
+  top: calc(36 * var(--i) * var(--art-px));
+  width: 0;
+  height: 0;
+  list-style: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.menu-btn.selected .menu-btn-highlight-wrap {
-  opacity: 1;
+/* The bar and its highlight share one shape: a stepped 45° parallelogram
+   (clip-path set by ButtonMenu.ts), 25px tall, --bar-len long per row */
+.menu-btn-bar,
+.menu-btn-highlight {
+  position: absolute;
+  left: 0;
+  top: calc(-25 * var(--art-px));
+  width: calc((var(--bar-len) + 24) * var(--art-px));
+  height: calc(25 * var(--art-px));
 }
 
-/* Invisible copy of the button image — gives the highlight its size */
-.menu-btn-highlight-spacer {
-  display: block;
-  width: 45vw;
-  height: auto;
-  visibility: hidden;
+.menu-btn-bar {
+  z-index: 1;
+  background: #000;
 }
 
 .menu-btn-highlight {
-  position: absolute;
-  inset: 0;
-  background-color: #b0020b;
-  /* --btn-mask is set by ButtonMenu.ts from the imported (WebP) button image,
-     so the mask and the <img>s share one download */
-  -webkit-mask-image: var(--btn-mask);
-  mask-image: var(--btn-mask);
-  -webkit-mask-size: 100% 100%;
-  mask-size: 100% 100%;
+  z-index: 0;
+  background: #b00206;
+  opacity: 0;
+  pointer-events: none;
+  /* Its own layer, like the bars and labels (below): at the top of its jump the
+     highlight touches the next button's text, and Safari on iPhone can draw an
+     animating layer over text that isn't on a layer of its own, whatever the
+     z-index. With all three on layers they stack strictly by z-index. */
+  will-change: transform, opacity;
 }
 
-/* Red ↔ pink pulse, done by fading a pink layer over the red one. Opacity
-   animations run on the compositor (animating the colour itself would restyle
-   and repaint every frame). Only the selected button's highlight is visible. */
+.menu-btn-bar,
+.menu-btn-label-move {
+  will-change: transform;
+}
+
+/* Red ↔ pink pulse (a full cycle every 0.53s, like the reference), done by
+   fading a pink layer over the red one: opacity runs on the compositor */
 .menu-btn-highlight::after {
   content: '';
   position: absolute;
   inset: 0;
-  background-color: #e2b4e7;
+  background: #e8ace7;
   opacity: 0;
 }
 
-.menu-btn.selected .menu-btn-highlight::after {
-  animation: highlight-pulse 0.3s linear infinite alternate;
+/* The label: letters 30px right of the slot and 28px above it (its 1px outline
+   makes the canvas 1px bigger all round). Above every bar, so a hopping label
+   passes in front of the button above, as in the reference. */
+.menu-btn-label-move {
+  position: absolute;
+  z-index: 2;
+  left: calc(29 * var(--art-px));
+  top: calc(-29 * var(--art-px));
 }
 
-@keyframes highlight-pulse {
+/* (.menu-btn-label-hop: the confirm flash animates its opacity, ButtonMenu.ts) */
+
+/* ── Selected ──────────────────────────────────────────────────────────── */
+
+.menu-btn.selected .menu-btn-bar,
+.menu-btn.selected .menu-btn-label-move {
+  transform: translate(calc(-2 * var(--art-px)), calc(-2 * var(--art-px)));
+}
+
+.menu-btn.selected .menu-btn-highlight {
+  opacity: 1;
+  transform: translate(calc(2 * var(--art-px)), calc(2 * var(--art-px)));
+}
+
+.menu-btn.selected .menu-btn-highlight::after {
+  animation: menu-highlight-pulse 0.267s linear infinite alternate;
+}
+
+@keyframes menu-highlight-pulse {
   from { opacity: 0; }
   to   { opacity: 1; }
 }
 
-/* ── "Split" bounce when the selection changes ─────────────────────────── */
-/* The label jumps first and the bar follows --bar-delay later (see the label
-   section below). `both` holds the first keyframe during that delay. */
+/* ── The jump when a button is selected ────────────────────────────────────
+   Played from ButtonMenu.ts (JUMP) with the Web Animations API, in plain px:
+   Safari draws CSS keyframes that use calc(var(--art-px)) at the wrong size,
+   which pushed the pink highlight over the button below. Never put var() in
+   transform keyframes. The label moves sideways with its bar
+   (.menu-btn-label-move) and hops up on its own wrapper (.menu-btn-label-hop). */
 
-.menu-btn.splitting .menu-btn-highlight-wrap {
-  animation: split-under 0.18s ease var(--bar-delay) both;
-}
-
-.menu-btn.splitting .menu-btn-bg {
-  animation: split-over 0.18s ease var(--bar-delay) both;
-}
-
-@keyframes split-under {
-  0%   { transform: translate(0vw, 0vw); }
-  45%  { transform: translate(1.1vw, 1.1vw); }
-  100% { transform: translate(0vw, 0vw); }
-}
-
-/* Starts and ends at the selected bar's resting spot (-1vw), so there's no snap
-   at either end; peaks at the same height as before. */
-@keyframes split-over {
-  0%   { transform: translate(-1vw, -1vw); }
-  45%  { transform: translate(-2.6vw, -2.6vw); }
-  100% { transform: translate(-1vw, -1vw); }
-}
-
-/* ── Label ─────────────────────────────────────────────────────────────── */
-
-/* Pixel-art label image, laid out like a classic game menu: left-aligned just
-   inside the bar's slanted edge, big, and raised so the letters poke out above
-   the bar. Positions are % of button_base.png (1024×512), whose bar runs
-   y 194–317 with its top-left corner at x 139:
-     letters = 78% of the bar's thickness
-     top     = 13% of the bar's thickness above the bar
-     left    = 31% of the bar's thickness in from the top-left corner
-   max-width stops a long label (PHOTO GALLERY) running off the bar's slanted
-   end: it shrinks just enough to fit, sitting on the same baseline. */
-.menu-btn-label-img {
-  position: absolute;
-  left: 17.21%;
-  top: 34.52%;
-  height: 19.35%;
-  width: auto;
-  max-width: 72.5%;
-  object-fit: contain;
-  object-position: left bottom;
-}
-
-.menu-btn.selected .menu-btn-label-img {
-  transform: translate(-1.5vw, -1.5vw);
-}
-
-/* ── The label's hop when its button jumps ─────────────────────────────────
-   The label jumps first and the bar follows a moment later (--bar-delay). The
-   label goes higher than the bar, so it's above it at the bar's peak, then
-   lingers and comes down after the bar has landed — like something tossed
-   lightly into the air. Two layers so neither animation cuts the other off:
-     - the <img> moves sideways like the bar (split-label)
-     - its wrapper (.menu-btn-label-hop) does the vertical toss (label-hop) */
-.menu-btn {
-  --bar-delay: 6ms;       /* how long after the label the bar starts its jump */
-  --label-hop: 1.9vw;     /* label's peak height above its resting spot (the bar rises 1.6vw) */
-  --label-airtime: 0.2s;  /* label's time in the air, vs the bar's 0.18s jump */
-}
-
-.menu-btn-label-hop {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  pointer-events: none;
-}
-
-/* Sideways: the same 1.6vw movement as split-over, from the label's resting spot */
-.menu-btn.splitting .menu-btn-label-img {
-  animation: split-label 0.18s ease both;
-}
-
-@keyframes split-label {
-  0%   { transform: translate(-1.5vw, -1.5vw); }
-  45%  { transform: translate(-3.1vw, -1.5vw); }
-  100% { transform: translate(-1.5vw, -1.5vw); }
-}
-
-/* Up and down: the same easing as the bar's jump, just a touch earlier, higher
-   and longer — so the two stay within a hair of each other. */
-.menu-btn.hopping .menu-btn-label-hop {
-  animation: label-hop var(--label-airtime) ease both;
-}
-
-@keyframes label-hop {
-  0%   { transform: translateY(0); }
-  45%  { transform: translateY(calc(-1 * var(--label-hop))); }
-  100% { transform: translateY(0); }
+@media (prefers-reduced-motion: reduce) {
+  .button-menu {
+    transition-duration: 0.1s;
+  }
 }

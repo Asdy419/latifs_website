@@ -41,21 +41,23 @@ export abstract class Scene {
 }
 
 /**
- * Fades to blue, swaps to `next`, then fades back.
+ * The reference menu clip's palette fade (Scene.css): the screen fades to
+ * black over `outSeconds` (red goes first, then green, then blue), swaps to
+ * `next`, and fades back in blue first, then green, then red, in 0.67s.
  * Input is blocked from the start of the fade until `next` is on screen.
  */
-export function transitionTo(next: Scene, inSeconds: number, outSeconds: number = inSeconds): void {
+export function transitionTo(next: Scene, outSeconds = 0.67): void {
   const unlock = lockInput()
   const fade = document.createElement('div')
-  fade.className = 'scene-fade'
-  fade.style.animationDuration = `${inSeconds}s`
+  fade.className = 'scene-fade out'
+  fade.style.animationDuration = `${outSeconds}s`
   document.body.appendChild(fade)
 
   fade.addEventListener('animationend', () => {
     next.show()
     unlock()
-    fade.style.animationDuration = `${outSeconds}s`
-    fade.classList.add('out')
+    fade.className = 'scene-fade in'
+    fade.style.animationDuration = ''
     fade.addEventListener('animationend', () => fade.remove(), { once: true })
   }, { once: true })
 }

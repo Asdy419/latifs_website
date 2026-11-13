@@ -1,43 +1,75 @@
 import { PixelText } from './PixelText'
+import { playSelectJump } from '../utils/selectJump'
+
+export interface Language {
+  name: string
+  /** % of the code (from GitHub) */
+  share: number
+  /** GitHub's colour for it */
+  color: string
+}
 
 /** One project, as listed in src/projects.ts. */
 export interface Project {
-  /** Shown in the box's white band in the pixel font (A–Z, 0–9 and . , : ' ! ? - + / ( )). */
+  /** On the box, in the pixel font (A–Z, 0–9 and . , : ' ! ? - + / ( )). Keep it short. */
   name: string
-  /** The project's picture: import the PNG (see src/projects.ts). */
-  image: string
+  /** The pop-up's heading, in the menu font. */
+  title: string
+  year: number
+  /** One fun line. */
+  tagline: string
+  /** Up to 4 short points. */
+  highlights: string[]
+  /** Biggest first. */
+  languages: Language[]
+  /** Pixel-art language logos, small in the box's bottom-right corner (assets/projects/langs/, 16×16). */
+  logos: string[]
+  /** The project's own logo/picture, in the middle of the box (optional: the space stays free until added). */
+  image?: string
+  /** The GitHub repo. */
+  url: string
+  /** Any other links (a devlog…). */
+  links?: { label: string; url: string }[]
 }
 
 /**
- * One project box: a striped banner with the project's name, and its picture
- * underneath. Laid out in "art pixels" (ProjectCarousel.css), so it scales with
- * the screen like the rest of the pixel art.
+ * One project box: a striped banner with the project's name, then its picture
+ * (the project's own logo, `image`) with its languages as small pixel-art logos
+ * in the bottom-right corner. Laid out in art pixels (ProjectCarousel.css), so
+ * it scales with the screen like the rest of the pixel art.
  *
  * Selected, it gets the main menu's highlight: a red copy of the box behind it,
- * pulsing red ↔ pink, with the box lifted up-left of it, and the same bounce.
+ * pulsing red ↔ pink, with the box lifted up-left of it, and the same jump.
  */
 export class ProjectCard {
   readonly element = document.createElement('li')
   readonly project: Project
+  private jump: Animation[] = []
 
   constructor(project: Project) {
     this.project = project
     const el = this.element
     el.className = 'project-card'
     el.setAttribute('role', 'option')
+    el.setAttribute('aria-label', `${project.title}: ${project.languages.map(l => l.name).join(', ')}`)
+    const logos = project.logos.map(src =>
+      `<img class="project-card-logo" src="${src}" alt="" draggable="false" decoding="async" />`).join('')
     el.innerHTML = `
       <div class="project-card-highlight"></div>
       <div class="project-card-box">
         <div class="project-card-banner"><div class="project-card-name"></div></div>
-        <div class="project-card-picture"><img alt="" draggable="false" decoding="async" loading="lazy" /></div>
+        <div class="project-card-picture">
+          <img class="project-card-image" alt="" draggable="false" decoding="async" hidden />
+          <div class="project-card-logos">${logos}</div>
+        </div>
       </div>
     `
-    el.querySelector('img')!.src = project.image
     el.querySelector('.project-card-name')!.append(new PixelText(project.name).element)
-    // the bounce ends itself, so its timing lives in the CSS alone
-    el.addEventListener('animationend', e => {
-      if (e.animationName === 'card-split-over') el.classList.remove('splitting')
-    })
+    if (project.image) {
+      const img = el.querySelector<HTMLImageElement>('.project-card-image')!
+      img.src = project.image
+      img.hidden = false
+    }
     this.selected = false
   }
 
@@ -46,12 +78,28 @@ export class ProjectCard {
     this.element.setAttribute('aria-selected', String(on))
   }
 
-  /** The quick "split" bounce the menu buttons do when they're selected. */
+  /** The jump the menu buttons do when they're selected (utils/selectJump.ts). */
   bounce(): void {
-    this.element.classList.remove('splitting')
-    void this.element.offsetWidth // restart the animation
-    this.element.classList.add('splitting')
+    this.stopBounce()
+    const box = this.element.querySelector('.project-card-box')!
+    this.jump = playSelectJump({
+      bar: [box],
+      highlight: this.element.querySelector('.project-card-highlight')!,
+    }, box.getBoundingClientRect().height / 164) // the box is 164 art px tall
   }
+
+  /** Stops a jump mid-way (the box drops straight back to its spot). */
+  stopBounce(): void {
+    for (const a of this.jump) a.cancel()
+    this.jump = []
+  }
+}
+
+/** A GitHub-style bar: one coloured segment per language, as wide as its share. */
+export function languageBar(languages: Language[], className: string): string {
+  const segments = languages.map(l =>
+    `<span style="flex: ${l.share} 0 0; background: ${l.color}" title="${l.name} ${l.share}%"></span>`).join('')
+  return `<div class="${className}" aria-hidden="true">${segments}</div>`
 }
 
 // ── Banner art ──────────────────────────────────────────────────────────────

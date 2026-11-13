@@ -7,6 +7,9 @@
   --font-display: 'Arial Black', Arial, sans-serif;
   /* Real usable viewport height, kept up to date by core/page.ts */
   --screen-h: calc(var(--vh, 1dvh) * 100);
+  /* One pixel of a 424×240 game screen (the reference menu's resolution),
+     scaled to fit the window: for layouts copied from it in art pixels */
+  --art-px: min(calc(100vw / 424), calc(var(--screen-h) / 240));
 }
 
 *,
@@ -48,33 +51,25 @@ body {
    The PORTFOLIO logo on the menu, and PROJECTS / ABOUT ME / … on the sub-pages.
    All of them are drawn on the same 2172×724 canvas with the blue bar centred
    at (1086, 400), so this one rule puts every banner in exactly the same spot.
-   Its transparent area doesn't catch taps. */
+   Sized in art pixels so the blue bar matches the reference menu's title bar
+   (x 107-316, y 20-47 on its 424×240 screen). Its transparent area doesn't
+   catch taps. */
 .page-banner {
   position: fixed;
-  top: -3vw;
+  top: calc(-6 * var(--art-px));
   left: 50%;
   transform: translateX(-50%);
-  max-height: 32vh;
+  height: calc(71 * var(--art-px));
+  width: auto;
   max-width: 90vw;
   z-index: 10;
   pointer-events: none;
 }
 
-/* "Now Playing" drops just below the banner, so it never covers it. The banner
-   is min(32vh, 30vw) tall from top -3vw, and its art ends about 80% of the way
-   down the image. img.page-banner makes this outrank the HUD's position for
-   the pop-up (under CONFIRM), which is used on pages without a banner. */
+/* "Now Playing" drops just below the banner, so it never covers it: the art
+   ends about 80% of the way down the image (-6 + 0.796 × 71), plus a 4px gap.
+   img.page-banner makes this outrank the HUD's position for the pop-up (under
+   CONFIRM), which is used on pages without a banner. */
 :root:has(img.page-banner) .now-playing {
-  top: calc(-3vw + 0.796 * min(32vh, 30vw) + 1vw);
-}
-
-@media (orientation: landscape) and (max-height: 500px) {
-  .page-banner {
-    max-height: 35vh;
-    top: -4vw;
-  }
-
-  :root:has(img.page-banner) .now-playing {
-    top: calc(-4vw + 0.796 * min(35vh, 30vw) + 1vw);
-  }
+  top: calc(54.5 * var(--art-px));
 }

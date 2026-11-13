@@ -1,0 +1,231 @@
+/*
+ * The project details pop-up (ProjectPopup.ts), in art pixels (--art-px).
+ * It covers the page under the title banner and the corner HUD (z-index 10),
+ * which stay usable: BACK closes it, CONFIRM opens the repo.
+ */
+.project-popup {
+  position: fixed;
+  inset: 0;
+  z-index: 9;
+  display: grid;
+  place-items: center;
+  /* keep clear of the title banner */
+  padding: calc(52 * var(--art-px)) calc(8 * var(--art-px)) calc(6 * var(--art-px));
+  background: rgb(0 0 0 / 0.45);
+  animation: popup-dim 0.15s ease-out both;
+}
+
+.project-popup.closing {
+  animation: popup-dim 0.12s ease-in reverse both;
+  pointer-events: none;
+}
+
+@keyframes popup-dim {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.project-popup-panel {
+  position: relative;
+  width: min(calc(300 * var(--art-px)), 100%);
+  max-height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: calc(30 * var(--art-px)) calc(14 * var(--art-px)) calc(10 * var(--art-px));
+  background: #f7f3f7;
+  border: calc(4 * var(--art-px)) solid #000;
+  box-shadow: calc(6 * var(--art-px)) calc(6 * var(--art-px)) 0 rgb(0 0 0 / 0.35);
+  color: #17141d;
+  font: 700 max(11px, calc(6 * var(--art-px))) / 1.3 'Trebuchet MS', 'Segoe UI', system-ui, sans-serif;
+  outline: none;
+  animation: popup-pop 0.18s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+}
+
+@keyframes popup-pop {
+  from { transform: translateY(calc(10 * var(--art-px))) scale(0.94); }
+  to   { transform: none; }
+}
+
+/* ── Title: a menu button bar, selected (see ButtonMenu.css) ─────────────── */
+.project-popup-heading {
+  position: absolute;
+  left: calc(4 * var(--art-px));
+  top: calc(4 * var(--art-px));
+  width: calc((var(--bar-len) + 24) * var(--art-px));
+  height: calc(25 * var(--art-px));
+}
+
+.project-popup-bar,
+.project-popup-highlight {
+  position: absolute;
+  inset: 0;
+  will-change: transform;
+}
+
+.project-popup-bar {
+  background: #000;
+  transform: translate(calc(-2 * var(--art-px)), calc(-2 * var(--art-px)));
+}
+
+.project-popup-highlight {
+  background: #b00206;
+  transform: translate(calc(2 * var(--art-px)), calc(2 * var(--art-px)));
+}
+
+.project-popup-highlight::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: #e8ace7;
+  animation: menu-highlight-pulse 0.267s linear infinite alternate;
+}
+
+/* the menu font's letters start 30px in and 28px up from the bar's bottom-left */
+.project-popup-title {
+  position: absolute;
+  left: calc(29 * var(--art-px));
+  top: calc(-4 * var(--art-px));
+  transform: translate(calc(-2 * var(--art-px)), calc(-2 * var(--art-px)));
+  will-change: transform;
+}
+
+/* bottom-right, on the buttons' row */
+.project-popup-year {
+  align-self: center;
+  margin-left: auto;
+  padding: 0 0.5em;
+  background: #000;
+  color: #efc400;
+  font-family: var(--font-display);
+  font-size: 0.85em;
+}
+
+/* ── Body ────────────────────────────────────────────────────────────────── */
+.project-popup-tagline {
+  margin: 0 0 0.5em;
+  font-family: var(--font-display);
+  font-size: 1.12em;
+  line-height: 1.2;
+}
+
+.project-popup-points {
+  margin: 0 0 0.6em;
+  padding: 0;
+  list-style: none;
+  font-weight: 600;
+}
+
+.project-popup-points li {
+  position: relative;
+  padding-left: 1.1em;
+}
+
+/* pixel bullets in the highlight's red */
+.project-popup-points li::before {
+  content: '';
+  position: absolute;
+  left: 0.15em;
+  top: 0.45em;
+  width: 0.45em;
+  height: 0.45em;
+  background: #b00206;
+  box-shadow: 0.12em 0.12em 0 #000;
+}
+
+.project-popup-langs {
+  display: flex;
+  align-items: center;
+  gap: calc(6 * var(--art-px));
+  margin-bottom: 0.7em;
+}
+
+.project-popup-logos {
+  display: flex;
+  gap: calc(3 * var(--art-px));
+}
+
+/* the 16×16 logos at 2 art px per pixel */
+.project-popup-logos img {
+  width: calc(32 * var(--art-px));
+  height: calc(32 * var(--art-px));
+  image-rendering: pixelated;
+}
+
+.project-popup-langbar {
+  flex: 1;
+  min-width: 0;
+}
+
+.project-popup-bar-chart {
+  display: flex;
+  height: calc(5 * var(--art-px));
+  background: #000;
+  outline: calc(1 * var(--art-px)) solid #000;
+}
+
+.project-popup-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2em 0.9em;
+  margin: 0.35em 0 0;
+  font-size: 0.85em;
+  font-weight: 600;
+}
+
+.project-popup-legend span::before {
+  content: '';
+  display: inline-block;
+  width: 0.6em;
+  height: 0.6em;
+  margin-right: 0.3em;
+  background: var(--dot);
+  outline: 1px solid #000;
+}
+
+/* ── Buttons ─────────────────────────────────────────────────────────────── */
+.project-popup-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(5 * var(--art-px));
+}
+
+.project-popup-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  padding: 0.25em 0.8em;
+  border: none;
+  background: #000;
+  color: #fff;
+  font: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: calc(2 * var(--art-px)) calc(2 * var(--art-px)) 0 #b00206;
+}
+
+.project-popup-btn.primary {
+  background: #0066ff;
+  box-shadow: calc(2 * var(--art-px)) calc(2 * var(--art-px)) 0 #000;
+}
+
+.project-popup-btn b {
+  display: inline-block;
+  min-width: 1.2em;
+  padding: 0 0.2em;
+  background: #fff;
+  color: #000;
+  text-align: center;
+  line-height: 1.25;
+}
+
+.project-popup-btn:hover,
+.project-popup-btn:focus-visible {
+  transform: translate(calc(-1 * var(--art-px)), calc(-1 * var(--art-px)));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .project-popup,
+  .project-popup-panel {
+    animation-duration: 0.01s;
+  }
+}
