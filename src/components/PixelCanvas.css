@@ -6,3 +6,17 @@
   object-fit: contain;
   image-rendering: pixelated;
 }
+
+/* PixelLabel: sized in em by its script (1em = the capitals' height) */
+.pixel-label {
+  object-fit: fill;
+}
+
+.pixel-label-inline {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.pixel-label-block {
+  max-width: 100%;
+}

@@ -34,7 +34,8 @@ src/
                      ProjectPopup
   utils/             audio.ts (sound effects + mute flag), music.ts (background music),
                      alphaMask.ts (pixel-perfect hit tests), pixelArt.ts (drawing pixel art),
-                     menuFont.ts (menu buttons), hudArt.ts (corner prompts' text),
+                     menuFont.ts (menu buttons), textFont.ts (ordinary text + corner
+                     prompts), hudArt.ts (corner prompts' text, via textFont),
                      pixelFont.ts (project boxes),
                      selectJump.ts (the menu's select jump, shared with the project boxes)
   styles/base.css    global CSS (reset, #app, .page, colours, --art-px, .page-banner)
@@ -99,8 +100,11 @@ Component/scene CSS sits next to its `.ts` file and is imported by it.
   and shows the pop-up again.
 - **Colours**: `COLORS` in `config.ts`; `--yellow`/`--blue` in `base.css` must match.
 - **Art**: use the user's own pixel-art images, not CSS text. Game-style text is
-  drawn in code in pixel fonts rebuilt from the user's references (menu buttons,
-  corner prompts, project boxes), never in CSS fonts. The user often exports on a
+  drawn in code in pixel fonts rebuilt from the user's references, never in CSS
+  fonts. Each place has the font the user picked: menu buttons and pop-up titles
+  `menuFont`; project box names `pixelFont` ("NEW"); corner prompts and all other
+  text (pop-up body, screen guard) `textFont`. Exception: the "Now Playing" pop-up
+  keeps its CSS font (Arial Black): the user asked for that. The user often exports on a
   1920×1080 transparent canvas, so crop before use (losslessly: check the total alpha
   before and after). A full canvas costs ~8 MB of memory on a phone.
   - Corner badges (HudButton): icon cropped to key cap + bar (`mute.png`, `confirm.png`,
@@ -172,6 +176,8 @@ Component/scene CSS sits next to its `.ts` file and is imported by it.
 - **Confirming**: Enter/Z, clicking the highlighted button again, or clicking the
   [↵] CONFIRM badge all call `ButtonMenu.confirmSelection()`. HudButton clicks only
   count on opaque pixels, and not while the badge is hidden by `hideWhenCovered`.
+  Confirming plays only the flash, except a mouse click on the highlighted button, which
+  also jumps. Taps on touch screens just flash, as the user asked.
 - **Pixel font** (`utils/pixelFont.ts`): the user's "NEW" reference text, rebuilt as a
   12px-tall bitmap font. N, E and W match the reference pixel for pixel (E's middle bar
   pokes 1px left: that's in the reference); the other glyphs follow its rules (see the
@@ -180,6 +186,20 @@ Component/scene CSS sits next to its `.ts` file and is imported by it.
   resolution whenever its size changes (one shared ResizeObserver), so it's always sharp.
   Use it for in-game-style text instead of CSS fonts. When editing glyphs, check them
   with a rendered sheet; every row of a glyph must be the same length.
+- **Text font** (`utils/textFont.ts`): the game's small dialog/prompt font, from
+  `reference/image.png` and the menu clip's prompts: 10-row capitals, 2px strokes,
+  1px apart, 9px between words, 18px line pitch, with a dark shadow on the right and
+  bottom edges. The game's shadows are hand-drawn, so each glyph stores its ink (`X`)
+  and shadow (`s`) pixels; the letters in the reference are copied exactly (re-rendering
+  its three sentences matches all 7,304 pixels), the rest are drawn to its rules. The
+  corner prompts (hudArt.ts) use the same glyphs with their own 1px diagonal shadow.
+  - Ordinary text: `new PixelLabel(text)` (one line) or `new PixelLabel(text, { wrap:
+    true })` (wraps to its container), in `components/PixelText.ts`. It's styled from
+    CSS: `font-size` = the capitals' height, `color` = ink, `--pixel-shadow` = shadow
+    (pick a darker shade of the background; the default suits light text), `text-align`,
+    and `--pixel-line-height` (default 1.8; the project pop-up uses 1.4).
+  - Sizes: whole CSS px per font pixel where possible (the screen guard uses 20px/30px),
+    or art px (the pop-up uses 6 art px capitals).
 - **Projects page**: `ProjectCarousel` (the row) holds one `ProjectCard` per entry in
   `src/projects.ts` (the pinned repos on github.com/Asdy419; that file's header says how
   to add one). Each box: the name in the pixel font, an optional `image` (the project's

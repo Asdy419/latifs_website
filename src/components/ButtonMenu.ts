@@ -51,6 +51,8 @@ export class ButtonMenu {
   private listEl: HTMLElement | null = null
   private buttonEls: HTMLLIElement[] = []
   private jump: Animation[] = []
+  /** 'mouse', 'touch' or 'pen': what pressed the list last */
+  private lastPointer = 'mouse'
 
   constructor(items: MenuItem[]) {
     this.items = items
@@ -65,6 +67,7 @@ export class ButtonMenu {
 
     this.updateHighlight()
     document.addEventListener('keydown', e => this.handleKey(e), { signal })
+    listEl.addEventListener('pointerdown', e => { this.lastPointer = e.pointerType }, { signal })
     listEl.addEventListener('click', e => this.handleClick(e), { signal })
   }
 
@@ -107,7 +110,8 @@ export class ButtonMenu {
     const i = this.buttonEls.findIndex(el => el === button)
     if (i < 0) return
     if (i === this.selectedIndex) {
-      this.playSplit()
+      // a mouse click on it jumps too; a tap confirms with just the flash, like Enter
+      if (this.lastPointer === 'mouse') this.playSplit()
       this.confirmSelection()
     } else {
       this.select(i)

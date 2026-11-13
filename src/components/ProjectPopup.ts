@@ -1,5 +1,6 @@
 import './ProjectPopup.css'
 import { PixelCanvas } from './PixelCanvas'
+import { PixelLabel } from './PixelText'
 import { barShape } from './ButtonMenu'
 import { languageBar, type Project } from './ProjectCard'
 import { menuTextArt, menuTextWidth } from '../utils/menuFont'
@@ -43,29 +44,36 @@ export class ProjectPopup {
           <div class="project-popup-bar"></div>
           <div class="project-popup-title"></div>
         </div>
-        <p class="project-popup-tagline"></p>
+        <div class="project-popup-tagline"></div>
         <ul class="project-popup-points"></ul>
         <div class="project-popup-langs">
           <div class="project-popup-logos"></div>
           <div class="project-popup-langbar">
             ${languageBar(project.languages, 'project-popup-bar-chart')}
-            <p class="project-popup-legend"></p>
+            <div class="project-popup-legend"></div>
           </div>
         </div>
         <div class="project-popup-actions">
-          <a class="project-popup-btn primary" target="_blank" rel="noopener"><b>↵</b> View on GitHub</a>
-          <button class="project-popup-btn" type="button" data-close><b>B</b> Close</button>
+          <a class="project-popup-btn primary" target="_blank" rel="noopener"></a>
+          <button class="project-popup-btn" type="button" data-close></button>
           <span class="project-popup-year"></span>
         </div>
       </div>
     `
-    // text goes in as text, never HTML
+    // all text in the references' small text font (sizes and colours in ProjectPopup.css)
     const q = <T extends Element>(s: string) => el.querySelector<T>(s)!
-    q<HTMLElement>('.project-popup-year').textContent = String(project.year)
-    q<HTMLElement>('.project-popup-tagline').textContent = project.tagline
+    const label = (text: string) => new PixelLabel(text).element
+    const paragraph = (text: string) => new PixelLabel(text, { wrap: true }).element
+    const keyCap = (key: string) => {
+      const b = document.createElement('b')
+      b.append(label(key))
+      return b
+    }
+    q<HTMLElement>('.project-popup-year').append(label(String(project.year)))
+    q<HTMLElement>('.project-popup-tagline').append(paragraph(project.tagline))
     q<HTMLElement>('.project-popup-points').append(...project.highlights.map(text => {
       const li = document.createElement('li')
-      li.textContent = text
+      li.append(paragraph(text))
       return li
     }))
     q<HTMLElement>('.project-popup-logos').append(...project.logos.map(src => {
@@ -77,18 +85,20 @@ export class ProjectPopup {
     q<HTMLElement>('.project-popup-legend').append(...project.languages.map(l => {
       const span = document.createElement('span')
       span.style.setProperty('--dot', l.color)
-      span.textContent = `${l.name} ${l.share}%`
+      span.append(label(`${l.name} ${l.share}%`))
       return span
     }))
     const github = q<HTMLAnchorElement>('.project-popup-btn.primary')
     github.href = project.url
+    github.append(keyCap('↵'), label('View on GitHub'))
+    q<HTMLElement>('[data-close]').append(keyCap('B'), label('Close'))
     for (const link of project.links ?? []) {
       const a = document.createElement('a')
       a.className = 'project-popup-btn'
       a.target = '_blank'
       a.rel = 'noopener'
       a.href = link.url
-      a.textContent = link.label
+      a.append(label(link.label))
       github.after(a)
     }
     const shape = barShape(length)

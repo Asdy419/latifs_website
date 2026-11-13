@@ -1,5 +1,6 @@
 import './screenGuard.css'
 import { lockInput } from './inputLock'
+import { PixelLabel } from '../components/PixelText'
 
 /**
  * Full-screen blocking message shown when the site can't be used as designed:
@@ -8,6 +9,7 @@ import { lockInput } from './inputLock'
  *  - on desktop (mouse) the browser window must be maximised or full screen
  *
  * While it's up, input is blocked and the page underneath isn't rendered.
+ * Its text is in the references' small text font (PixelLabel).
  */
 
 type Problem = 'maximise' | 'rotate' | 'too-small'
@@ -46,13 +48,15 @@ export function installScreenGuard(): void {
   const guard = document.createElement('div')
   guard.id = 'screen-guard'
   guard.innerHTML = `
-    <p id="screen-guard-msg"></p>
+    <div id="screen-guard-msg"></div>
     <button id="screen-guard-fullscreen" type="button" data-input-lock-exempt>Go full screen</button>
   `
   document.body.append(guard)
 
-  const msg = guard.querySelector('p')!
+  const msg = new PixelLabel('', { wrap: true })
+  guard.querySelector('#screen-guard-msg')!.append(msg.element)
   const fullscreenBtn = guard.querySelector('button')!
+  fullscreenBtn.replaceChildren(new PixelLabel('Go full screen').element)
   fullscreenBtn.addEventListener('click', e => {
     e.stopPropagation() // don't let the click reach the page underneath
     document.documentElement.requestFullscreen?.().catch(() => {})
@@ -64,7 +68,7 @@ export function installScreenGuard(): void {
     const problem = currentProblem()
     document.documentElement.classList.toggle('screen-blocked', problem !== null)
     if (problem) {
-      msg.textContent = MESSAGES[problem]
+      msg.setText(MESSAGES[problem])
       fullscreenBtn.hidden = !(problem === 'maximise' && document.fullscreenEnabled)
       unlock ??= lockInput()
     } else {
