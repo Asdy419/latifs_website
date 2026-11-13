@@ -1,0 +1,45 @@
+/* Full-screen container for the rings (behind everything else on the page) */
+.circles {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: var(--screen-h);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* WebGL renderer: the shader handles the spin and pulse itself */
+.circles-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* SVG fallback (no usable WebGL): CSS spins each ring layer */
+.circle-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: var(--screen-h);
+  overflow: visible;
+  transform-origin: center center;
+  z-index: 0;
+}
+
+#circle-svg {
+  animation: rotate-cw 6s linear infinite;
+}
+
+#circle-svg-2 {
+  animation: rotate-ccw 6s linear infinite;
+}
+
+@keyframes rotate-cw {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes rotate-ccw {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(-360deg); }
+}

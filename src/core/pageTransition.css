@@ -1,0 +1,93 @@
+#panel-transition {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/*
+  Three slanted parallelogram columns, all with the same / slant (parallel seams).
+
+  Technique: each panel is an OVERSIZED rectangle that is skewed with skewX(-45deg).
+  Because the slant comes from a skew (not a clip-path) everything stays in px/vw,
+  so the seam is a true 45° in screen space AND the diagonal slide (also 45°) runs
+  exactly parallel to the seam.
+
+  - top/height make every panel taller than the viewport, so the flat top & bottom
+    edges are always off-screen.
+  - `left` sets where a panel's seam sits at the vertical centre of the viewport;
+    `width` sets the band thickness. The left-most (orange) and right-most (pink)
+    panels run far past the screen edges, so their outer vertical edges are NEVER
+    visible — only the slanted seams show.
+  - #panel-transition has overflow:hidden, which trims everything to the viewport.
+
+  Seam at viewport centre:  orange|blue = 22vw,  blue|pink = 67vw.
+  Travel: orange + pink come from top-right (↙); blue comes from bottom-left (↗).
+  ENTER order (staggered): orange → blue → pink.
+  REVEAL order: orange + pink first, then blue.
+*/
+.trans-panel {
+  position: absolute;
+  top: -50vh;
+  height: 200vh;
+  transform: skewX(-45deg);
+  transform-origin: center center; /* pivot row = viewport centre */
+}
+
+.trans-panel-0 {
+  left: -200vw;
+  width: 222vw; /* right seam at centre = 22vw */
+  background: #e89020;
+  z-index: 1;
+}
+
+.trans-panel-1 {
+  left: 22vw;
+  width: 45vw; /* seams 22vw → 67vw */
+  background: #2288e8;
+  z-index: 3;
+}
+
+.trans-panel-2 {
+  left: 67vw;
+  width: 233vw; /* right edge at centre = 300vw, far off-screen */
+  background: #e83070;
+  z-index: 2;
+}
+
+/* COVERING — static, fully covering (pages arrived at by a wipe start like this,
+   see vite.config.ts). The home page only shows its copy when arriving from BACK. */
+.covering .trans-panel-2 { z-index: 5; }
+.home-cover { display: none; }
+.from-page .home-cover { display: block; }
+
+/* ENTER — panels slide in to cover the screen */
+.entering .trans-panel-0 { animation: panel-in-tr 0.625s cubic-bezier(0.2, 0.8, 0.2, 1) 0s    both; }
+.entering .trans-panel-1 { animation: panel-in-bl 0.625s cubic-bezier(0.2, 0.8, 0.2, 1) 0.14s both; }
+.entering .trans-panel-2 { animation: panel-in-tr 0.625s cubic-bezier(0.2, 0.8, 0.2, 1) 0.28s both; }
+
+/* REVEAL — panels exit continuing their travel direction */
+.revealing .trans-panel-0 { animation: panel-out-bl 0.9s cubic-bezier(0.7, 0, 0.3, 1) 0s   both; }
+.revealing .trans-panel-1 { animation: panel-out-tr 0.9s cubic-bezier(0.7, 0, 0.3, 1) 0.1s both; }
+.revealing .trans-panel-2 { animation: panel-out-bl 0.9s cubic-bezier(0.7, 0, 0.3, 1) 0s   both; z-index: 5; }
+
+@keyframes panel-in-tr {
+  from { transform: translate(100vw, -100vw) skewX(-45deg); }
+  to   { transform: translate(0, 0) skewX(-45deg); }
+}
+
+@keyframes panel-in-bl {
+  from { transform: translate(-100vw, 100vw) skewX(-45deg); }
+  to   { transform: translate(0, 0) skewX(-45deg); }
+}
+
+@keyframes panel-out-bl {
+  from { transform: translate(0, 0) skewX(-45deg); }
+  to   { transform: translate(-100vw, 100vw) skewX(-45deg); }
+}
+
+@keyframes panel-out-tr {
+  from { transform: translate(0, 0) skewX(-45deg); }
+  to   { transform: translate(100vw, -100vw) skewX(-45deg); }
+}

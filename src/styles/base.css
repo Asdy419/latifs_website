@@ -1,0 +1,45 @@
+/* Global styles shared by every page. Component styles live next to their .ts file. */
+
+/* Colours used by the CSS (the full palette, incl. page backgrounds, is COLORS in config.ts) */
+:root {
+  --yellow: #efc400;
+  --blue: #0066ff;
+  --font-display: 'Arial Black', Arial, sans-serif;
+  /* Real usable viewport height, kept up to date by core/page.ts */
+  --screen-h: calc(var(--vh, 1dvh) * 100);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+/* No html/body background here: each HTML file sets its page colour inline
+   (so the very first paint is right) and startPage() keeps it in sync. */
+
+#app {
+  position: fixed;
+  inset: 0;
+  height: 100%;
+  height: -webkit-fill-available;
+  overflow: hidden;
+}
+
+/* Root container of every sub-page (see startSubpage in core/page.ts) */
+.page {
+  position: relative;
+  width: 100%;
+  height: var(--screen-h);
+  overflow: hidden;
+}

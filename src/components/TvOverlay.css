@@ -1,0 +1,39 @@
+#tv-wrap {
+  display: grid;
+}
+
+#tv-frame {
+  display: block;
+  width: 100%;
+  height: auto;
+  position: relative;
+  z-index: 0;
+}
+
+/* The screen: same shape as the frame image (used as a mask), slightly smaller
+   so the frame shows around it. */
+#tv-white {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50.3%, -49.9%) scale(0.98);
+  width: 100%;
+  height: 100%;
+  /* --tv-mask is set by TvOverlay.ts from the imported (WebP) frame image,
+     so the mask and the frame share one download */
+  -webkit-mask-image: var(--tv-mask);
+  mask-image: var(--tv-mask);
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  /* No filter here: CSS applies filters *before* masks, so a drop-shadow on
+     this element gets cut away by the mask (never visible) while still being
+     re-computed on every video frame. */
+  z-index: 2;
+}
+
+#tv-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}

@@ -1,0 +1,66 @@
+#menu {
+  position: relative;
+  width: 100%;
+  height: var(--screen-h);
+  background: var(--yellow);
+}
+
+#menu-logo {
+  position: fixed;
+  top: -3vw;
+  left: 50%;
+  transform: translateX(-50%);
+  max-height: 32vh;
+  max-width: 90vw;
+  z-index: 10;
+}
+
+#tv-wrap {
+  position: absolute;
+  left: -3.5%;
+  top: 60%;
+  transform: translateY(-50%);
+  width: 70vw;
+  z-index: 2;
+}
+
+#menu-buttons {
+  position: absolute;
+  right: 2vw;
+  bottom: -14vw;
+  width: 55vw;
+  z-index: 1;
+}
+
+/* Corner badges (BACK / MUTE / CONFIRM) are laid out by HudButton.css */
+
+/* "Now Playing" sits just below the logo's banner, so it never covers it.
+   The logo is min(32vh, 30vw) tall (3:1, max 90vw wide) from top -3vw, and its
+   banner's visible bottom is 79.6% of the way down the image. */
+:root:has(#menu) .now-playing {
+  top: calc(-3vw + 0.796 * min(32vh, 30vw) + 1vw);
+}
+
+/* ── Short landscape screens (phones) ──────────────────────────────────── */
+
+@media (orientation: landscape) and (max-height: 500px) {
+  :root:has(#menu) .now-playing {
+    top: calc(-4vw + 0.796 * min(35vh, 30vw) + 1vw);
+  }
+
+  #tv-wrap {
+    width: 50vw;
+    top: 60%;
+    left: -3%;
+  }
+
+  #menu-logo {
+    max-height: 35vh;
+    top: -4vw;
+  }
+
+  #menu-buttons {
+    bottom: -18vw;
+    width: 40vw;
+  }
+}

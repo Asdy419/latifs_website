@@ -1,0 +1,56 @@
+/* Black slanted box at the top right, like the menu's bars. Slides in from the
+   right edge, holds, slides back out (one animation; removed on animationend).
+   Sized from the HUD's key cap size, so it scales with the screen like the
+   badges do — with a floor so the text stays readable on small phones.
+   Its height on the page is set by the HUD / menu CSS (below CONFIRM, or below the logo). */
+.now-playing {
+  position: fixed;
+  top: 2.2vw;
+  right: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25em;
+  max-width: 48vw;
+  padding: 0.55em 1.3em 0.6em 2.2em;
+  background: #111;
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: max(11px, calc(var(--hud-size, 2.89vw) * 0.42));
+  /* slanted left edge, flush with the screen's right edge */
+  clip-path: polygon(1.3em 0, 100% 0, 100% 100%, 0 100%);
+  pointer-events: none;
+  animation: now-playing 4.6s both;
+}
+
+.now-playing-label {
+  font-size: max(9px, 0.7em);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--yellow);
+}
+
+.now-playing-title {
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@keyframes now-playing {
+  0%   { transform: translateX(105%); animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1); }
+  8%   { transform: translateX(0); }
+  92%  { transform: translateX(0);    animation-timing-function: cubic-bezier(0.6, 0, 0.8, 0.4); }
+  100% { transform: translateX(105%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .now-playing {
+    animation-name: now-playing-fade;
+  }
+
+  @keyframes now-playing-fade {
+    0%, 100% { opacity: 0; }
+    6%, 94%  { opacity: 1; }
+  }
+}

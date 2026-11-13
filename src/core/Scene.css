@@ -1,0 +1,22 @@
+/* Blue fade used by transitionTo() */
+.scene-fade {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  background: var(--blue);
+  animation: scene-fade-in 1.5s forwards;
+}
+
+.scene-fade.out {
+  animation-name: scene-fade-out;
+}
+
+@keyframes scene-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes scene-fade-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}

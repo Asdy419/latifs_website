@@ -1,0 +1,82 @@
+/* ── Corner HUD ──────────────────────────────────────────────────────────────
+   Key-prompt badges ([B] BACK, [↵] CONFIRM, [M] MUTE) stacked in a column in a
+   top corner. Icon images are cropped to the key cap + bar, so giving every
+   badge the same height makes every key cap the same size. Everything scales
+   with the screen width; tweak these four variables to resize the whole HUD. */
+:root {
+  --hud-size: 2.89vw; /* key cap height */
+  --hud-top: 1.88vw;  /* gap above the first badge */
+  --hud-side: 6.16vw; /* gap to the screen edge */
+  --hud-gap: 0.75vw;  /* between stacked badges */
+}
+
+/* Phones: nearly the same proportions as desktop (big enough to read and tap),
+   a little tighter to the edges so BACK clears the logo on 16:9 phones too. */
+@media (orientation: landscape) and (max-height: 500px) {
+  :root {
+    --hud-size: 2.6vw;
+    --hud-top: 1.97vw;
+    --hud-side: 5.09vw;
+    --hud-gap: 0.6vw;
+  }
+}
+
+/* A corner column of badges; key caps line up on the left */
+.hud {
+  position: fixed;
+  top: var(--hud-top);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--hud-gap);
+  pointer-events: none;
+}
+
+.hud-left  { left: var(--hud-side); }
+.hud-right { right: var(--hud-side); }
+
+.hud-btn {
+  position: relative;
+  height: var(--hud-size);
+  pointer-events: auto;
+}
+
+/* Touch screens: a bigger invisible tap area around each badge (they're small
+   on phones, and BACK is how you leave a page). Between stacked badges it only
+   reaches halfway into the gap, so neighbours never overlap; above the first and
+   below the last it reaches further. Mouse clicks stay pixel-perfect. */
+@media (pointer: coarse) {
+  .hud-btn::before {
+    content: '';
+    position: absolute;
+    inset: calc(var(--hud-gap) * -0.5) calc(var(--hud-size) * -0.4);
+  }
+
+  .hud-btn:first-child::before { top: calc(var(--hud-size) * -0.6); }
+  .hud-btn:last-child::before  { bottom: calc(var(--hud-size) * -0.6); }
+}
+
+.hud-btn-icon {
+  display: block;
+  height: 100%;
+  width: auto;
+}
+
+/* Label image on the bar. All label PNGs share the same canvas height and
+   margins (215px tall, letters starting 34px in, 35px down), so one size rule
+   fits them all; each badge sets `left` to where its icon's bar starts. */
+.hud-btn-label {
+  position: absolute;
+  top: 0;
+  height: 91.8%;
+  width: auto;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Keep the "Now Playing" pop-up clear of the top-right badge (CONFIRM).
+   The menu moves it further down, below the logo (Menu.css). */
+:root:has(.hud-right) .now-playing {
+  top: calc(var(--hud-top) + var(--hud-size) + 1.2vw);
+}
