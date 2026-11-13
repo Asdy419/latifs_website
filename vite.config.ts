@@ -60,16 +60,35 @@ function sharedHead(): Plugin {
  * Every imported PNG is served as WebP (in dev and in the build), so new
  * exports dropped into src/assets are optimised automatically:
  *  - lossless (pixel-identical) for the pixel-art UI
- *  - near-lossless for the big banners — at most 2/255 change per channel, ~30% smaller
+ *  - near-lossless for the menu's logo: at most 2/255 change per channel, ~30% smaller
+ *  - high-quality lossy for the sub-page title banners (any *_banner.png): their
+ *    soft, noisy edges barely compress losslessly (~360 KB each), while quality 92
+ *    is ~75 KB and looks the same at the size they're shown (a mean change of
+ *    under 1/255 at 1080p); only 1px edge highlights soften, and only at full zoom
  * The source PNGs are never modified.
  */
-const NEAR_LOSSLESS = /\/(menu_logo|projects)\.png$/
+const NEAR_LOSSLESS = /\/menu_logo\.png$/
+const LOSSY = /\/\w+_banner\.png$/
 
 // imagetools has no near-lossless option, so add one: `?nearLossless=<quality>`
 const nearLossless: TransformFactory = config => {
   if (!config.nearLossless) return undefined
   return (_state, image) =>
     image.webp({ nearLossless: true, quality: Number(config.nearLossless), effort: 6 })
+}
+
+// …and lossy with the alpha kept exact (crisp cut-out edges): `?lossyArt=<quality>`
+const lossyArt: TransformFactory = config => {
+  if (!config.lossyArt) return undefined
+  return (_state, image) =>
+    image.webp({ quality: Number(config.lossyArt), alphaQuality: 100, smartSubsample: true, effort: 6 })
+}
+
+function imageDirectives(url: URL): URLSearchParams {
+  if (url.searchParams.size > 0) return new URLSearchParams() // explicit directives win
+  if (NEAR_LOSSLESS.test(url.pathname)) return new URLSearchParams({ format: 'webp', nearLossless: '60' })
+  if (LOSSY.test(url.pathname)) return new URLSearchParams({ format: 'webp', lossyArt: '92' })
+  return new URLSearchParams({ format: 'webp', lossless: 'true', effort: '6' })
 }
 
 /**
@@ -103,13 +122,8 @@ export default defineConfig({
     imagetools({
       include: '**/*.png',
       removeMetadata: true,
-      defaultDirectives: url => {
-        if (url.searchParams.size > 0) return new URLSearchParams() // explicit directives win
-        return NEAR_LOSSLESS.test(url.pathname)
-          ? new URLSearchParams({ format: 'webp', nearLossless: '60' })
-          : new URLSearchParams({ format: 'webp', lossless: 'true', effort: '6' })
-      },
-      extendTransforms: builtins => [...builtins, nearLossless],
+      defaultDirectives: imageDirectives,
+      extendTransforms: builtins => [...builtins, nearLossless, lossyArt],
     }),
   ],
   build: {

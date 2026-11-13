@@ -1,0 +1,166 @@
+/*
+ * Projects page: the row of project boxes (ProjectCarousel + ProjectCard).
+ *
+ * Everything is measured in art pixels: --px is one pixel of a 424 × 240 game
+ * screen, scaled to fit the window (so the layout matches the 16:9 reference
+ * and keeps its proportions on any screen).
+ *
+ * A box is 96 × 164 art px: a 5px frame around the 86 × 58 banner, a 3px
+ * divider, then the 86 × 93 picture panel. Boxes sit 108 apart (12px gaps).
+ */
+.project-carousel {
+  --px: min(calc(100vw / 424), calc(var(--screen-h) / 240));
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(50% - 58 * var(--px)); /* box tops 62px down the 240px-tall screen */
+  height: calc(168 * var(--px));   /* box + shadow */
+  z-index: 1;
+  touch-action: none;              /* swipes are handled in ProjectCarousel.ts */
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Slides so the selected box (--index) is centred; --drag follows a swipe */
+.project-track {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  transform: translateX(calc(var(--drag, 0px) - (var(--index, 0) * 108 + 48) * var(--px)));
+  transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.3, 1);
+  will-change: transform;
+}
+
+.project-track.dragging {
+  transition: none;
+}
+
+/* A box's slot in the row (the highlight and the box itself sit inside it) */
+.project-card {
+  position: absolute;
+  top: 0;
+  left: calc(var(--i) * 108 * var(--px));
+  width: calc(96 * var(--px));
+  height: calc(164 * var(--px));
+  cursor: pointer;
+}
+
+.project-card-box {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: calc(3 * var(--px));
+  width: 100%;
+  height: 100%;
+  padding: calc(5 * var(--px));
+  background: #000; /* the frame */
+  box-shadow: calc(4 * var(--px)) calc(4 * var(--px)) 0 rgb(0 0 0 / 0.25);
+}
+
+/* ── Selected: the main menu's highlight (see ButtonMenu.css) ────────────────
+   A red copy of the box stays put behind it while the box lifts up-left, so
+   the red shows along the bottom and right; the copy pulses red ↔ pink.
+   Offsets are the menu's 1vw / 2.6vw / 1.1vw, in art px (1vw ≈ 4.24px). */
+.project-card.selected .project-card-box {
+  transform: translate(calc(-4 * var(--px)), calc(-4 * var(--px)));
+  box-shadow: none; /* the highlight takes the shadow's place */
+}
+
+.project-card-highlight {
+  position: absolute;
+  inset: 0;
+  background: #b0020b;
+  opacity: 0;
+}
+
+.project-card.selected .project-card-highlight {
+  opacity: 1;
+}
+
+/* the pulse: a pink layer fading in and out over the red (compositor-only, like the menu) */
+.project-card-highlight::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: #e2b4e7;
+  opacity: 0;
+}
+
+.project-card.selected .project-card-highlight::after {
+  animation: card-highlight-pulse 0.3s linear infinite alternate;
+}
+
+@keyframes card-highlight-pulse {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* The menu's "split" bounce when a box becomes selected: the box jumps up-left
+   while its highlight dips down-right, then both settle */
+.project-card.splitting .project-card-box {
+  animation: card-split-over 0.18s ease both;
+}
+
+.project-card.splitting .project-card-highlight {
+  animation: card-split-under 0.18s ease both;
+}
+
+@keyframes card-split-over {
+  0%   { transform: translate(calc(-4 * var(--px)), calc(-4 * var(--px))); }
+  45%  { transform: translate(calc(-11 * var(--px)), calc(-11 * var(--px))); }
+  100% { transform: translate(calc(-4 * var(--px)), calc(-4 * var(--px))); }
+}
+
+@keyframes card-split-under {
+  0%   { transform: translate(0, 0); }
+  45%  { transform: translate(calc(5 * var(--px)), calc(5 * var(--px))); }
+  100% { transform: translate(0, 0); }
+}
+
+.project-card-banner {
+  position: relative;
+  flex: none;
+  height: calc(58 * var(--px));
+  background: var(--card-banner) center / 100% 100% no-repeat;
+  image-rendering: pixelated;
+}
+
+/* The name: fitted into the white band (2px margins; 12px = the font's full size) */
+.project-card-name {
+  position: absolute;
+  left: calc(2 * var(--px));
+  right: calc(2 * var(--px));
+  top: calc(23 * var(--px));
+  height: calc(12 * var(--px));
+}
+
+.project-card-picture {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  background: #9ad3df;
+  box-shadow: inset calc(3 * var(--px)) calc(3 * var(--px)) 0 rgb(0 0 0 / 0.15);
+}
+
+.project-card-picture img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .project-track {
+    transition: none;
+  }
+  .project-card.splitting .project-card-box,
+  .project-card.splitting .project-card-highlight {
+    animation: none;
+  }
+}

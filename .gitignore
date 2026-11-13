@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Reference clips/screenshots for development (often game footage: never publish)
+reference/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

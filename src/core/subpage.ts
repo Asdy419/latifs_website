@@ -14,14 +14,21 @@ interface SubpageOptions {
 /**
  * Sets up a menu sub-page and returns its (empty) full-screen container:
  *  - the wipe in from the menu
+ *  - the page's title banner across the top (`banner` in config.ts)
  *  - background music, with "Now Playing" once the page is revealed
  *  - the corner HUD: [B] BACK (or B / Escape) returns to the main menu,
  *    [M] MUTE, and [↵] CONFIRM (see `onConfirm`)
  */
 export function startSubpage(id: SubpageId, { onConfirm }: SubpageOptions = {}): HTMLDivElement {
-  const app = startPage({ background: subpage(id).background, reveal: false })
+  const { background, banner, label } = subpage(id)
+  const app = startPage({ background, reveal: false })
   const hud = new Hud()
-  app.innerHTML = `<div id="${id}" class="page"></div>${hud.markup()}`
+  // The banner is in the first render, so it downloads while the wipe still covers the screen
+  app.innerHTML = `
+    <div id="${id}" class="page"></div>
+    <img class="page-banner" src="${banner}" alt="${label}" fetchpriority="high" decoding="async" />
+    ${hud.markup()}
+  `
 
   const revealed = pageReveal()
   startMusic().then(title => { if (title) revealed.then(() => showNowPlaying(title)) })

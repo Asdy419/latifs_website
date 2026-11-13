@@ -36,10 +36,45 @@ body {
   overflow: hidden;
 }
 
-/* Root container of every sub-page (see startSubpage in core/page.ts) */
+/* Root container of every sub-page (see startSubpage in core/subpage.ts) */
 .page {
   position: relative;
   width: 100%;
   height: var(--screen-h);
   overflow: hidden;
+}
+
+/* ── Title banner at the top of the screen ─────────────────────────────────
+   The PORTFOLIO logo on the menu, and PROJECTS / ABOUT ME / … on the sub-pages.
+   All of them are drawn on the same 2172×724 canvas with the blue bar centred
+   at (1086, 400), so this one rule puts every banner in exactly the same spot.
+   Its transparent area doesn't catch taps. */
+.page-banner {
+  position: fixed;
+  top: -3vw;
+  left: 50%;
+  transform: translateX(-50%);
+  max-height: 32vh;
+  max-width: 90vw;
+  z-index: 10;
+  pointer-events: none;
+}
+
+/* "Now Playing" drops just below the banner, so it never covers it. The banner
+   is min(32vh, 30vw) tall from top -3vw, and its art ends about 80% of the way
+   down the image. img.page-banner makes this outrank the HUD's position for
+   the pop-up (under CONFIRM), which is used on pages without a banner. */
+:root:has(img.page-banner) .now-playing {
+  top: calc(-3vw + 0.796 * min(32vh, 30vw) + 1vw);
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+  .page-banner {
+    max-height: 35vh;
+    top: -4vw;
+  }
+
+  :root:has(img.page-banner) .now-playing {
+    top: calc(-4vw + 0.796 * min(35vh, 30vw) + 1vw);
+  }
 }

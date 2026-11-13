@@ -62,7 +62,7 @@ export class Menu extends Scene {
     return `
       <div id="menu">
         ${this.circles.markup()}
-        <img src="${menuLogo}" id="menu-logo" decoding="async" />
+        <img src="${menuLogo}" id="menu-logo" class="page-banner" decoding="async" />
         ${this.tv.markup()}
         <ul id="menu-buttons"></ul>
         ${this.hud.markup()}

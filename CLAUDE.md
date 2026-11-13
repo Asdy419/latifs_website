@@ -19,6 +19,7 @@ index.html, projects.html, …   one HTML file per page (vite.config.ts finds th
                                and injects the shared <head> tags)
 src/
   config.ts          COLORS + SUBPAGES (the list that drives the main menu)
+  projects.ts        PROJECTS: the boxes on the Projects page ({ name, image } each)
   pages/<name>.ts    entry module for <name>.html
   core/
     page.ts          startPage(): every page starts here (CSS, guard, --vh, service worker)
@@ -29,9 +30,9 @@ src/
     inputLock.ts     lockInput(): swallow key/click input during transitions
   scenes/            TitleScreen → Menu (screens inside index.html)
   components/        Hud (corner HUD) + HudButton (one badge), ButtonMenu, NowPlaying,
-                     CircleAnimation, TvOverlay
+                     CircleAnimation, TvOverlay, PixelText, ProjectCarousel + ProjectCard
   utils/             audio.ts (sound effects + mute flag), music.ts (background music),
-                     alphaMask.ts (pixel-perfect hit tests)
+                     alphaMask.ts (pixel-perfect hit tests), pixelFont.ts (the pixel font)
   styles/base.css    global CSS (reset, #app, .page, colour variables)
   assets/            organised by page/screen: shared/ (sounds, BACK badge), title/, menu/,
                      projects/, about/, socials/, gallery/, bg_music/
@@ -53,7 +54,8 @@ Component/scene CSS sits next to its `.ts` file and is imported by it.
   - CONFIRM: on the menu = Enter (`ButtonMenu.confirmSelection()`); on sub-pages it does
     whatever `startSubpage(id, { onConfirm })` passes (nothing yet), and Enter does too.
   - MUTE / M: works the same everywhere (see Mute below).
-  - "Now Playing" sits under CONFIRM; on the menu it drops below the logo (Menu.css).
+  - "Now Playing" sits under CONFIRM, or just below the title banner on pages that
+    have one (all of them, currently; rule in base.css).
 - **Scenes**: implement `render()` + `onMount()`. Register listeners with
   `{ signal: this.signal }`; it aborts when the scene is replaced, so nothing leaks.
 - **Navigation**: `navigateTo('/x.html')` between pages, `transitionTo(scene, in, out)`
@@ -98,11 +100,21 @@ Component/scene CSS sits next to its `.ts` file and is imported by it.
     the left and 35px from the top (`mute_btn.png`, `unmute_btn.png`, `confirm_btn.png`,
     `shared/back_txt.png`), so one CSS rule sizes every label. Each badge's `labelLeft`
     in Hud.ts is where its icon's bar starts (% of width).
+  - Title banners (`menu/menu_logo.png`, `<page>/<name>_banner.png`): kept on their
+    full 2172×724 canvas (not cropped) with the blue bar centred at (1086, 400), so the
+    one `.page-banner` rule in base.css puts every banner where the menu's logo is.
+    The user's exports don't always land there: move the art by whole pixels to match
+    (measure the bar; never resample), rather than adding per-page CSS offsets.
+    Background removal can leave faint stray specks: erase blobs separate from the
+    banner, checking the banner's own pixels are unchanged. Set per page via `banner`
+    in config.ts. The user sometimes drops new exports into `dist/`, which the build
+    wipes: move them into `src/assets/<page>/`.
 - **Performance**: animate `transform`/`opacity` only; don't run per-frame loops that
   aren't needed.
   - Images: every imported PNG is served as WebP by `vite-imagetools` (vite.config.ts):
-    lossless for UI art, near-lossless for `menu_logo`/`projects`. Source PNGs stay as
-    they are. Use images through JS imports, not CSS `url()` (that would ship a second
+    lossless for UI art, near-lossless for `menu_logo`, and lossy quality 92 (exact
+    alpha) for `*_banner.png`, whose soft edges cost ~360 KB each losslessly vs ~75 KB.
+    Source PNGs stay as they are. Use images through JS imports, not CSS `url()` (that would ship a second
     PNG copy). Masks take the URL from a CSS variable set in TS (`--btn-mask`, `--tv-mask`).
   - Video/audio aren't converted automatically. `menu/static.mp4` is H.264 CRF 26 with
     no audio track; `MenuAccept` is MP3. Short UI blips stay WAV (MP3 adds start latency).
@@ -129,6 +141,26 @@ Component/scene CSS sits next to its `.ts` file and is imported by it.
 - **Confirming**: Enter/Z, clicking the highlighted button again, or clicking the
   [↵] CONFIRM badge all call `ButtonMenu.confirmSelection()`. HudButton clicks only
   count on opaque pixels, and not while the badge is hidden by `hideWhenCovered`.
+- **Pixel font** (`utils/pixelFont.ts`): the user's "NEW" reference text, rebuilt as a
+  12px-tall bitmap font. N, E and W match the reference pixel for pixel (E's middle bar
+  pokes 1px left: that's in the reference); the other glyphs follow its rules (see the
+  file header). Show text with `new PixelText(text)` (`components/PixelText.ts`): a
+  canvas that fills its parent, fits the text inside, and redraws at the real screen
+  resolution whenever its size changes (one shared ResizeObserver), so it's always sharp.
+  Use it for in-game-style text instead of CSS fonts. When editing glyphs, check them
+  with a rendered sheet; every row of a glyph must be the same length.
+- **Projects page**: `ProjectCarousel` (the row) holds one `ProjectCard` per entry in
+  `src/projects.ts`; adding a project is one line there (picture PNGs go in
+  `assets/projects/cards/`, shown fitted in an 86 × 93 panel). Layout is in art pixels
+  (`--px` = one pixel of a 424 × 240 screen, in ProjectCarousel.css), copied from the
+  user's save-select reference: 96 × 164 boxes, 108 apart, selected one centred.
+  - Input: ← / →, swipe (follows the finger, rubber-bands at the ends), mouse wheel,
+    or tap/click a box. Taps are handled on `pointerup`, not `click` (Chrome can swallow
+    the click after a quick swipe).
+  - Selected box: the main menu's highlight (red copy behind, pulsing red ↔ pink, box
+    lifted up-left, the same split bounce), at the menu's offsets converted to art px.
+  - CONFIRM / Enter on a box (opening a project) isn't built yet; `carousel.selected`
+    is the box to open.
 - **Screen guard**: mouse devices must be maximised/full screen; touch devices must be
   landscape and at least 480px wide. When testing in headless/emulated browsers, emulate
   touch or use a full-size window, or the guard blocks all input.
@@ -138,11 +170,20 @@ Component/scene CSS sits next to its `.ts` file and is imported by it.
 
 ## Adding a sub-page
 
-1. Add `{ id, label, background }` to `SUBPAGES` in `src/config.ts`. The menu button
-   appears automatically.
+1. Add `{ id, label, labelImage, banner, background }` to `SUBPAGES` in
+   `src/config.ts`. The menu button and the page's title banner appear automatically.
 2. Copy `about.html` to `<id>.html` and change the title, script path and inline
    background colour.
 3. Create `src/pages/<id>.ts` with `const page = startSubpage('<id>')`, then fill `page`.
    The HUD (BACK / MUTE / CONFIRM), music and transitions come with it.
 
 `public/favicon.svg` is still the Vite template logo; replace it when there's site art.
+
+## Reference material
+
+The user drops reference videos and screenshots into `reference/` (git-ignored: the repo
+is public and these are often game footage, so never move them into `src/` or commit them).
+Videos: extract frames with ffmpeg and read them as images or contact sheets. ffmpeg
+isn't installed system-wide: `npm install ffmpeg-static` in the session scratchpad
+gives a working `node_modules/ffmpeg-static/ffmpeg.exe` (keep it out of the project). Ask what to match (timing, layout or
+colours): for timing, take every frame around the moment and count frames.
