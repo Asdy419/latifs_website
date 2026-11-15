@@ -141,6 +141,7 @@
   width: calc(78 * var(--px));
   height: calc(70 * var(--px));
   object-fit: contain;
+  image-rendering: pixelated;
 }
 
 .project-card-image[hidden] {

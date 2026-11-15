@@ -1,5 +1,6 @@
 import './TitleScreen.css'
 import pressAnyButton from '../assets/title/press_any_button.png'
+import titleBackground from '../assets/title/Blurred Blue Neon Corridor.png'
 import { COLORS } from '../config'
 import { Scene, transitionTo } from '../core/Scene'
 import { sfx, playSfx, durationOf, loadSounds } from '../utils/audio'
@@ -12,19 +13,22 @@ export class TitleScreen extends Scene {
   protected readonly background = COLORS.blue
 
   protected render(): string {
-    return `<img src="${pressAnyButton}" id="press-btn" fetchpriority="high" />`
+    return `
+      <img src="${titleBackground}" id="title-background" alt="" draggable="false" fetchpriority="high" />
+      <img src="${pressAnyButton}" id="press-btn" alt="Press any button" fetchpriority="high" />
+    `
   }
 
   protected onMount(): void {
     // Coming back from the menu, its "Now Playing" may still be on screen: the
-    // blue screen goes over it (this runs while the fade is fully black).
+    // title screen goes over it (this runs while the fade is fully black).
     hideNowPlaying()
 
     // Use the idle time on this screen to fetch what comes next, in order of
-    // need so nothing competes for bandwidth: this screen's image → the confirm
+    // need so nothing competes for bandwidth: this screen's images → the confirm
     // sounds (needed on the first key press) → the menu's assets.
-    const title = this.app.querySelector<HTMLImageElement>('#press-btn')!
-    title.decode().catch(() => {})
+    const images = this.app.querySelectorAll<HTMLImageElement>('img')
+    Promise.all([...images].map(image => image.decode().catch(() => {})))
       .then(() => loadSounds())
       .then(() => Menu.preload())
 

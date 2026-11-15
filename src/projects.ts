@@ -18,6 +18,18 @@ import kinemechanicsShot from './assets/projects/shots/kinemechanics_projectile_
 import unityClashShot from './assets/projects/shots/unity_clash_menu.png'
 import xrayRestorationShot from './assets/projects/shots/xray_restoration.png'
 import companionAiShot from './assets/projects/shots/companion_ai_daily_check_in.png'
+import marsAllocatorImage from './assets/projects/container_imgs/mars_allocator.png'
+import companionAiImage from './assets/projects/container_imgs/companion_ai.png'
+import bitcoinClassifierImage from './assets/projects/container_imgs/bitcoin_classifier.png'
+import zeroShotEegImage from './assets/projects/container_imgs/zero_shot_eeg.png'
+import mysticMessagingImage from './assets/projects/container_imgs/mystic_messaging.png'
+import xrayRestorationImage from './assets/projects/container_imgs/xray_restoration.png'
+import tspImage from './assets/projects/container_imgs/tsp_solvers.png'
+import toxicityBiasAuditImage from './assets/projects/container_imgs/toxicity_bias_audit.png'
+import horsesFromNoiseImage from './assets/projects/container_imgs/horses_from_noise.png'
+import kinemechanicsImage from './assets/projects/container_imgs/kinemechanics.png'
+import portfolioImage from './assets/projects/container_imgs/portfolio_site.png'
+import unityClashImage from './assets/projects/container_imgs/unity_clash.png'
 
 /**
  * The boxes on the Projects page, left to right (the first is selected when the
@@ -38,7 +50,7 @@ import companionAiShot from './assets/projects/shots/companion_ai_daily_check_in
  *  - url: the public GitHub repo (leave it out for private or no repo: the
  *    pop-up then has no GitHub button).
  *  - image (optional): the project's own logo/picture, in the middle of the box
- *    (fitted into 78×70, not cropped). Put the PNG in assets/projects/, import
+ *    (fitted into 78×70, not cropped). Put the PNG in assets/projects/container_imgs/, import
  *    it at the top like the logos, and add `image: myPicture,` to the entry.
  *  - shot (optional): the picture inside the expanded pop-up only, with a
  *    frame that follows its proportions. Store it in
@@ -55,6 +67,7 @@ export const PROJECTS: Project[] = [
   {
     name: 'Mars Alloc',
     title: 'Mars Allocator',
+    image: marsAllocatorImage,
     shot: marsAllocatorShot,
     detailsLayout: 'balanced',
     year: 2025,
@@ -92,6 +105,7 @@ export const PROJECTS: Project[] = [
   {
     name: 'Companion',
     title: 'CompanionAI',
+    image: companionAiImage,
     shot: companionAiShot,
     year: 2026,
     tagline: 'A wellness virtual pet with a mind of its own, built for an IBM brief.',
@@ -127,6 +141,7 @@ export const PROJECTS: Project[] = [
   {
     name: 'Bitcoin',
     title: 'Bitcoin Classifier',
+    image: bitcoinClassifierImage,
     shot: bitcoinClassifierShot,
     year: 2026,
     tagline: 'One deadline, four people, one prize.',
@@ -154,6 +169,7 @@ export const PROJECTS: Project[] = [
   {
     name: 'Brain AI',
     title: 'Zero-Shot EEG',
+    image: zeroShotEegImage,
     shot: zeroShotEegShot,
     year: 2025,
     tagline: 'Guessing what someone saw, from their brainwaves alone.',
@@ -189,6 +205,7 @@ export const PROJECTS: Project[] = [
   {
     name: 'Mystic',
     title: 'Mystic Messaging',
+    image: mysticMessagingImage,
     shot: mysticMessagingShot,
     shotFullWidth: true,
     detailsLayout: 'balanced',
@@ -227,6 +244,7 @@ export const PROJECTS: Project[] = [
   {
     name: 'X-Ray',
     title: 'X-Ray Restoration',
+    image: xrayRestorationImage,
     shot: xrayRestorationShot,
     year: 2026,
     tagline: 'Ten steps of classical image surgery to rescue wrecked X-rays.',
@@ -262,6 +280,7 @@ export const PROJECTS: Project[] = [
   {
     name: 'TSP',
     title: 'TSP Solvers',
+    image: tspImage,
     shot: tspShot,
     year: 2026,
     tagline: 'Evolution versus a swarm, racing to find the shortest round trip.',
@@ -296,6 +315,7 @@ export const PROJECTS: Project[] = [
   {
     name: 'Bias Audit',
     title: 'Toxicity Bias Audit',
+    image: toxicityBiasAuditImage,
     shot: toxicityBiasAuditShot,
     year: 2026,
     tagline: 'Does a moderation dataset teach models that mentioning certain identities is "toxic"?',
@@ -331,6 +351,7 @@ export const PROJECTS: Project[] = [
   {
     name: 'Horses',
     title: 'Horses From Noise',
+    image: horsesFromNoiseImage,
     shot: horsesFromNoiseShot,
     year: 2026,
     tagline: 'A generator and a discriminator in an arms race over 32 × 32 horses.',
@@ -362,6 +383,7 @@ export const PROJECTS: Project[] = [
   {
     name: 'Physics',
     title: 'Kinemechanics',
+    image: kinemechanicsImage,
     shot: kinemechanicsShot,
     year: 2023,
     tagline: 'Physics homework that actually moves.',
@@ -395,6 +417,7 @@ export const PROJECTS: Project[] = [
   {
     name: 'Portfolio',
     title: 'Portfolio Site',
+    image: portfolioImage,
     year: 2026,
     tagline: "The retro game menu you're scrolling right now.",
     kind: 'Web, front end',
@@ -431,6 +454,7 @@ export const PROJECTS: Project[] = [
   {
     name: 'Clash',
     title: 'Unity Clash',
+    image: unityClashImage,
     shot: unityClashShot,
     year: 2022,
     tagline: 'An arena platformer, still in the workshop.',
