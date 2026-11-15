@@ -17,6 +17,18 @@ import { TitleScreen } from './TitleScreen'
 /** How long after the menu appears the "Now Playing" pop-up slides in. */
 const NOW_PLAYING_DELAY_MS = 1000
 
+/**
+ * The button you picked to leave for a sub-page, so BACK returns to it (per
+ * tab). Coming from the title screen always starts on the first button.
+ */
+const SELECTION_KEY = 'menu-selection'
+const saveSelection = (index: number) => {
+  try { sessionStorage.setItem(SELECTION_KEY, String(index)) } catch { /* storage blocked: start at the top */ }
+}
+const savedSelection = (): number => {
+  try { return Number(sessionStorage.getItem(SELECTION_KEY) ?? 0) } catch { return 0 }
+}
+
 // Keeps preloaded images referenced so the browser holds on to the decoded copies.
 const preloaded: HTMLImageElement[] = []
 
@@ -44,16 +56,23 @@ export class Menu extends Scene {
   private readonly circles = new CircleAnimation()
   private readonly tv      = new TvOverlay(staticVideo)
   private readonly hud     = new Hud()
-  private readonly buttons = new ButtonMenu([
-    ...SUBPAGES.map(page => ({
-      label: page.label,
-      onSelect: () => {
-        stopMusic() // fades out under the page wipe; the page starts its own track
-        navigateTo(`/${page.id}.html`)
-      },
-    })),
-    { label: 'Exit', onSelect: () => this.exitToTitle() },
-  ])
+  private readonly buttons: ButtonMenu
+
+  /** `returning`: back from a sub-page, so the button you left on stays selected. */
+  constructor({ returning = false } = {}) {
+    super()
+    this.buttons = new ButtonMenu([
+      ...SUBPAGES.map((page, i) => ({
+        label: page.label,
+        onSelect: () => {
+          saveSelection(i)
+          stopMusic() // fades out under the page wipe; the page starts its own track
+          navigateTo(`/${page.id}.html`)
+        },
+      })),
+      { label: 'Exit', onSelect: () => this.exitToTitle() },
+    ], { selected: returning ? savedSelection() : 0 })
+  }
 
   protected render(): string {
     return `

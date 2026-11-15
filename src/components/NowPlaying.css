@@ -10,31 +10,32 @@
   z-index: 50;
   display: flex;
   flex-direction: column;
-  gap: 0.25em;
+  gap: 0.45em;
   max-width: 48vw;
   padding: 0.55em 1.3em 0.6em 2.2em;
   background: #111;
-  color: #fff;
-  font-family: var(--font-display);
-  font-size: max(11px, calc(var(--hud-size, 2.89vw) * 0.42));
+  font-size: max(11px, calc(var(--hud-size, 2.89vw) * 0.42)); /* sets the em padding and slant */
   /* slanted left edge, flush with the screen's right edge */
   clip-path: polygon(1.3em 0, 100% 0, 100% 100%, 0 100%);
   pointer-events: none;
   animation: now-playing 4.6s both;
 }
 
+/* The text is PixelLabel canvases (font-size = the capitals' height), sized
+   from the HUD like the box, with a floor of 1px per font pixel. */
+.now-playing .pixel-label {
+  --pixel-shadow: #000; /* a darker shade of the box */
+  max-width: 100%; /* very long titles are cut off at the box's edge */
+}
+
 .now-playing-label {
-  font-size: max(9px, 0.7em);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  font-size: max(8px, calc(var(--hud-size, 2.89vw) * 0.22));
   color: var(--yellow);
 }
 
 .now-playing-title {
-  letter-spacing: 0.02em;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  font-size: max(10px, calc(var(--hud-size, 2.89vw) * 0.3));
+  color: #fff;
 }
 
 @keyframes now-playing {

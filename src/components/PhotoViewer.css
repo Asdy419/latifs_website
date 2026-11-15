@@ -1,0 +1,81 @@
+/*
+ * The Photo Gallery's big view (PhotoViewer.ts): the photo in a frame with an
+ * even white border (so the frame has the photo's own shape), with the same
+ * thick black outline and shadow as the polaroids (PhotoGrid.css), over a
+ * dimmed page. Sized in art pixels (--art-px). Centred on the screen and as
+ * big as the screen allows for the photo's shape (--ratio).
+ */
+.photo-viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 10; /* the banner's and HUD's layer: it's placed between them in the page */
+  display: grid;
+  place-items: center;
+  /* centred on the screen, as the user wants (it covers the title banner, and the
+     corner HUD stays on top of its corners); top + bottom = 54, which the photo's size below assumes */
+  padding: calc(27 * var(--art-px)) calc(10 * var(--art-px));
+  background: rgb(0 0 0 / 0.6);
+  cursor: zoom-out;
+  animation: photo-viewer-dim 0.2s ease-out both;
+}
+
+.photo-viewer.closing {
+  animation: photo-viewer-dim 0.22s ease-in reverse both;
+  pointer-events: none;
+}
+
+@keyframes photo-viewer-dim {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.photo-viewer-frame {
+  position: relative;
+  margin: 0;
+  padding: calc(6 * var(--art-px)); /* the white border, the same all round */
+  border: calc(3 * var(--art-px)) solid #000;
+  background: #fff;
+  box-shadow: calc(6 * var(--art-px)) calc(6 * var(--art-px)) 0 rgb(0 0 0 / 0.35);
+  will-change: transform;
+}
+
+/* The photo: as wide as fits across (less the margins, outline and border: 38
+   art px), or as tall as fits down (less 72 art px), keeping its shape */
+.photo-viewer-photo {
+  position: relative;
+  width: min(
+    calc(100vw - 38 * var(--art-px)),
+    calc((var(--screen-h) - 72 * var(--art-px)) * var(--ratio))
+  );
+  aspect-ratio: var(--ratio);
+  overflow: hidden;
+  background: #cfc8d4;
+}
+
+.photo-viewer-photo img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* the small copy is a square crop: it fills in until the full one arrives */
+}
+
+.photo-viewer-full {
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.photo-viewer-full.loaded {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .photo-viewer,
+  .photo-viewer.closing {
+    animation-duration: 0.01s;
+  }
+
+  .photo-viewer-full {
+    transition: none;
+  }
+}

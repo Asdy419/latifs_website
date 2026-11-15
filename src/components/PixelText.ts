@@ -88,7 +88,9 @@ export class PixelLabel extends PixelCanvas {
     const lineHeight = pitch > 0 ? Math.round(pitch * TEXT_FONT_HEIGHT) : LINE_HEIGHT
     let text = this.text
     if (this.wrap) {
-      text = wrapText(this.text, Math.floor(boxWidth / fontPx + 0.01))
+      // + 0.1: layout rounds the box to 1/64 px, which made lines that fit
+      // exactly wrap their last word (at most ~0.02 font px short)
+      text = wrapText(this.text, Math.floor(boxWidth / fontPx + 0.1))
       const heightEm = measureText(text, lineHeight).height / TEXT_FONT_HEIGHT
       if (text !== this.lines) {
         this.lines = text
@@ -106,7 +108,9 @@ export class PixelLabel extends PixelCanvas {
     canvas.height = Math.max(1, Math.round(boxHeight * dpr))
     const ctx = canvas.getContext('2d')
     if (!ctx) return
-    const scale = canvas.height / art.height // device px per font pixel
+    // device px per font pixel: from the font size, not canvas.height / art.height,
+    // whose rounding grew across a long line and cut off its last letter
+    const scale = fontPx * dpr
     const room = canvas.width - art.width * scale
     ctx.save()
     ctx.translate(Math.round(align === 'left' ? 0 : align === 'right' ? room : room / 2), 0)

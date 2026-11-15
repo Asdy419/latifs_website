@@ -3,18 +3,32 @@
  * All its text is PixelLabel canvases in the references' small text font
  * (utils/textFont.ts): font-size is the capitals' height, color the ink and
  * --pixel-shadow the shadow.
- * It covers the page under the title banner and the corner HUD (z-index 10),
- * which stay usable: BACK closes it, CONFIRM opens the repo.
+ *
+ * It fills nearly the whole screen: from just under the corner HUD (worked out
+ * from the HUD's own size variables, so it fits on phones too) to 4 art px
+ * from the other edges. It covers the title banner (hidden meanwhile) but not
+ * the HUD, which stays usable: BACK closes it, CONFIRM opens the repo.
+ *
+ *   ┌─────────────────────────────────────────────────────────┐
+ *   │ TITLE                                                   │
+ *   │ ┌─────────────┐  [OVERVIEW][FEATURES][NUMBERS][TIMELINE]│
+ *   │ │ picture slot│  the section (scrolls if it's long)     │
+ *   │ └─────────────┘                                         │
+ *   │ kind / when / tech                                      │
+ *   │ languages                                               │
+ *   │ [↵ View on GitHub] [Devlog] [B Close]            [YEAR] │
+ *   └─────────────────────────────────────────────────────────┘
  */
 .project-popup {
   position: fixed;
   inset: 0;
-  z-index: 9;
-  display: grid;
-  place-items: center;
-  /* keep clear of the title banner */
-  padding: calc(52 * var(--art-px)) calc(8 * var(--art-px)) calc(6 * var(--art-px));
-  background: rgb(0 0 0 / 0.45);
+  z-index: 10; /* the banner's and HUD's layer: it's placed between them in the page */
+  display: flex;
+  padding:
+    calc(var(--hud-top) + 2 * var(--hud-size) + var(--hud-gap) + 3 * var(--art-px))
+    calc(4 * var(--art-px))
+    calc(4 * var(--art-px));
+  background: rgb(0 0 0 / 0.55);
   animation: popup-dim 0.15s ease-out both;
 }
 
@@ -23,23 +37,30 @@
   pointer-events: none;
 }
 
+/* the title banner steps aside while the pop-up is open (the pop-up has its own title) */
+:root:has(.project-popup:not(.closing)) .page-banner {
+  opacity: 0;
+}
+
 @keyframes popup-dim {
   from { opacity: 0; }
   to   { opacity: 1; }
 }
 
 .project-popup-panel {
+  --project-side-width: calc(150 * var(--art-px));
   position: relative;
-  width: min(calc(300 * var(--art-px)), 100%);
-  max-height: 100%;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  padding: calc(37 * var(--art-px)) calc(14 * var(--art-px)) calc(8 * var(--art-px));
+  display: flex;
+  flex-direction: column;
+  gap: calc(5 * var(--art-px));
+  width: 100%;
+  height: 100%;
+  padding: calc(7 * var(--art-px)) calc(8 * var(--art-px));
   background: #f7f3f7;
-  border: calc(4 * var(--art-px)) solid #000;
+  border: calc(3 * var(--art-px)) solid #000;
   box-shadow: calc(6 * var(--art-px)) calc(6 * var(--art-px)) 0 rgb(0 0 0 / 0.35);
   color: #000;
-  font-size: max(8px, calc(6 * var(--art-px)));
+  font-size: max(8px, calc(5 * var(--art-px)));
   --pixel-line-height: 1.4; /* wrapped lines closer than the reference dialog's 1.8, so each point reads as one */
   line-height: 0;
   outline: none;
@@ -51,66 +72,164 @@
   to   { transform: none; }
 }
 
-/* ── Title: a menu button bar, selected (see ButtonMenu.css) ─────────────── */
+/* ── Title: large plain text (no menu-button bar: the user's call) ──────── */
 .project-popup-heading {
-  position: absolute;
-  left: calc(4 * var(--art-px));
-  top: calc(4 * var(--art-px));
-  width: calc((var(--bar-len) + 24) * var(--art-px));
-  height: calc(25 * var(--art-px));
+  flex: none;
+  width: var(--project-side-width);
+  margin: 0;
+  font-size: min(2.4em, calc(var(--project-side-width) / var(--title-em-width)));
+  font-weight: normal;
+  line-height: 0;
+  color: #000;
+  text-align: center;
 }
 
-.project-popup-bar,
-.project-popup-highlight {
-  position: absolute;
-  inset: 0;
-  will-change: transform;
+/* ── Body: the picture side and the sections ────────────────────────────── */
+.project-popup-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  gap: calc(9 * var(--art-px));
 }
 
-.project-popup-bar {
+.project-popup-side {
+  flex: none;
+  width: var(--project-side-width);
+  display: flex;
+  flex-direction: column;
+  gap: calc(4 * var(--art-px));
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Empty slots stay 16:9; supplied pictures keep their own proportions. */
+.project-popup-shot {
+  flex: none;
+  min-height: 0;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border: calc(2 * var(--art-px)) solid #000;
+  background: #9ad3df;
+  box-shadow: inset calc(3 * var(--art-px)) calc(3 * var(--art-px)) 0 rgb(0 0 0 / 0.15);
+}
+
+.project-popup-shot:has(img) {
+  flex: 0 1 auto;
+  min-height: 0;
+  aspect-ratio: auto;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+
+.project-popup-shot img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border: calc(2 * var(--art-px)) solid #000;
+}
+
+/* Wide terminal captures align with the metadata and language bar below. */
+.project-popup-shot img.project-popup-shot-fill {
+  width: 100%;
+}
+
+/* Let the picture shrink on short screens while keeping its details visible. */
+.project-popup-meta,
+.project-popup-langs {
+  flex: none;
+}
+
+.project-popup-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55em;
+  font-size: 0.85em;
+}
+
+.project-popup-kind {
+  color: #b00206;
+  --pixel-shadow: #e8c6cc;
+}
+
+.project-popup-tech {
+  color: #4a496b;
+}
+
+.project-popup-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: calc(5 * var(--art-px));
+}
+
+/* The section tabs: the selected one is black with the menu's red shadow */
+.project-popup-tabs {
+  flex: none;
+  display: flex;
+  gap: calc(4 * var(--art-px));
+}
+
+.project-popup-tab {
+  padding: 0.45em 0.75em;
+  border: none;
+  background: #ddd6e0;
+  color: #000;
+  font: inherit;
+  font-size: 0.9em;
+  line-height: 0;
+  cursor: pointer;
+  --pixel-shadow: #b9b0be;
+}
+
+.project-popup-tab.selected {
   background: #000;
-  transform: translate(calc(-2 * var(--art-px)), calc(-2 * var(--art-px)));
+  color: #fff;
+  box-shadow: calc(2 * var(--art-px)) calc(2 * var(--art-px)) 0 #b00206;
+  --pixel-shadow: #4a496b;
 }
 
-.project-popup-highlight {
-  background: #b00206;
-  transform: translate(calc(2 * var(--art-px)), calc(2 * var(--art-px)));
+.project-popup-section {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: calc(3 * var(--art-px));
+  scrollbar-width: thin;
+  scrollbar-color: #000 transparent;
 }
 
-.project-popup-highlight::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: #e8ace7;
-  animation: menu-highlight-pulse 0.267s linear infinite alternate;
-}
-
-/* the menu font's letters start 30px in and 28px up from the bar's bottom-left */
-.project-popup-title {
-  position: absolute;
-  left: calc(29 * var(--art-px));
-  top: calc(-4 * var(--art-px));
-  transform: translate(calc(-2 * var(--art-px)), calc(-2 * var(--art-px)));
-  will-change: transform;
-}
-
-/* bottom-right, on the buttons' row */
-.project-popup-year {
-  align-self: center;
-  margin-left: auto;
-  padding: 0.35em 0.5em;
-  background: #000;
-  color: #efc400;
-}
-
-/* ── Body ────────────────────────────────────────────────────────────────── */
+/* Overview */
 .project-popup-tagline {
-  margin: 0 0 0.6em;
-  font-size: 1.2em;
+  margin-bottom: 0.8em;
+  font-size: 1.15em;
 }
 
+.project-popup-fact {
+  margin-top: 1em;
+  padding: 0.75em 0.85em;
+  border: calc(2 * var(--art-px)) solid #000;
+  background: #efc400;
+  box-shadow: calc(2 * var(--art-px)) calc(2 * var(--art-px)) 0 rgb(0 0 0 / 0.25);
+  --pixel-shadow: #a88a00;
+}
+
+.project-popup-fact-title {
+  display: block;
+  margin-bottom: 0.55em;
+  color: #b00206;
+}
+
+/* Features */
 .project-popup-points {
-  margin: 0 0 0.8em;
+  margin: 0;
   padding: 0;
   list-style: none;
 }
@@ -121,7 +240,7 @@
 }
 
 .project-popup-points li + li {
-  margin-top: 0.7em;
+  margin-top: 0.65em;
 }
 
 /* pixel bullets in the highlight's red */
@@ -136,43 +255,117 @@
   box-shadow: 0.12em 0.12em 0 #000;
 }
 
+/* Numbers: big figures on tiles */
+.project-popup-numbers {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.9em;
+  padding: 0 calc(2 * var(--art-px)) calc(2 * var(--art-px)) 0; /* room for the tiles' shadows */
+}
+
+.project-popup-number {
+  padding: 0.8em 0.9em;
+  border: calc(2 * var(--art-px)) solid #000;
+  background: #fff;
+  box-shadow: calc(2 * var(--art-px)) calc(2 * var(--art-px)) 0 #b00206;
+}
+
+.project-popup-number-value {
+  display: block;
+  margin-bottom: 0.5em;
+  font-size: 2.2em;
+  color: #b00206;
+  --pixel-shadow: #e8c6cc;
+}
+
+/* Timeline: a line down the left with a dot per milestone */
+.project-popup-timeline {
+  position: relative;
+  margin: 0;
+  padding: 0 0 0 1.4em;
+  list-style: none;
+}
+
+.project-popup-timeline::before {
+  content: '';
+  position: absolute;
+  left: 0.3em;
+  top: 0.3em;
+  bottom: 0.3em;
+  width: calc(1 * var(--art-px));
+  background: #000;
+}
+
+.project-popup-timeline li {
+  position: relative;
+}
+
+.project-popup-timeline li + li {
+  margin-top: 0.75em;
+}
+
+.project-popup-timeline li::before {
+  content: '';
+  position: absolute;
+  left: -1.35em;
+  top: 0.1em;
+  width: 0.65em;
+  height: 0.65em;
+  background: #b00206;
+  border: calc(1 * var(--art-px)) solid #000;
+}
+
+.project-popup-when {
+  display: block;
+  margin-bottom: 0.4em;
+  font-size: 0.85em;
+  color: #b00206;
+  --pixel-shadow: #e8c6cc;
+}
+
+/* ── Languages: the logos with the bar beside them (centred on them), the legend below ── */
 .project-popup-langs {
   display: flex;
+  flex-direction: column;
+  gap: calc(3 * var(--art-px));
+}
+
+.project-popup-langrow {
+  display: flex;
   align-items: center;
-  gap: calc(6 * var(--art-px));
-  margin-bottom: 0.7em;
+  gap: calc(5 * var(--art-px));
 }
 
 .project-popup-logos {
   display: flex;
+  flex: none;
   gap: calc(3 * var(--art-px));
 }
 
 /* the 16×16 logos, 1 art px per pixel as on the boxes */
 .project-popup-logos img {
+  display: block;
   width: calc(16 * var(--art-px));
   height: calc(16 * var(--art-px));
   image-rendering: pixelated;
 }
 
-.project-popup-langbar {
+/* A GitHub-style bar, outlined on all four sides (a border, inside its box:
+   an outline would be cut off by the column's edge) */
+.project-popup-bar-chart {
   flex: 1;
   min-width: 0;
-}
-
-.project-popup-bar-chart {
   display: flex;
-  height: calc(5 * var(--art-px));
+  height: calc(7 * var(--art-px));
+  border: calc(1 * var(--art-px)) solid #000;
   background: #000;
-  outline: calc(1 * var(--art-px)) solid #000;
 }
 
 .project-popup-legend {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5em 1em;
-  margin: 0.6em 0 0;
-  font-size: 0.8em;
+  font-size: 0.75em;
 }
 
 .project-popup-legend span {
@@ -191,6 +384,7 @@
 
 /* ── Buttons ─────────────────────────────────────────────────────────────── */
 .project-popup-actions {
+  flex: none;
   display: flex;
   flex-wrap: wrap;
   gap: calc(5 * var(--art-px));
@@ -228,6 +422,15 @@
   font-size: 0.85em;
 }
 
+/* bottom-right, on the buttons' row */
+.project-popup-year {
+  align-self: center;
+  margin-left: auto;
+  padding: 0.35em 0.5em;
+  background: #000;
+  color: #efc400;
+}
+
 /* text shadows (PixelLabel): darker shades of what the text sits on */
 .project-popup-btn.primary { --pixel-shadow: #0b3a8c; }
 .project-popup-btn:not(.primary),
@@ -235,8 +438,33 @@
 .project-popup-btn b       { --pixel-shadow: #c6c0d2; }
 
 .project-popup-btn:hover,
-.project-popup-btn:focus-visible {
+.project-popup-btn:focus-visible,
+.project-popup-tab:hover {
   transform: translate(calc(-1 * var(--art-px)), calc(-1 * var(--art-px)));
+}
+
+/* The earlier custom arrangement for Mystic Messaging and Mars Allocator. */
+.project-popup-balanced .project-popup-body {
+  align-items: center;
+  gap: calc(12 * var(--art-px));
+  padding-block: calc(6 * var(--art-px));
+}
+
+.project-popup-balanced .project-popup-side {
+  max-height: 100%;
+  gap: calc(6 * var(--art-px));
+}
+
+.project-popup-balanced .project-popup-main {
+  height: calc(128 * var(--art-px));
+  min-height: 0;
+  max-height: 100%;
+  gap: calc(6 * var(--art-px));
+}
+
+.project-popup-balanced .project-popup-actions {
+  padding-top: calc(6 * var(--art-px));
+  border-top: calc(1 * var(--art-px)) solid #ddd6e0;
 }
 
 @media (prefers-reduced-motion: reduce) {

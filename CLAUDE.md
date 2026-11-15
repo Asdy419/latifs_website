@@ -19,7 +19,7 @@ index.html, projects.html, …   one HTML file per page (vite.config.ts finds th
                                and injects the shared <head> tags)
 src/
   config.ts          COLORS + SUBPAGES (the list that drives the main menu)
-  projects.ts        PROJECTS: the Projects page (pinned GitHub repos: box + pop-up details)
+  projects.ts        PROJECTS: the Projects page (box + pop-up details per project)
   pages/<name>.ts    entry module for <name>.html
   core/
     page.ts          startPage(): every page starts here (CSS, guard, --vh, service worker)
@@ -31,8 +31,9 @@ src/
   scenes/            TitleScreen → Menu (screens inside index.html)
   components/        Hud (corner HUD) + HudButton (one badge), ButtonMenu, NowPlaying,
                      CircleAnimation, TvOverlay, PixelCanvas + PixelText, ProjectCarousel + ProjectCard,
-                     ProjectPopup
+                     ProjectPopup, PhotoGrid + Polaroid (the Photo Gallery)
   utils/             audio.ts (sound effects + mute flag), music.ts (background music),
+                     cloudinary.ts (the gallery's photo list + image URLs),
                      alphaMask.ts (pixel-perfect hit tests), pixelArt.ts (drawing pixel art),
                      menuFont.ts (menu buttons), textFont.ts (ordinary text + corner
                      prompts), hudArt.ts (corner prompts' text, via textFont),
@@ -64,8 +65,8 @@ Component/scene CSS sits next to its `.ts` file and is imported by it.
   - CONFIRM: on the menu = Enter (`ButtonMenu.confirmSelection()`); on sub-pages it does
     whatever `startSubpage(id, { onConfirm })` passes (nothing yet), and Enter does too.
   - MUTE / M: works the same everywhere (see Mute below).
-  - "Now Playing" sits under CONFIRM, or just below the title banner on pages that
-    have one (all of them, currently; rule in base.css).
+  - "Now Playing" sits just under CONFIRM on every page (rule in HudButton.css). Long
+    titles cover the title banner's right end; the user is fine with that overlap.
 - **Scenes**: implement `render()` + `onMount()`. Register listeners with
   `{ signal: this.signal }`; it aborts when the scene is replaced, so nothing leaks.
 - **Navigation**: `navigateTo('/x.html')` between pages, `transitionTo(scene, in, out)`
@@ -82,7 +83,8 @@ Component/scene CSS sits next to its `.ts` file and is imported by it.
   "Now Playing" pop-up (`components/NowPlaying.ts`).
   - Menu: the music starts inside the title screen's key press (iOS only allows audio
     from a user gesture), and the pop-up appears about 1s after the menu shows. It fades
-    out when you pick a page or Exit.
+    out when you pick a page or Exit. The title screen removes a pop-up still on
+    screen (`hideNowPlaying()`), so the blue screen is never covered by it.
   - Sub-pages: the music starts on load, and the pop-up appears after the reveal. If the
     browser blocks autoplay (Safari/Firefox, direct visits), it starts on the first tap
     or key press.
@@ -99,12 +101,15 @@ Component/scene CSS sits next to its `.ts` file and is imported by it.
   background music only, live, never the sound effects. Unmuting resumes the track
   and shows the pop-up again.
 - **Colours**: `COLORS` in `config.ts`; `--yellow`/`--blue` in `base.css` must match.
+  Page backgrounds: menu and Photo Gallery yellow, Projects teal, About Me and Socials
+  green (`#4ad39c`, the user's pick). A page's colour is also inlined in its HTML file
+  (`<style>` and `theme-color`): change both. Every sub-page has the rings; on the
+  green pages the menu's green ring would vanish, so they pass `GREEN_PAGE_RINGS`.
 - **Art**: use the user's own pixel-art images, not CSS text. Game-style text is
   drawn in code in pixel fonts rebuilt from the user's references, never in CSS
   fonts. Each place has the font the user picked: menu buttons and pop-up titles
   `menuFont`; project box names `pixelFont` ("NEW"); corner prompts and all other
-  text (pop-up body, screen guard) `textFont`. Exception: the "Now Playing" pop-up
-  keeps its CSS font (Arial Black): the user asked for that. The user often exports on a
+  text (pop-up body, screen guard, "Now Playing") `textFont`. The user often exports on a
   1920×1080 transparent canvas, so crop before use (losslessly: check the total alpha
   before and after). A full canvas costs ~8 MB of memory on a phone.
   - Corner badges (HudButton): icon cropped to key cap + bar (`mute.png`, `confirm.png`,
@@ -133,7 +138,8 @@ Component/scene CSS sits next to its `.ts` file and is imported by it.
   - Loading order on the home page: title image (fetchpriority high) → sounds
     (`loadSounds()`) → menu images (`Menu.preload()`, which must list every menu image)
     → video. Keep big downloads out of the title screen's first paint.
-  - Rings (`CircleAnimation`): drawn by a WebGL fragment shader (one draw call per
+  - Rings (`CircleAnimation(timeOffset, { colors })`; colours are shader uniforms, set
+    once): drawn by a WebGL fragment shader (one draw call per
     frame, aliased edges like `crispEdges`), with the original SVG as an automatic fallback
     (no WebGL, software GL, or context loss). Shape constants are shared by both.
   - Page wipe (`pageTransition.css`): copied frame by frame from the reference clip at
@@ -170,6 +176,9 @@ Component/scene CSS sits next to its `.ts` file and is imported by it.
     are the reference's per-frame positions. Tune them in CSS only: the classes are
     removed on `animationend`.
   - The label hops first and lands last, as the user originally asked.
+  - BACK from a sub-page reopens the menu on the button you left from (sessionStorage
+    `menu-selection`, already in place, no slide); from the title screen it always
+    opens on the first button.
 - **Confirm flash** (ButtonMenu.ts `flashLabel()`): on confirm, the label blinks
   off/on (`FLASH_PHASE_MS` 25, `FLASH_BLINKS` 14, about 0.7s, ends visible). Web
   Animations API on opacity, so it never conflicts with the CSS jump animations.
@@ -201,8 +210,14 @@ Component/scene CSS sits next to its `.ts` file and is imported by it.
   - Sizes: whole CSS px per font pixel where possible (the screen guard uses 20px/30px),
     or art px (the pop-up uses 6 art px capitals).
 - **Projects page**: `ProjectCarousel` (the row) holds one `ProjectCard` per entry in
-  `src/projects.ts` (the pinned repos on github.com/Asdy419; that file's header says how
-  to add one). Each box: the name in the pixel font, an optional `image` (the project's
+  `src/projects.ts` (that file's header says how to add one). The facts (taglines,
+  highlights, years) come from the user's write-up `reference/The_Project_Files_Ahmed_Latif*.pdf`
+  (the newest: re-exports get "(2)" etc.; extract its text with pypdf in the
+  scratchpad, and diff against the site when it changes); language %s come from GitHub
+  (`gh api repos/Asdy419/<repo>/languages`). Projects without a public repo leave out
+  `url` (no GitHub button); no repo to measure means no `share` (no %). Pop-up titles
+  must stay under ~19 menu-font letters or the bar runs out of the panel: check every
+  pop-up for overflow on desktop and phone sizes. Each box: the name in the pixel font, an optional `image` (the project's
   own logo, fitted in 78 × 70), and its languages as overlapping 16 × 16 pixel-art logos
   in the bottom-right corner (`assets/projects/langs/`, made from Devicon, MIT). Layout is in art pixels
   (`--px` = one pixel of a 424 × 240 screen, in ProjectCarousel.css), copied from the
@@ -212,10 +227,46 @@ Component/scene CSS sits next to its `.ts` file and is imported by it.
     the click after a quick swipe).
   - Selected box: the main menu's highlight (red copy behind, pulsing red ↔ pink, box
     lifted up-left, the same split bounce), at the menu's offsets converted to art px.
-  - CONFIRM / Enter / tapping the selected box opens `ProjectPopup` (tagline, highlights,
-    language bar, links; heading drawn as a selected menu bar). It's appended inside
-    `#app` so the banner and HUD stay above it. Enter again opens the repo in a new tab;
+  - CONFIRM / Enter / tapping the selected box opens `ProjectPopup`: nearly full screen
+    (the user wanted it "damn near the entire screen"), from just under the corner HUD
+    (its top is computed from the `--hud-*` variables) to 4 art px from the other edges.
+    It's inserted before the `.hud` so it covers the banner (which fades out meanwhile)
+    while the HUD stays on top. The title is large plain text-font text (the user had
+    the menu-button bar with its highlight removed). Left: a blank 16:9 picture slot
+    (`shot`, for a screenshot later: the user asked for an empty space), kind / when /
+    tech, then the language logos with the bar beside them (centred on them, outlined
+    with a border so the column's edge can't clip its right side) and the legend
+    below. Right: tabs Overview (tagline, gist, fun fact) /
+    Features / Numbers / Timeline (← → or click; ↑ ↓ scroll), from the Project Files'
+    sections. Every section of every project fits without scrolling at 16:9 and on a
+    844 × 390 phone: re-check that after adding text. A tab's colours change on select,
+    so its PixelLabel is re-rendered then. Enter again opens the repo in a new tab;
     BACK / Escape closes it (`startSubpage`'s `onBack` returns true when it handled it).
+  - `startSubpage`'s `onConfirm` may return false to skip the confirm sound (the
+    gallery does when Enter closes a zoomed photo).
+- **Photo Gallery**: the photos live on Cloudinary. `fetchPhotos()` (utils/cloudinary.ts)
+  reads the public list of images tagged `GALLERY.tag` (`res.cloudinary.com/<cloud>/image/list/<tag>.json`,
+  no API key; "Resource list" must be unticked in Cloudinary's Settings → Security;
+  404 = nothing tagged). `GALLERY.cloudName` in config.ts (the user's: `jt1dcrqu`) is the only setting; never
+  put the API key/secret in the repo (public). Each photo is requested as a square
+  crop (`c_fill,g_auto,f_auto,q_auto`) at one of a few fixed sizes (`SIZES` in
+  PhotoGrid.ts) so Cloudinary's cache and free-plan credits go further; resized copies
+  carry no GPS data. The caption is the photo's `caption` context (Title in Cloudinary).
+  - `PhotoGrid`: a CSS grid of 68 × 78 art px `Polaroid`s (5 across at 16:9, more on
+    phones) in a scroller that starts under the banner. Selection: arrows (2D, scrolls
+    into view), mouse hover, tap. Each polaroid hangs at a slight tilt (hashed from
+    its ID, `--tilt`); selected, it gets the menu's highlight and swings on its pin
+    (`SWING`/`SWING_MS` in Polaroid.ts, shortened to 500ms at the user's request)
+    until it hangs straight. The pin is 9 × 9 pixel art (one data URL per colour).
+  - `PhotoViewer` (CONFIRM / Enter / clicking the selected photo; Enter again, BACK or
+    any click closes): the whole photo in a frame with an even white border (the user
+    didn't want a polaroid here), growing out of the polaroid with an overshoot
+    (FLIP, WAAPI in plain px) and shrinking back into it. Shows the small copy at once,
+    then the full one (`c_limit`, width stepped to the screen). Inserted before the
+    `.hud` so it covers the banner but the corner HUD stays on top.
+  - To test without the real account: set `cloudName` to anything and answer
+    `res.cloudinary.com` requests from Playwright (`page.route`) with a fake list and
+    sharp-generated images; set it back afterwards.
 - **Screen guard**: mouse devices must be maximised/full screen; touch devices must be
   landscape and at least 480px wide. When testing in headless/emulated browsers, emulate
   touch or use a full-size window, or the guard blocks all input.

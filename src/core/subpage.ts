@@ -7,8 +7,11 @@ import { sfx, playSfx, loadSounds } from '../utils/audio'
 import { startMusic, stopMusic } from '../utils/music'
 
 interface SubpageOptions {
-  /** What [↵] CONFIRM / Enter does on this page (nothing by default). */
-  onConfirm?: () => void
+  /**
+   * What [↵] CONFIRM / Enter does on this page (nothing by default). It plays
+   * the confirm sound, unless this returns false.
+   */
+  onConfirm?: () => boolean | void
   /**
    * Runs first when [B] BACK / B / Escape is pressed. Return true if the page
    * handled it (e.g. closed a pop-up) to stay; otherwise it goes back to the menu.
@@ -46,7 +49,7 @@ export function startSubpage(id: SubpageId, { onConfirm, onBack }: SubpageOption
       stopMusic() // fades out under the wipe
       navigateTo(MENU_URL, { replace: true })
     },
-    onConfirm: onConfirm && (() => { playSfx(sfx.accept); onConfirm() }),
+    onConfirm: onConfirm && (() => { if (onConfirm() !== false) playSfx(sfx.accept) }),
     enterConfirms: true,
   })
 

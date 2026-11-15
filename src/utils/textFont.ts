@@ -84,6 +84,7 @@ const GLYPHS: Record<string, readonly string[]> = {
   '%': ['XXs   XXs', 'XXs  XXXs', 'sss XXXs ', '   XXXs  ', '  XXXs   ', ' XXXs    ', 'XXXs     ', 'XXs      ', 'ss    XXs', '      XXs', '      sss'], // drawn
   '#': [' XXsXXs ', ' XXsXXs ', 'XXXXXXXs', 'XXXXXXXs', ' XXsXXs ', ' XXsXXs ', 'XXXXXXXs', 'XXXXXXXs', ' XXsXXs ', ' XXsXXs ', ' ssssss '], // drawn
   '↵': ['      XXs', '      XXs', '      XXs', '  Xs  XXs', ' XXs  XXs', 'XXXXXXXXs', 'XXXXXXXXs', ' XXssssss', '  Xs     ', '  ss     ', '         '], // drawn
+  '♫': ['  XXXXXXXXs', '  XXXXXXXXs', '  XXssssXXs', '  XXs   XXs', '  XXs   XXs', '  XXs   XXs', ' XXXs  XXXs', 'XXXXs XXXXs', 'XXXXs XXXXs', ' XXs   XXs ', ' sss   sss '], // drawn
 }
 
 if (import.meta.env?.DEV) {

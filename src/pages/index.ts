@@ -9,7 +9,7 @@ import { Menu } from '../scenes/Menu'
 if (location.hash === '#menu') {
   history.replaceState(null, '', location.pathname) // a reload shows the title screen again
   startPage({ background: COLORS.yellow, reveal: true })
-  new Menu().show()
+  new Menu({ returning: true }).show() // on the button you left from
 } else {
   startPage({ background: COLORS.blue, reveal: false })
   new TitleScreen().show()

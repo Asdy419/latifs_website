@@ -2,6 +2,7 @@ import { defineConfig, type HtmlTagDescriptor, type Plugin } from 'vite'
 import { imagetools, type TransformFactory } from 'vite-imagetools'
 import { readdirSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
+import { PROJECT_SHOT_CROPS } from './src/assets/projects/shots/crops.ts'
 
 // Multi-page site: every .html file in the project root is a page.
 const pages = Object.fromEntries(
@@ -108,8 +109,30 @@ const lossyArt: TransformFactory = config => {
     image.webp({ quality: Number(config.lossyArt), alphaQuality: 100, smartSubsample: true, effort: 6 })
 }
 
+/** Apply the curated screenshot crops before encoding, in both dev and production. */
+const cropProjectShot: TransformFactory = config => {
+  if (!config.projectShotCrop) return undefined
+  const [left, top, width, height] = config.projectShotCrop.split('_').map(Number)
+  const crop = { left, top, width, height }
+  return (state, image) => {
+    state.info.width = crop.width
+    state.info.height = crop.height
+    state.info.autoOriented = { width: crop.width, height: crop.height }
+    return image.extract(crop)
+  }
+}
+
 function imageDirectives(url: URL): URLSearchParams {
   if (url.searchParams.size > 0) return new URLSearchParams() // explicit directives win
+  const shotName = url.pathname.split('/').at(-1) ?? ''
+  if (url.pathname.includes('/assets/projects/shots/') && PROJECT_SHOT_CROPS[shotName]) {
+    const { left, top, width, height } = PROJECT_SHOT_CROPS[shotName]
+    // Include the coordinates in the cache key so crop edits regenerate the asset.
+    return new URLSearchParams({
+      format: 'webp', lossless: 'true', effort: '6',
+      projectShotCrop: [left, top, width, height].join('_'),
+    })
+  }
   if (NEAR_LOSSLESS.test(url.pathname)) return new URLSearchParams({ format: 'webp', nearLossless: '60' })
   if (LOSSY.test(url.pathname)) return new URLSearchParams({ format: 'webp', lossyArt: '92' })
   return new URLSearchParams({ format: 'webp', lossless: 'true', effort: '6' })
@@ -147,7 +170,7 @@ export default defineConfig({
       include: '**/*.png',
       removeMetadata: true,
       defaultDirectives: imageDirectives,
-      extendTransforms: builtins => [...builtins, nearLossless, lossyArt],
+      extendTransforms: builtins => [cropProjectShot, ...builtins, nearLossless, lossyArt],
     }),
   ],
   build: {

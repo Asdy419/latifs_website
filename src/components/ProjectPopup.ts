@@ -1,26 +1,34 @@
 import './ProjectPopup.css'
-import { PixelCanvas } from './PixelCanvas'
 import { PixelLabel } from './PixelText'
-import { barShape } from './ButtonMenu'
-import { languageBar, type Project } from './ProjectCard'
-import { menuTextArt, menuTextWidth } from '../utils/menuFont'
-import { playSelectJump } from '../utils/selectJump'
+import { measureText, TEXT_FONT_HEIGHT } from '../utils/textFont'
+import { languageBar, languageLabel, type Project } from './ProjectCard'
+import { sfx, playSfx } from '../utils/audio'
 
-/** Title bar length: as the menu's buttons (room for the text, at least the menu's bar length). */
-const titleBarLength = (title: string) => Math.max(140, menuTextWidth(title) + 29)
+/** The pop-up's sections, as tabs (← → or a click switches). */
+const SECTIONS = ['Overview', 'Features', 'Numbers', 'Timeline'] as const
+type Section = (typeof SECTIONS)[number]
 
 /**
  * The details pop-up for a project (the Projects page opens it on Enter /
- * CONFIRM / tapping the selected box). Its title sits on a menu-style bar with
- * the menu's highlight and jump; then a fun one-liner, a few highlights, the
- * languages (logos, GitHub-style bar and percentages) and links.
+ * CONFIRM / tapping the selected box). It fills nearly the whole screen under
+ * the corner HUD (the title banner hides meanwhile). Its title is large plain
+ * text (the user didn't want a menu-button bar there). On the left: a picture
+ * slot (`shot`, blank until one is added), what kind of project it is and when,
+ * and its languages. On the right: the write-up in sections (Overview,
+ * Features, Numbers, Timeline), switched with ← → or the tabs; ↑ ↓ scroll a
+ * long one. Along the bottom: links, Close and the year.
  *
- * It sits under the corner HUD, so [B] BACK closes it and [↵] CONFIRM opens
- * the repo (the page wires that up: see pages/projects.ts).
+ * [B] BACK closes it and [↵] CONFIRM opens the repo (the page wires that up:
+ * see pages/projects.ts). Projects without a public repo get no GitHub button
+ * (and CONFIRM does nothing); with no known languages, that part is left out.
  */
 export class ProjectPopup {
   private el: HTMLElement | null = null
   private project: Project | null = null
+  private section: Section = 'Overview'
+  /** The tabs' text, redrawn when a tab's colours change (a PixelLabel only redraws by itself on resize). */
+  private tabLabels = new Map<Section, PixelLabel>()
+  private listeners: AbortController | null = null
   /** Called when it closes (by any means). */
   onClose: (() => void) | null = null
 
@@ -31,26 +39,30 @@ export class ProjectPopup {
   open(project: Project): void {
     if (this.el) this.remove()
     this.project = project
-    const length = titleBarLength(project.title)
     const el = document.createElement('div')
     el.className = 'project-popup'
+    el.classList.toggle('project-popup-balanced', project.detailsLayout === 'balanced')
     el.setAttribute('role', 'dialog')
     el.setAttribute('aria-modal', 'true')
     el.setAttribute('aria-label', project.title)
     el.innerHTML = `
       <div class="project-popup-panel" tabindex="-1">
-        <div class="project-popup-heading" style="--bar-len: ${length}">
-          <div class="project-popup-highlight"></div>
-          <div class="project-popup-bar"></div>
-          <div class="project-popup-title"></div>
-        </div>
-        <div class="project-popup-tagline"></div>
-        <ul class="project-popup-points"></ul>
-        <div class="project-popup-langs">
-          <div class="project-popup-logos"></div>
-          <div class="project-popup-langbar">
-            ${languageBar(project.languages, 'project-popup-bar-chart')}
-            <div class="project-popup-legend"></div>
+        <h2 class="project-popup-heading"></h2>
+        <div class="project-popup-body">
+          <div class="project-popup-side">
+            <div class="project-popup-shot"></div>
+            <div class="project-popup-meta"></div>
+            <div class="project-popup-langs">
+              <div class="project-popup-langrow">
+                <div class="project-popup-logos"></div>
+                ${languageBar(project.languages, 'project-popup-bar-chart')}
+              </div>
+              <div class="project-popup-legend"></div>
+            </div>
+          </div>
+          <div class="project-popup-main">
+            <div class="project-popup-tabs" role="tablist"></div>
+            <div class="project-popup-section" role="tabpanel"></div>
           </div>
         </div>
         <div class="project-popup-actions">
@@ -62,20 +74,19 @@ export class ProjectPopup {
     `
     // all text in the references' small text font (sizes and colours in ProjectPopup.css)
     const q = <T extends Element>(s: string) => el.querySelector<T>(s)!
-    const label = (text: string) => new PixelLabel(text).element
-    const paragraph = (text: string) => new PixelLabel(text, { wrap: true }).element
-    const keyCap = (key: string) => {
-      const b = document.createElement('b')
-      b.append(label(key))
-      return b
+
+    // left: the picture slot, what and when, languages
+    if (project.shot) {
+      const img = document.createElement('img')
+      img.src = project.shot
+      img.alt = `${project.title} project image`
+      img.decoding = 'async'
+      if (project.shotFullWidth) img.classList.add('project-popup-shot-fill')
+      q('.project-popup-shot').append(img)
     }
-    q<HTMLElement>('.project-popup-year').append(label(String(project.year)))
-    q<HTMLElement>('.project-popup-tagline').append(paragraph(project.tagline))
-    q<HTMLElement>('.project-popup-points').append(...project.highlights.map(text => {
-      const li = document.createElement('li')
-      li.append(paragraph(text))
-      return li
-    }))
+    const meta = q<HTMLElement>('.project-popup-meta')
+    meta.append(paragraph(project.kind, 'project-popup-kind'), paragraph(project.when))
+    if (project.tech?.length) meta.append(paragraph(project.tech.join(' / '), 'project-popup-tech'))
     q<HTMLElement>('.project-popup-logos').append(...project.logos.map(src => {
       const img = document.createElement('img')
       img.src = src
@@ -85,30 +96,56 @@ export class ProjectPopup {
     q<HTMLElement>('.project-popup-legend').append(...project.languages.map(l => {
       const span = document.createElement('span')
       span.style.setProperty('--dot', l.color)
-      span.append(label(`${l.name} ${l.share}%`))
+      span.append(label(languageLabel(l)))
       return span
     }))
+    if (!project.languages.length) q('.project-popup-langs').remove()
+
+    // right: the section tabs
+    const tabs = q<HTMLElement>('.project-popup-tabs')
+    this.tabLabels.clear()
+    for (const name of SECTIONS) {
+      const tab = document.createElement('button')
+      tab.type = 'button'
+      tab.className = 'project-popup-tab'
+      tab.dataset.section = name
+      tab.setAttribute('role', 'tab')
+      const text = new PixelLabel(name)
+      this.tabLabels.set(name, text)
+      tab.append(text.element)
+      tab.addEventListener('click', e => {
+        e.stopPropagation()
+        if (this.section !== name) playSfx(sfx.bleep)
+        this.showSection(name)
+      })
+      tabs.append(tab)
+    }
+
+    // bottom: links, Close, year
+    q<HTMLElement>('.project-popup-year').append(label(String(project.year)))
     const github = q<HTMLAnchorElement>('.project-popup-btn.primary')
-    github.href = project.url
-    github.append(keyCap('↵'), label('View on GitHub'))
-    q<HTMLElement>('[data-close]').append(keyCap('B'), label('Close'))
-    for (const link of project.links ?? []) {
+    const close = q<HTMLElement>('[data-close]')
+    close.append(keyCap('B'), label('Close'))
+    if (project.url) {
+      github.href = project.url
+      github.append(keyCap('↵'), label('View on GitHub'))
+    } else {
+      github.remove()
+    }
+    for (const link of project.links ?? []) { // in order, between GitHub and Close
       const a = document.createElement('a')
       a.className = 'project-popup-btn'
       a.target = '_blank'
       a.rel = 'noopener'
       a.href = link.url
       a.append(label(link.label))
-      github.after(a)
+      close.before(a)
     }
-    const shape = barShape(length)
-    q<HTMLElement>('.project-popup-highlight').style.clipPath = shape
-    q<HTMLElement>('.project-popup-bar').style.clipPath = shape
-    const art = menuTextArt(project.title)
-    const title = new PixelCanvas(art, project.title)
-    title.element.style.width = `calc(${art.width} * var(--art-px))`
-    title.element.style.height = `calc(${art.height} * var(--art-px))`
-    q<HTMLElement>('.project-popup-title').append(title.element)
+
+    const heading = q<HTMLElement>('.project-popup-heading')
+    heading.style.setProperty('--title-em-width', String(measureText(project.title).width / TEXT_FONT_HEIGHT))
+    heading.append(label(project.title))
+    if (project.detailsLayout === 'balanced') q('.project-popup-side').prepend(heading)
 
     // close on the backdrop or the Close button; links work as links
     el.addEventListener('click', e => {
@@ -116,22 +153,21 @@ export class ProjectPopup {
       if (target === el || target.closest('[data-close]')) this.close()
     })
 
-    // inside #app, beside the HUD and banner (#app is position: fixed, so it has
-    // its own layer order): there z-index 9 puts the pop-up under them
-    ;(document.getElementById('app') ?? document.body).append(el)
+    // ← → switch sections, ↑ ↓ scroll the section (BACK and CONFIRM are the HUD's)
+    this.listeners = new AbortController()
+    document.addEventListener('keydown', e => this.handleKey(e), { signal: this.listeners.signal })
+
+    // over the page and the banner, under the corner HUD (same layer, so it goes just before it)
+    const app = document.getElementById('app') ?? document.body
+    app.insertBefore(el, app.querySelector('.hud'))
     this.el = el
+    this.showSection('Overview')
     q<HTMLElement>('.project-popup-panel').focus({ preventScroll: true })
-    // the title bar does the menu's jump as it appears
-    const bar = q<HTMLElement>('.project-popup-bar')
-    requestAnimationFrame(() => playSelectJump({
-      bar: [bar, q('.project-popup-title')],
-      highlight: q('.project-popup-highlight'),
-    }, bar.getBoundingClientRect().height / 25))
   }
 
-  /** Opens the project's GitHub page in a new tab. */
+  /** Opens the project's GitHub page in a new tab (if it has a public one). */
   openLink(): void {
-    if (this.project) window.open(this.project.url, '_blank', 'noopener')
+    if (this.project?.url) window.open(this.project.url, '_blank', 'noopener')
   }
 
   close(): void {
@@ -139,6 +175,8 @@ export class ProjectPopup {
     if (!el) return
     this.el = null
     this.project = null
+    this.listeners?.abort()
+    this.listeners = null
     el.classList.add('closing')
     el.addEventListener('animationend', () => el.remove(), { once: true })
     setTimeout(() => el.remove(), 400) // in case animations are off
@@ -146,7 +184,115 @@ export class ProjectPopup {
   }
 
   private remove(): void {
+    this.listeners?.abort()
+    this.listeners = null
     this.el?.remove()
     this.el = null
   }
+
+  private handleKey(e: KeyboardEvent): void {
+    if (!this.el) return
+    const box = this.el.querySelector<HTMLElement>('.project-popup-section')!
+    const i = SECTIONS.indexOf(this.section)
+    switch (e.key) {
+      case 'ArrowLeft':
+      case 'ArrowRight': {
+        e.preventDefault()
+        const next = i + (e.key === 'ArrowLeft' ? -1 : 1)
+        if (next < 0 || next >= SECTIONS.length) return
+        playSfx(sfx.bleep)
+        this.showSection(SECTIONS[next])
+        break
+      }
+      case 'ArrowUp':
+      case 'ArrowDown':
+        e.preventDefault()
+        box.scrollBy({ top: (e.key === 'ArrowUp' ? -0.4 : 0.4) * box.clientHeight, behavior: 'smooth' })
+        break
+    }
+  }
+
+  /** Fills the right-hand side with one section of the write-up. */
+  private showSection(name: Section): void {
+    const project = this.project
+    if (!this.el || !project) return
+    this.section = name
+    for (const tab of this.el.querySelectorAll<HTMLElement>('.project-popup-tab')) {
+      const on = tab.dataset.section === name
+      if (tab.classList.contains('selected') === on) continue
+      tab.classList.toggle('selected', on)
+      tab.setAttribute('aria-selected', String(on))
+      this.tabLabels.get(tab.dataset.section as Section)?.render() // its ink and shadow colours changed
+    }
+    const box = this.el.querySelector<HTMLElement>('.project-popup-section')!
+    box.replaceChildren(...sectionContent(project, name))
+    box.scrollTop = 0
+  }
+}
+
+function sectionContent(project: Project, name: Section): HTMLElement[] {
+  switch (name) {
+    case 'Overview': {
+      const parts = [paragraph(project.tagline, 'project-popup-tagline'), paragraph(project.gist)]
+      if (project.funFact) {
+        const fact = document.createElement('div')
+        fact.className = 'project-popup-fact'
+        fact.append(label('Fun fact', 'project-popup-fact-title'), paragraph(project.funFact))
+        parts.push(fact)
+      }
+      return parts
+    }
+    case 'Features': {
+      const list = document.createElement('ul')
+      list.className = 'project-popup-points'
+      list.append(...project.features.map(text => {
+        const li = document.createElement('li')
+        li.append(paragraph(text))
+        return li
+      }))
+      return [list]
+    }
+    case 'Numbers': {
+      const grid = document.createElement('div')
+      grid.className = 'project-popup-numbers'
+      grid.append(...project.numbers.map(({ value, label: text }) => {
+        const tile = document.createElement('div')
+        tile.className = 'project-popup-number'
+        tile.append(label(value, 'project-popup-number-value'), paragraph(text))
+        return tile
+      }))
+      return [grid]
+    }
+    case 'Timeline': {
+      const list = document.createElement('ol')
+      list.className = 'project-popup-timeline'
+      list.append(...project.milestones.map(({ when, text }) => {
+        const li = document.createElement('li')
+        li.append(label(when, 'project-popup-when'), paragraph(text))
+        return li
+      }))
+      return [list]
+    }
+  }
+}
+
+/** One line of text in the text font (PixelLabel), optionally with a class. */
+function label(text: string, className?: string): HTMLElement {
+  const el = new PixelLabel(text).element
+  if (className) el.classList.add(className)
+  return el
+}
+
+/** Text that wraps to its container (PixelLabel), optionally with a class. */
+function paragraph(text: string, className?: string): HTMLElement {
+  const el = new PixelLabel(text, { wrap: true }).element
+  if (className) el.classList.add(className)
+  return el
+}
+
+/** A key cap, like [B] or [↵], for a button. */
+function keyCap(key: string): HTMLElement {
+  const b = document.createElement('b')
+  b.append(label(key))
+  return b
 }

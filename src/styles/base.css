@@ -64,12 +64,5 @@ body {
   max-width: 90vw;
   z-index: 10;
   pointer-events: none;
-}
-
-/* "Now Playing" drops just below the banner, so it never covers it: the art
-   ends about 80% of the way down the image (-6 + 0.796 × 71), plus a 4px gap.
-   img.page-banner makes this outrank the HUD's position for the pop-up (under
-   CONFIRM), which is used on pages without a banner. */
-:root:has(img.page-banner) .now-playing {
-  top: calc(54.5 * var(--art-px));
+  transition: opacity 0.15s; /* it fades out under the project pop-up (ProjectPopup.css) */
 }

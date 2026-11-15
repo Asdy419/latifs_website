@@ -1,0 +1,190 @@
+/*
+ * The Photo Gallery's wall (PhotoGrid + Polaroid), in art pixels (--art-px:
+ * one pixel of a 424 × 240 game screen, scaled to fit the window).
+ *
+ * A polaroid is 68 × 78 art px: a 2px black outline around a white frame with
+ * 4px edges and a 14px bottom (where the caption goes), holding a 56 × 56
+ * photo. On a 16:9 screen five fit across; wider screens (phones) fit more.
+ */
+
+/* The wall: a scrolling window from just under the title banner to the bottom
+   of the screen (rows leave at a clean edge instead of sliding under the
+   banner and corner HUD), over the page's rings */
+.gallery {
+  position: absolute;
+  top: calc(54 * var(--art-px)); /* the banner's art ends ~52 art px down */
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none; /* a game screen: no scrollbar */
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.gallery::-webkit-scrollbar {
+  display: none;
+}
+
+.gallery-grid {
+  position: relative; /* the photos' offsetTop is measured from here (PhotoGrid.scrollIntoView) */
+  display: grid;
+  grid-template-columns: repeat(auto-fill, calc(68 * var(--art-px)));
+  justify-content: center;
+  gap: calc(20 * var(--art-px)) calc(14 * var(--art-px)); /* rows leave room for the pins */
+  margin: 0;
+  /* top: room for a pin, plus the selected frame's jump (PhotoGrid.scrollIntoView keeps it too) */
+  padding: calc(15 * var(--art-px)) calc(12 * var(--art-px)) calc(18 * var(--art-px));
+  list-style: none;
+}
+
+/* ── A polaroid ──────────────────────────────────────────────────────────── */
+/* Each hangs from its pin at its own slight tilt (--tilt, from Polaroid.ts).
+   Selected, it swings until it hangs straight (Polaroid.bounce); the one left
+   behind springs back to its tilt. */
+.polaroid {
+  position: relative;
+  width: calc(68 * var(--art-px));
+  height: calc(78 * var(--art-px));
+  cursor: pointer;
+  transform: rotate(var(--tilt, 0deg));
+  transform-origin: 50% 0; /* the pin */
+  transition: transform 0.45s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+
+.polaroid.selected {
+  z-index: 1; /* its highlight goes over its neighbours' shadows */
+  transform: none;
+}
+
+/* Hidden while the big view (PhotoViewer) has it "off the wall" */
+.polaroid.lifted {
+  visibility: hidden;
+}
+
+.polaroid-frame {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  padding: calc(4 * var(--art-px)) calc(4 * var(--art-px)) calc(14 * var(--art-px));
+  border: calc(2 * var(--art-px)) solid #000;
+  background: #fbf8f2;
+  box-shadow:
+    inset calc(-2 * var(--art-px)) calc(-2 * var(--art-px)) 0 #ddd5cc, /* cartoon shading, bottom-right */
+    calc(4 * var(--art-px)) calc(4 * var(--art-px)) 0 rgb(0 0 0 / 0.25);
+}
+
+.polaroid-photo {
+  width: calc(56 * var(--art-px));
+  height: calc(56 * var(--art-px));
+  overflow: hidden;
+  border: calc(1 * var(--art-px)) solid #2b2830;
+  background: #cfc8d4; /* until the photo arrives */
+}
+
+.polaroid-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+
+.polaroid-photo img.loaded {
+  opacity: 1;
+}
+
+/* The caption (the photo's Title in Cloudinary), in the bottom edge */
+.polaroid-caption {
+  position: absolute;
+  left: calc(3 * var(--art-px));
+  right: calc(3 * var(--art-px));
+  top: calc(60 * var(--art-px));
+  height: calc(14 * var(--art-px));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  font-size: calc(5 * var(--art-px)); /* PixelLabel: the capitals' height */
+  line-height: 0;
+  color: #2b2830;
+}
+
+.polaroid-caption .pixel-label {
+  max-width: 100%; /* a long caption is cut off at the frame's edge */
+}
+
+/* The pin, centred on the frame's top edge (9 × 9 art px, from Polaroid.ts) */
+.polaroid-pin {
+  position: absolute;
+  left: 50%;
+  top: calc(-7 * var(--art-px));
+  width: calc(9 * var(--art-px));
+  height: calc(9 * var(--art-px));
+  margin-left: calc(-4.5 * var(--art-px));
+  background: center / 100% 100% no-repeat;
+  image-rendering: pixelated;
+  filter: drop-shadow(var(--art-px) var(--art-px) 0 rgb(0 0 0 / 0.3));
+}
+
+/* ── Selected: the main menu's highlight (see ButtonMenu.css) ────────────────
+   A red copy of the frame sits 2px down-right while the frame lifts 2px
+   up-left; the copy pulses red ↔ pink. The jump is utils/selectJump.ts. */
+.polaroid.selected .polaroid-frame {
+  transform: translate(calc(-2 * var(--art-px)), calc(-2 * var(--art-px)));
+  box-shadow: inset calc(-2 * var(--art-px)) calc(-2 * var(--art-px)) 0 #ddd5cc; /* the highlight replaces the shadow */
+}
+
+.polaroid-highlight {
+  position: absolute;
+  inset: 0;
+  background: #b00206;
+  opacity: 0;
+}
+
+.polaroid.selected .polaroid-highlight {
+  opacity: 1;
+  transform: translate(calc(2 * var(--art-px)), calc(2 * var(--art-px)));
+}
+
+.polaroid-highlight::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: #e8ace7;
+  opacity: 0;
+}
+
+.polaroid.selected .polaroid-highlight::after {
+  animation: polaroid-pulse 0.267s linear infinite alternate;
+}
+
+@keyframes polaroid-pulse {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── Page messages (loading, no photos, couldn't load) ──────────────────── */
+.gallery-status {
+  position: absolute;
+  left: 50%;
+  top: 55%;
+  transform: translate(-50%, -50%);
+  font-size: max(10px, calc(8 * var(--art-px)));
+  color: #000;
+  --pixel-shadow: #a88a00; /* a darker yellow */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .polaroid,
+  .polaroid-photo img {
+    transition: none;
+  }
+}

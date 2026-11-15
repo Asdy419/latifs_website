@@ -2,6 +2,8 @@ import './CircleAnimation.css'
 
 /**
  * Two rotating, pulsing rings (blue + orange) drawn full-screen behind a page.
+ * ("Blue" is the green one, #52dba5; pages whose background is close to it
+ * pass other colours: `new CircleAnimation(0, { colors: [...] })`.)
  *
  * Usage:
  *   const circles = new CircleAnimation()
@@ -30,14 +32,23 @@ const PERIOD_ORANGE = 10000
 const SPIN_PERIOD = 6000    // one full turn (ms): blue clockwise, orange anticlockwise
 const SVG_MIN_FRAME_MS = 10 // SVG fallback: cap geometry updates at ~60fps on 120Hz+ screens
 
+/** The rings' colours: [blue (drawn on top), orange], as #rrggbb. */
+export type RingColors = readonly [string, string]
+const RING_COLORS: RingColors = ['#52dba5', '#f77129']
+
 export class CircleAnimation {
   private readonly timeOffset: number
+  private readonly colors: RingColors
   /** Largest ring radius — the ring edge just touches the screen's sides. */
   private maxR = 0
 
-  /** @param timeOffset shifts the pulse phase (ms), so pages don't all start in sync */
-  constructor(timeOffset: number = 0) {
+  /**
+   * @param timeOffset shifts the pulse phase (ms), so pages don't all start in sync
+   * @param colors the rings' colours, if not the menu's (see RING_COLORS)
+   */
+  constructor(timeOffset: number = 0, { colors = RING_COLORS }: { colors?: RingColors } = {}) {
     this.timeOffset = timeOffset
+    this.colors = colors
   }
 
   markup(): string {
@@ -94,6 +105,8 @@ export class CircleAnimation {
     const uRadius = gl.getUniformLocation(program, 'uRadius')
     const uSpin   = gl.getUniformLocation(program, 'uSpin')
     const uGap    = gl.getUniformLocation(program, 'uGap')
+    gl.uniform4fv(gl.getUniformLocation(program, 'uBlue'), hexToRgba(this.colors[0]))
+    gl.uniform4fv(gl.getUniformLocation(program, 'uOrange'), hexToRgba(this.colors[1]))
 
     // Draw at the reference menu's resolution, one canvas pixel per art pixel
     // (a 424×240 screen, like --art-px in base.css), and let CSS scale it up
@@ -158,16 +171,17 @@ export class CircleAnimation {
   // ── SVG fallback (the original renderer) ──────────────────────────────────
 
   private startSvg(host: HTMLElement, onStop: () => void): void {
+    const [blue, orange] = this.colors
     host.innerHTML = `
       <svg id="circle-svg-2" class="circle-layer" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
-        <circle id="main-ring-2" cx="200" cy="200" fill="none" stroke="#f77129"/>
-        <circle id="top-dot-2"   cx="200" fill="#f77129"/>
-        <circle id="bot-dot-2"   cx="200" fill="#f77129"/>
+        <circle id="main-ring-2" cx="200" cy="200" fill="none" stroke="${orange}"/>
+        <circle id="top-dot-2"   cx="200" fill="${orange}"/>
+        <circle id="bot-dot-2"   cx="200" fill="${orange}"/>
       </svg>
       <svg id="circle-svg" class="circle-layer" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
-        <path   id="main-arc"   fill="none" stroke="#52dba5"/>
-        <circle id="top-circle" cx="200"   fill="none" stroke="#52dba5"/>
-        <circle id="bot-dot"    cx="200"   fill="#52dba5"/>
+        <path   id="main-arc"   fill="none" stroke="${blue}"/>
+        <circle id="top-circle" cx="200"   fill="none" stroke="${blue}"/>
+        <circle id="bot-dot"    cx="200"   fill="${blue}"/>
       </svg>
     `
     const q = <T extends Element>(id: string) => host.querySelector<T>(`#${id}`)!
@@ -218,6 +232,12 @@ export class CircleAnimation {
 }
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
+
+/** "#rrggbb" → [r, g, b, 1] in 0–1, for the shader. */
+function hexToRgba(hex: string): Float32Array {
+  const n = parseInt(hex.slice(1, 7), 16)
+  return new Float32Array([(n >> 16 & 255) / 255, (n >> 8 & 255) / 255, (n & 255) / 255, 1])
+}
 
 function computeMaxR(): number {
   const w = window.innerWidth
@@ -272,12 +292,12 @@ uniform vec4 uView;   // centre x, centre y (device px, y down), device px per S
 uniform vec2 uRadius; // ring radius: blue, orange (SVG units)
 uniform vec4 uSpin;   // cos/sin of the blue spin, cos/sin of the orange spin
 uniform float uGap;   // half-angle of the gap at the top of the blue ring
+uniform vec4 uBlue;   // the rings' colours (opaque)
+uniform vec4 uOrange;
 
 const float HALF_STROKE = ${(STROKE / 2).toFixed(1)};
 const float TOP_R = ${TOP_R.toFixed(1)};
 const float BOT_R = ${BOT_R.toFixed(1)};
-const vec4 BLUE   = vec4(82.0, 219.0, 165.0, 255.0) / 255.0;  // #52dba5
-const vec4 ORANGE = vec4(247.0, 113.0, 41.0, 255.0) / 255.0;  // #f77129
 
 // Undo a clockwise on-screen rotation (y down) and convert to SVG units
 vec2 unspin(vec2 d, vec2 cs) {
@@ -293,7 +313,7 @@ void main() {
   bool blue = (abs(length(b) - rb) <= HALF_STROKE && atan(abs(b.x), -b.y) >= uGap)
            || abs(length(b - vec2(0.0, -rb)) - TOP_R) <= HALF_STROKE
            || length(b - vec2(0.0, rb)) <= BOT_R;
-  if (blue) { gl_FragColor = BLUE; return; }
+  if (blue) { gl_FragColor = uBlue; return; }
 
   // Orange: full ring, big dot at the top, small dot at the bottom
   vec2 o = unspin(d, uSpin.zw);
@@ -301,6 +321,6 @@ void main() {
   bool orange = abs(length(o) - ro) <= HALF_STROKE
              || length(o - vec2(0.0, -ro)) <= TOP_R
              || length(o - vec2(0.0, ro)) <= BOT_R;
-  gl_FragColor = orange ? ORANGE : vec4(0.0);
+  gl_FragColor = orange ? uOrange : vec4(0.0);
 }
 `

@@ -78,8 +78,8 @@
   height: 100%;
 }
 
-/* Keep the "Now Playing" pop-up clear of the top-right badge (CONFIRM).
-   The menu moves it further down, below the logo (Menu.css). */
+/* "Now Playing" sits just under the top-right badge (CONFIRM), on every page.
+   Long titles slide in over the title banner's right end (the user's call). */
 :root:has(.hud-right) .now-playing {
   top: calc(var(--hud-top) + var(--hud-size) + 1.2vw);
 }

@@ -54,8 +54,15 @@ export class ButtonMenu {
   /** 'mouse', 'touch' or 'pen': what pressed the list last */
   private lastPointer = 'mouse'
 
-  constructor(items: MenuItem[]) {
+  /** `selected`: the button highlighted when it opens (out-of-range values mean the first). */
+  constructor(items: MenuItem[], { selected = 0 } = {}) {
     this.items = items
+    if (Number.isInteger(selected) && selected >= 0 && selected < items.length) this.selectedIndex = selected
+  }
+
+  /** Index of the highlighted button. */
+  get selected(): number {
+    return this.selectedIndex
   }
 
   /** Renders into `listEl` (a <ul>). Listeners are removed when `signal` aborts. */
@@ -65,7 +72,11 @@ export class ButtonMenu {
     this.buttonEls = this.items.map((item, i) => buttonElement(item, i))
     listEl.replaceChildren(...this.buttonEls)
 
+    // open with the stack already in place, not sliding there from the first button
+    listEl.style.transition = 'none'
     this.updateHighlight()
+    void listEl.offsetWidth // apply that position before the slide comes back on
+    listEl.style.transition = ''
     document.addEventListener('keydown', e => this.handleKey(e), { signal })
     listEl.addEventListener('pointerdown', e => { this.lastPointer = e.pointerType }, { signal })
     listEl.addEventListener('click', e => this.handleClick(e), { signal })

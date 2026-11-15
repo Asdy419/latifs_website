@@ -3,8 +3,8 @@ import { playSelectJump } from '../utils/selectJump'
 
 export interface Language {
   name: string
-  /** % of the code (from GitHub) */
-  share: number
+  /** % of the code (from GitHub). Leave it out when there's no repo to measure: the bar splits evenly and no % is shown. */
+  share?: number
   /** GitHub's colour for it */
   color: string
 }
@@ -16,18 +16,38 @@ export interface Project {
   /** The pop-up's heading, in the menu font. */
   title: string
   year: number
-  /** One fun line. */
+  /** One fun line (opens the Overview). */
   tagline: string
-  /** Up to 4 short points. */
-  highlights: string[]
-  /** Biggest first. */
+  /** What kind of project, under the picture ("Systems programming"). */
+  kind: string
+  /** When, and what sort ("Dec 2025, coursework"), under that. */
+  when: string
+  /** Tools and libraries, under that (optional). */
+  tech?: string[]
+  /** OVERVIEW: what it is, in a paragraph. */
+  gist: string
+  /** OVERVIEW, after the gist (optional). */
+  funFact?: string
+  /** FEATURES: each "Lead. The rest." */
+  features: string[]
+  /** NUMBERS: up to 4 big figures. */
+  numbers: { value: string; label: string }[]
+  /** TIMELINE, oldest first. */
+  milestones: { when: string; text: string }[]
+  /** The pop-up's picture slot (a screenshot…); it stays a blank panel until set. */
+  shot?: string
+  /** Fill the picture column with a wide screenshot, including when it needs upscaling. */
+  shotFullWidth?: boolean
+  /** Centre the image/details and tabbed write-up as two balanced groups. */
+  detailsLayout?: 'balanced'
+  /** Biggest first. Empty hides the pop-up's language section. */
   languages: Language[]
   /** Pixel-art language logos, small in the box's bottom-right corner (assets/projects/langs/, 16×16). */
   logos: string[]
   /** The project's own logo/picture, in the middle of the box (optional: the space stays free until added). */
   image?: string
-  /** The GitHub repo. */
-  url: string
+  /** The public GitHub repo, if there is one (the pop-up's "View on GitHub"). */
+  url?: string
   /** Any other links (a devlog…). */
   links?: { label: string; url: string }[]
 }
@@ -51,7 +71,8 @@ export class ProjectCard {
     const el = this.element
     el.className = 'project-card'
     el.setAttribute('role', 'option')
-    el.setAttribute('aria-label', `${project.title}: ${project.languages.map(l => l.name).join(', ')}`)
+    const languages = project.languages.map(l => l.name).join(', ')
+    el.setAttribute('aria-label', languages ? `${project.title}: ${languages}` : project.title)
     const logos = project.logos.map(src =>
       `<img class="project-card-logo" src="${src}" alt="" draggable="false" decoding="async" />`).join('')
     el.innerHTML = `
@@ -96,9 +117,12 @@ export class ProjectCard {
 }
 
 /** A GitHub-style bar: one coloured segment per language, as wide as its share. */
+/** "C 99.4%", or just the name when the share isn't known. */
+export const languageLabel = (l: Language): string => l.share === undefined ? l.name : `${l.name} ${l.share}%`
+
 export function languageBar(languages: Language[], className: string): string {
   const segments = languages.map(l =>
-    `<span style="flex: ${l.share} 0 0; background: ${l.color}" title="${l.name} ${l.share}%"></span>`).join('')
+    `<span style="flex: ${l.share ?? 1} 0 0; background: ${l.color}" title="${languageLabel(l)}"></span>`).join('')
   return `<div class="${className}" aria-hidden="true">${segments}</div>`
 }
 
