@@ -3,6 +3,7 @@ import { imagetools, type TransformFactory } from 'vite-imagetools'
 import { readdirSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { PROJECT_SHOT_CROPS } from './src/assets/projects/shots/crops.ts'
+import { normalizeMusic } from './build/normalizeMusic.ts'
 
 // Multi-page site: every .html file in the project root is a page.
 const pages = Object.fromEntries(
@@ -165,6 +166,7 @@ function stripMp3Tags(): Plugin {
 export default defineConfig({
   plugins: [
     sharedHead(),
+    normalizeMusic(),
     stripMp3Tags(),
     imagetools({
       include: '**/*.png',

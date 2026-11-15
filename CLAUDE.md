@@ -92,6 +92,11 @@ Component/scene CSS sits next to its `.ts` file and is imported by it.
     "_ " becomes ": ".
   - The build strips ID3 tags and cover art from MP3s (`stripMp3Tags` in
     vite.config.ts), so the user can drop YouTube downloads in as they are.
+  - Background tracks are normalised in dev and builds by `build/normalizeMusic.ts`:
+    FFmpeg two-pass loudnorm at -18 LUFS, -2 dB true peak, LRA 50 to preserve dynamics,
+    then stereo 44.1 kHz / 192 kbps MP3. Originals stay untouched; `.cache/music/`
+    stores processed audio keyed by source contents and settings. Only `bg_music`
+    imports go through this; sound effects keep their original levels.
   - Adding or changing files in `bg_music` makes the dev server reload the page, which
     breaks browser tests that are mid-run.
   - Fades: animation frames drive them, with a timer backup so they still finish in
@@ -132,7 +137,7 @@ Component/scene CSS sits next to its `.ts` file and is imported by it.
     Source PNGs stay as they are. Use images through JS imports, not CSS `url()` (that
     would ship a second PNG copy). Masks take the URL from a CSS variable set in TS
     (`--tv-mask`).
-  - Video/audio aren't converted automatically. `menu/static.mp4` is H.264 CRF 26 with
+  - Other video/audio aren't converted automatically. `menu/static.mp4` is H.264 CRF 26 with
     no audio track; `MenuAccept` is MP3. Short UI blips stay WAV (MP3 adds start latency).
     Encode new media the same way.
   - Loading order on the home page: title image (fetchpriority high) → sounds

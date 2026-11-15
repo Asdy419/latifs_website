@@ -20,7 +20,8 @@ with Vite and plain TypeScript (no framework), with performance on phones as a p
 - **Key prompts in the corners**: [B] BACK, [M] MUTE and [↵] CONFIRM on every page. They
   work with the keyboard or a click/tap.
 - **Background music**: a random track plays on each screen, with a "Now Playing"
-  pop-up. Mute only affects the music and is remembered between visits.
+  pop-up. Tracks are normalised to the same perceived loudness. Mute only affects
+  the music and is remembered between visits.
 - **Transitions**: a three-panel slanted wipe between pages, and a fade between the
   title screen and the menu.
 - **Animated backdrop**: two spinning, pulsing rings drawn with a WebGL shader (with an
@@ -63,6 +64,15 @@ npm run dev       # dev server, also reachable from a phone on the same Wi-Fi
 npm run build     # type-check + production build into dist/
 npm run preview   # serve the production build
 ```
+
+Background tracks in `src/assets/bg_music/` are automatically normalised to
+-18 LUFS with a -2 dB true-peak ceiling using FFmpeg's two-pass
+[`loudnorm`](https://ffmpeg.org/ffmpeg-filters.html#loudnorm) filter, in both dev
+and production. Original audio files stay untouched. FFmpeg is installed by the
+`ffmpeg-static` build dependency; no system installation is needed on supported
+platforms. The first build processes every track; later runs reuse `.cache/music/`
+unless the source audio or normalisation settings change. New tracks are picked
+up automatically, and sound effects are unaffected.
 
 ## Project structure
 

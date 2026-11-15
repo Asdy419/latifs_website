@@ -2,8 +2,8 @@ import { isMuted } from './audio'
 
 /**
  * Background music: one random track from src/assets/bg_music at a time,
- * looping, at full volume (sound effects sit below it). Respects the mute
- * toggle, which only ever affects the music.
+ * looping, with tracks normalised to -18 LUFS by the Vite music plugin.
+ * Respects the mute toggle, which only ever affects the music.
  *
  * Drop more files into bg_music and they're picked up automatically; the
  * "Now Playing" title comes from the file name (see trackTitle).
