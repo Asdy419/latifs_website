@@ -7,11 +7,25 @@
   pointer-events: none;
 }
 
+#title-logo {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(74vw, calc(var(--screen-h) * 1.45));
+  height: auto;
+  max-height: 70%;
+  object-fit: contain;
+  image-rendering: pixelated;
+  pointer-events: none;
+}
+
 #press-btn {
   position: fixed;
-  bottom: -15%;
+  /* Its lettering sits in the centre of a transparent square canvas. */
+  top: 84%;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translate(-50%, -50%);
   max-width: 40vw;
   animation: flash 1s step-start infinite;
 }
