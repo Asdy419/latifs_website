@@ -1,8 +1,6 @@
 import './TitleScreen.css'
 import pressAnyButton from '../assets/title/press_any_button.png'
-import titleBackground from '../assets/title/80ef3821-2967-4d50-991e-4a0b15633311.png'
-import titleLogo from '../assets/title/LATIF Vaporwave Pixel Logo.png'
-import { COLORS } from '../config'
+import titleLogo from '../assets/title/801d7d18-2490-462a-a084-4c50907c7205.png'
 import { Scene, transitionTo } from '../core/Scene'
 import { sfx, playSfx, durationOf, loadSounds } from '../utils/audio'
 import { startMusic } from '../utils/music'
@@ -11,11 +9,10 @@ import { Menu } from './Menu'
 
 /** "Press any button" screen. Any key or click goes to the main menu. */
 export class TitleScreen extends Scene {
-  protected readonly background = COLORS.blue
+  protected readonly background = '#000'
 
   protected render(): string {
     return `
-      <img src="${titleBackground}" id="title-background" alt="" draggable="false" fetchpriority="high" />
       <img src="${titleLogo}" id="title-logo" alt="Latif" draggable="false" fetchpriority="high" />
       <img src="${pressAnyButton}" id="press-btn" alt="Press any button" fetchpriority="high" />
     `

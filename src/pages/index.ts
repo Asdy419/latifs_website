@@ -11,6 +11,6 @@ if (location.hash === '#menu') {
   startPage({ background: COLORS.yellow, reveal: true })
   new Menu({ returning: true }).show() // on the button you left from
 } else {
-  startPage({ background: COLORS.blue, reveal: false })
+  startPage({ background: '#000', reveal: false })
   new TitleScreen().show()
 }
