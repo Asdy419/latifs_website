@@ -68,18 +68,14 @@ export class PhotoGrid {
     return this.items[this.index]
   }
 
-  /** Highlights photo `index` (`scroll`: bring it into view; `quiet`: no sound or jump). */
+  /** Highlights photo `index` (`scroll`: bring it into view; `quiet`: no sound or wobble). */
   select(index: number, { scroll = true, quiet = false } = {}): void {
     if (!this.items.length) return
     const next = Math.max(0, Math.min(this.items.length - 1, index))
     if (next === this.index) return
-    if (!quiet) {
-      playSfx(sfx.bleep)
-      this.items[this.index].stopBounce() // the one being left drops straight back
-      this.items[next].bounce()
-    }
-    this.items[this.index].selected = false
-    this.items[next].selected = true
+    if (!quiet) playSfx(sfx.bleep)
+    this.items[this.index].deselect() // tilts back, from wherever it had got to
+    this.items[next].select({ quiet }) // straightens, with a wobble unless quiet
     this.index = next
     if (scroll) this.scrollIntoView(this.items[next].element)
   }
@@ -123,7 +119,7 @@ export class PhotoGrid {
 
   /**
    * Scrolls the wall just enough to show `el`, keeping the grid's padding
-   * around it (above: room for its pin and jump).
+   * around it (above: room for its pin and the selected frame's lift).
    */
   private scrollIntoView(el: HTMLElement): void {
     const wall = this.element

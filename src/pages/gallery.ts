@@ -14,8 +14,9 @@ const viewer = new PhotoViewer()
 viewer.onClose = () => { if (grid) grid.enabled = true }
 viewer.onDismiss = () => playSfx(sfx.bleep) // closed by a click/tap
 
-// [↵] CONFIRM / Enter / clicking the selected photo: open it big; again: close
-// it, silently (false: startSubpage skips the confirm sound)
+// [↵] CONFIRM / Enter / clicking the selected photo: open it big, with a woosh (the same as opening
+// a project's box: the user's call); again: close it, silently. Returns whether the confirm sound is
+// due (false: startSubpage skips it).
 const confirm = (): boolean => {
   if (viewer.isOpen) {
     viewer.close()
@@ -23,13 +24,14 @@ const confirm = (): boolean => {
   }
   const item = grid?.selected
   if (!grid || !item) return true
+  playSfx(sfx.woosh)
   grid.enabled = false
   viewer.open(item.photo, item.element, item.src)
-  return true
+  return false
 }
 
 const page = startSubpage('gallery', {
-  onConfirm: confirm, // startSubpage plays the confirm sound (except when this closes the photo)
+  onConfirm: confirm, // (which plays the confirm sound when confirm says so)
   // [B] BACK / Escape closes the big view first
   onBack: () => {
     if (!viewer.isOpen) return false
@@ -56,8 +58,7 @@ fetchPhotos()
     status.element.remove()
     grid = new PhotoGrid(photos)
     grid.onConfirm = () => {
-      playSfx(sfx.accept)
-      confirm()
+      if (confirm()) playSfx(sfx.accept)
     }
     grid.mount(page)
   })

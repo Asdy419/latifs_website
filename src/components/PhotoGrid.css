@@ -38,28 +38,29 @@
   justify-content: center;
   gap: calc(20 * var(--art-px)) calc(14 * var(--art-px)); /* rows leave room for the pins */
   margin: 0;
-  /* top: room for a pin, plus the selected frame's jump (PhotoGrid.scrollIntoView keeps it too) */
+  /* top: room for a pin and the selected frame's lift (PhotoGrid.scrollIntoView keeps it too) */
   padding: calc(15 * var(--art-px)) calc(12 * var(--art-px)) calc(18 * var(--art-px));
   list-style: none;
 }
 
 /* ── A polaroid ──────────────────────────────────────────────────────────── */
-/* Each hangs from its pin at its own slight tilt (--tilt, from Polaroid.ts).
-   Selected, it does the menu buttons' jump and a quick little wobble as it
-   straightens (Polaroid.bounce); the one left behind tilts back. */
+/* Each hangs from its pin at its own slight tilt. Selected, it does a quick
+   little wobble as it straightens (not the menu's jump, which parted the frame
+   from its highlight: the user's call); the one left behind tilts back.
+   Polaroid.ts turns it (an inline transform, a frame at a time) and, at every
+   angle, cuts its frame, shadow and highlight to the screen's art pixels
+   (--frame-steps, --shadow-steps, --highlight-steps), so their edges always step
+   like pixel art rather than sloping smoothly, even mid-turn (the user's call). */
 .polaroid {
   position: relative;
   width: calc(68 * var(--art-px));
   height: calc(78 * var(--art-px));
   cursor: pointer;
-  transform: rotate(var(--tilt, 0deg));
   transform-origin: 50% 0; /* the pin */
-  transition: transform 0.2s ease-out;
 }
 
 .polaroid.selected {
   z-index: 1; /* its highlight goes over its neighbours' shadows */
-  transform: none;
 }
 
 /* Hidden while the big view (PhotoViewer) has it "off the wall" */
@@ -75,9 +76,34 @@
   padding: calc(4 * var(--art-px)) calc(4 * var(--art-px)) calc(14 * var(--art-px));
   border: calc(2 * var(--art-px)) solid #000;
   background: #fbf8f2;
-  box-shadow:
-    inset calc(-2 * var(--art-px)) calc(-2 * var(--art-px)) 0 #ddd5cc, /* cartoon shading, bottom-right */
-    calc(4 * var(--art-px)) calc(4 * var(--art-px)) 0 rgb(0 0 0 / 0.25);
+  box-shadow: inset calc(-2 * var(--art-px)) calc(-2 * var(--art-px)) 0 #ddd5cc; /* cartoon shading, bottom-right */
+}
+
+/* its drop shadow (its own box, so it can be cut to the screen's art pixels too) */
+.polaroid-shadow {
+  position: absolute;
+  left: calc(4 * var(--art-px));
+  top: calc(4 * var(--art-px));
+  width: 100%;
+  height: 100%;
+  background: rgb(0 0 0 / 0.25);
+}
+
+.polaroid-frame {
+  clip-path: var(--frame-steps);
+}
+
+.polaroid-shadow {
+  clip-path: var(--shadow-steps);
+}
+
+.polaroid-highlight {
+  clip-path: var(--highlight-steps);
+}
+
+/* selected: straight, its highlight in the shadow's place */
+.polaroid.selected .polaroid-shadow {
+  visibility: hidden;
 }
 
 .polaroid-photo {
@@ -121,9 +147,11 @@
   max-width: 100%; /* a long caption is cut off at the frame's edge */
 }
 
-/* The pin, centred on the frame's top edge (9 × 9 art px, from Polaroid.ts) */
+/* The pin, centred on the frame's top edge (9 × 9 art px, from Polaroid.ts): beside the frame,
+   not in it, so the frame's stepped clip doesn't cut it off */
 .polaroid-pin {
   position: absolute;
+  z-index: 2;
   left: 50%;
   top: calc(-7 * var(--art-px));
   width: calc(9 * var(--art-px));
@@ -136,8 +164,7 @@
 
 /* ── Selected: the main menu's highlight (see ButtonMenu.css) ────────────────
    A red copy of the frame sits 2px down-right while the frame lifts 2px
-   up-left; the copy pulses red ↔ pink. The jump is utils/selectJump.ts, as
-   on the menu. */
+   up-left; the copy pulses red ↔ pink. (No jump into place: the user's call.) */
 .polaroid.selected .polaroid-frame {
   transform: translate(calc(-2 * var(--art-px)), calc(-2 * var(--art-px)));
   box-shadow: inset calc(-2 * var(--art-px)) calc(-2 * var(--art-px)) 0 #ddd5cc; /* the highlight replaces the shadow */
@@ -148,13 +175,6 @@
   inset: 0;
   background: #b00206;
   opacity: 0;
-}
-
-/* the selected one's frame and highlight get layers of their own while they
-   jump (only that one: a gallery can hold dozens of photos) */
-.polaroid.selected .polaroid-frame,
-.polaroid.selected .polaroid-highlight {
-  will-change: transform;
 }
 
 .polaroid.selected .polaroid-highlight {
@@ -191,7 +211,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .polaroid,
   .polaroid-photo img {
     transition: none;
   }
