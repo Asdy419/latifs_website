@@ -1,6 +1,6 @@
 /* A pixel-art banner at the top right (the user's call: pixelated, like the rest
-   of the site): its background is drawn in art pixels by NowPlaying.ts (a stepped
-   slanted end with a yellow stripe, an outline and a lit rim), which also sizes it
+   of the site): its background is drawn in art pixels by NowPlaying.ts (a dark
+   fill with a stepped slanted end), which also sizes it
    to whole art pixels and sets its left padding. Slides in from the right edge,
    holds, slides back out (one animation; removed on animationend). The text is
    sized from the HUD's key cap size, so it scales with the screen like the badges

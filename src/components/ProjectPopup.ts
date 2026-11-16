@@ -14,6 +14,13 @@ type Section = (typeof SECTIONS)[number]
 const OPEN_CLASS = 'project-popup-open'
 
 /**
+ * The user's experiment: the panel, its tabs, the Fun fact box and the buttons as
+ * parallelograms, after a Sonic Mania dialog (ProjectPopup.css, "Experiment: parallelograms").
+ * Set to false to put everything back as it was.
+ */
+const SLANTED = true
+
+/**
  * The details pop-up for a project (the Projects page opens it on Enter /
  * CONFIRM / tapping the selected box): a panel over most of the screen (the
  * page shows dimmed around it), which appears at once, with no animation. The
@@ -54,6 +61,7 @@ export class ProjectPopup {
     this.project = project
     const el = document.createElement('div') // the dimmed backdrop
     el.className = 'project-popup'
+    el.classList.toggle('project-popup-slanted', SLANTED)
     el.innerHTML = `
       <div class="project-popup-panel" role="dialog" aria-modal="true" tabindex="-1">
         <header class="project-popup-header">
@@ -84,8 +92,10 @@ export class ProjectPopup {
           </div>
         </div>
         <footer class="project-popup-actions">
-          <a class="project-popup-btn primary" target="_blank" rel="noopener"></a>
-          <button class="project-popup-btn" type="button" data-close></button>
+          <div class="project-popup-buttons">
+            <a class="project-popup-btn primary" target="_blank" rel="noopener"></a>
+            <button class="project-popup-btn" type="button" data-close></button>
+          </div>
         </footer>
       </div>
     `
@@ -103,12 +113,15 @@ export class ProjectPopup {
     const tv = q<HTMLElement>('.project-popup-shot')
     tv.style.setProperty('--tv-art', `url("${tvArt()}")`)
     tv.style.aspectRatio = `${TV.width} / ${TV.height}`
+    tv.style.setProperty('--tv-ratio', String(TV.width / TV.height)) // (ProjectPopup.css fits it in the middle's height)
     const screen = q<HTMLElement>('.project-popup-screen')
+    // the screen one art pixel bigger all round than the TV's hole, under its bezel: its edges
+    // then never land mid-pixel on the hole's, which let the panel show through as a light line
     const pct = (v: number, of: number) => `${(v / of) * 100}%`
-    screen.style.left = pct(TV_SCREEN.x, TV.width)
-    screen.style.top = pct(TV_SCREEN.y, TV.height)
-    screen.style.width = pct(TV_SCREEN.width, TV.width)
-    screen.style.height = pct(TV_SCREEN.height, TV.height)
+    screen.style.left = pct(TV_SCREEN.x - 1, TV.width)
+    screen.style.top = pct(TV_SCREEN.y - 1, TV.height)
+    screen.style.width = pct(TV_SCREEN.width + 2, TV.width)
+    screen.style.height = pct(TV_SCREEN.height + 2, TV.height)
     q('.project-popup-static').append(staticCanvas(TV_SCREEN.width, TV_SCREEN.height))
     q<HTMLImageElement>('.project-popup-picture').alt = `${project.title} project image`
     // under the title: what kind of project, and when
@@ -144,7 +157,7 @@ export class ProjectPopup {
       tabs.append(tab)
     }
 
-    // bottom: GitHub, other links, Close
+    // bottom, under the text: GitHub, other links, Close (with the keys that do the same)
     const github = q<HTMLAnchorElement>('.project-popup-btn.primary')
     const close = q<HTMLElement>('[data-close]')
     close.append(keyCap('B'), label('Close'))
@@ -163,12 +176,12 @@ export class ProjectPopup {
       a.append(label(link.label))
       close.before(a)
     }
-    // bottom right: what it was built with (tools as well as languages), on one line
+    // bottom, under the TV: what it was built with (tools as well as languages), on one line
     if (project.tech?.length) {
       const built = document.createElement('div')
       built.className = 'project-popup-builtwith'
       built.append(label('Built with', 'project-popup-builtwith-title'), label(project.tech.join(' / '), 'project-popup-tech'))
-      q('.project-popup-actions').append(built)
+      q('.project-popup-actions').prepend(built)
     }
     // Close, or a click on the dimmed page around the panel, closes it
     close.addEventListener('click', () => this.close())
@@ -277,10 +290,14 @@ export class ProjectPopup {
       this.tabLabels.get(tab.dataset.section as Section)?.render() // its ink and shadow colours changed
     }
     const box = this.el.querySelector<HTMLElement>('.project-popup-section')!
-    // the section's parts in one block, which the section centres on the TV (centreOnTV)
+    // the section's parts in one block, which the section centres on the TV (centreOnTV), with
+    // room between them that closes up when the tab is short of space (ProjectPopup.css)
     const parts = document.createElement('div')
     parts.className = 'project-popup-section-parts'
-    parts.append(...sectionContent(project, name))
+    sectionContent(project, name).forEach((part, i) => {
+      if (i) parts.append(Object.assign(document.createElement('div'), { className: 'project-popup-parts-space' }))
+      parts.append(part)
+    })
     box.replaceChildren(parts)
     box.scrollTop = 0
   }
@@ -375,7 +392,7 @@ function spacer(className: string): HTMLElement {
   return Object.assign(document.createElement('li'), { className, ariaHidden: 'true' })
 }
 
-/** A key cap, like [B] or [↵], for a button. */
+/** A key, like [B] or [↵], drawn as a small outlined key cap inside a button. */
 function keyCap(key: string): HTMLElement {
   const b = document.createElement('b')
   b.append(label(key))
@@ -394,42 +411,64 @@ function image(src: string, className?: string): HTMLImageElement {
 }
 
 // ── The TV around the screenshot ──────────────────────────────────────────
-// Pixel art drawn once in code (160 × 96 art px) after the user's reference: a
-// retro wooden set with rabbit-ear antennas, its frame kept thin so the
-// screen is as big as it can be (the antennas and the frame are what matter).
-// It's laid over the picture (ProjectPopup.css), which shows through the
-// screen (TV_SCREEN, set on the screen element by open()). Static (between
-// pictures, or with none) is the site's TV static (TvStatic.ts), one speckle
-// per art pixel of the screen.
+// Pixel art drawn once in code, shaped after the user's reference (a grey CRT set with its
+// controls along the bottom), with rabbit-ear antennas on top: a rounded grey plastic
+// casing lit along its top, a thick dark bezel round the rounded screen, a badge band
+// (LATIF), a dark control strip (power button and light, AV sockets, buttons, a grille,
+// knobs) and a darker base. (A closer copy, with a curved bottom and cables, was tried and
+// turned down: the user prefers this one.) It's laid over the picture (ProjectPopup.css),
+// which shows through the screen (TV_SCREEN, set on the screen element by open()). Static
+// (between pictures, or with none) is the site's TV static (TvStatic.ts), one speckle per
+// art pixel of the screen.
 
 /**
  * The rabbit ears: how many rows they rise above the casing, and how far each tip leans out
- * from the middle. 12 rows is (at ~1.42 pp per row, the 228 pp TV) the tabs' height plus the
- * gap under them, so with the TV at the top of its column the tips line up with the tabs
- * and the casing with the first line of text.
+ * from the middle. With the TV at the top of its column, the tips are level with the tabs.
  */
-const ANTENNA = { height: 12, reach: 20 }
-const TV_CASING = { x: 0, y: ANTENNA.height, width: 160, height: 88 }
+const ANTENNA = { height: 13, reach: 20 }
+/** Beside the screen: the outline, the grey casing (3) and the dark bezel (3). */
+const TV_SIDE = 7
+/** Above the screen: the outline, the lit lip, grey (2) and the bezel (3). */
+const TV_TOP = 7
+/** Under the screen: the bezel (3), the badge band (7), the control strip (11), the base (2), the outline. */
+const TV_BOTTOM = 24
+const TV_CASING = { x: 0, y: ANTENNA.height, width: 150 + 2 * TV_SIDE, height: TV_TOP + 78 + TV_BOTTOM }
 const TV = { width: TV_CASING.width, height: TV_CASING.y + TV_CASING.height }
-/** The frame round the screen: outline, wood, a grey face line and a dark bezel line. */
-const TV_FRAME = 5
-const TV_SCREEN = {
-  x: TV_CASING.x + TV_FRAME,
-  y: TV_CASING.y + TV_FRAME,
-  width: TV_CASING.width - 2 * TV_FRAME,
-  height: TV_CASING.height - 2 * TV_FRAME,
-}
+/** The screen: the pictures' shape (960 x 499 = 150:78). */
+const TV_SCREEN = { x: TV_CASING.x + TV_SIDE, y: TV_CASING.y + TV_TOP, width: 150, height: 78 }
 const TV_COLORS = {
-  outline: '#21160f',
-  woodLight: '#d0903f',
-  wood: '#ad692b',
-  woodDark: '#87501f',
-  grain: '#9a5b25',
-  face: '#8f90a8',
-  bezel: '#262632',
+  outline: '#2b2d33',
+  lip: '#e4e6ea',
+  casing: '#b4b8bf',
+  casingShade: '#9a9ea7',
+  base: '#80848d',
+  bezelEdge: '#5d616a',
+  bezel: '#24262c',
   antenna: '#2b2b35',
-  antennaBase: '#8f90a8',
+  antennaBase: '#9a9ea7',
+  badgeInk: '#5d616a',
+  panel: '#3a3c43',
+  panelLight: '#53565f',
+  hole: '#15161a',
+  jackYellow: '#efc400',
+  jackWhite: '#e8e6ee',
+  jackRed: '#d0302f',
+  led: '#ff4545',
+  ledDark: '#8c1c1c',
+  button: '#c4c7ce',
+  buttonLight: '#eceef2',
+  knob: '#c9cad8',
+  knobLight: '#f4f4fa',
+  knobDark: '#6e6f85',
 }
+/** LATIF in a 3 x 5 pixel font, for the badge band. */
+const TV_BADGE = [
+  ['X..', 'X..', 'X..', 'X..', 'XXX'],
+  ['.X.', 'X.X', 'XXX', 'X.X', 'X.X'],
+  ['XXX', '.X.', '.X.', '.X.', '.X.'],
+  ['XXX', '.X.', '.X.', '.X.', 'XXX'],
+  ['XXX', 'X..', 'XX.', 'X..', 'X..'],
+]
 
 let tvUrl: string | null = null
 
@@ -459,34 +498,81 @@ function tvArt(): string {
   fill(Math.round(mid) - 7, TV_CASING.y - 2, 14, 3, TV_COLORS.outline)
   fill(Math.round(mid) - 6, TV_CASING.y - 2, 12, 2, TV_COLORS.antennaBase)
 
-  // the wooden casing: outline, a lighter top edge, a darker bottom, a little grain
+  // the grey plastic casing: round corners, a lit lip along the top, the right side in shade,
+  // a darker base along the bottom
+  const C = TV_COLORS
   const c = TV_CASING
-  const inCasing = (x: number, y: number) => inRounded(x, y, c.x, c.y, c.width, c.height, [3, 1])
+  const inCasing = (x: number, y: number) => inRounded(x, y, c.x, c.y, c.width, c.height, [4, 2, 1, 1])
   for (let y = c.y; y < c.y + c.height; y++) {
     for (let x = c.x; x < c.x + c.width; x++) {
       if (!inCasing(x, y)) continue
       const edge = !inCasing(x - 1, y) || !inCasing(x + 1, y) || !inCasing(x, y - 1) || !inCasing(x, y + 1)
       const row = y - c.y
-      set(x, y, edge ? TV_COLORS.outline : row <= 1 ? TV_COLORS.woodLight : row >= c.height - 2 ? TV_COLORS.woodDark : TV_COLORS.wood)
+      set(x, y, edge ? C.outline : row === 1 ? C.lip : row >= c.height - 3 ? C.base : x >= c.x + c.width - 3 ? C.casingShade : C.casing)
     }
   }
-  for (const [x, y, n] of [[10, c.y + 2, 18], [52, c.y + 2, 12], [100, c.y + 2, 20], [16, c.y + c.height - 3, 14], [70, c.y + c.height - 3, 22], [120, c.y + c.height - 3, 12]]) {
-    fill(x, y, n, 1, TV_COLORS.grain)
-  }
-  for (const [y, n] of [[c.y + 18, 9], [c.y + 47, 12]]) { fill(c.x + 2, y, 1, n, TV_COLORS.grain); fill(c.x + c.width - 3, y + 6, 1, n, TV_COLORS.grain) }
 
-  // a grey face line and a dark bezel line round the screen, then the screen
-  // itself cut out with rounded (CRT) corners
+  // a thick dark bezel round the screen (its outer ring a step down from the casing), then
+  // the screen itself cut out with rounded (CRT) corners
   const s = TV_SCREEN
-  for (let y = s.y - 2; y < s.y + s.height + 2; y++) {
-    for (let x = s.x - 2; x < s.x + s.width + 2; x++) {
-      if (!inRounded(x, y, s.x - 2, s.y - 2, s.width + 4, s.height + 4, [2, 1])) continue
-      const ring = Math.min(x - (s.x - 2), y - (s.y - 2), s.x + s.width + 1 - x, s.y + s.height + 1 - y)
-      set(x, y, ring === 0 ? TV_COLORS.face : TV_COLORS.bezel)
+  const b = 3
+  for (let y = s.y - b; y < s.y + s.height + b; y++) {
+    for (let x = s.x - b; x < s.x + s.width + b; x++) {
+      if (!inRounded(x, y, s.x - b, s.y - b, s.width + 2 * b, s.height + 2 * b, [3, 1, 1])) continue
+      const ring = Math.min(x - (s.x - b), y - (s.y - b), s.x + s.width + b - 1 - x, s.y + s.height + b - 1 - y)
+      set(x, y, ring === 0 ? C.bezelEdge : C.bezel)
     }
   }
   for (let y = s.y; y < s.y + s.height; y++) {
     for (let x = s.x; x < s.x + s.width; x++) if (inRounded(x, y, s.x, s.y, s.width, s.height, [3, 1, 1])) set(x, y, null)
+  }
+
+  // the badge band under the screen: LATIF, centred
+  const bandY = s.y + s.height + b
+  const badgeW = TV_BADGE.length * 4 - 1
+  TV_BADGE.forEach((glyph, i) => glyph.forEach((rowBits, gy) => [...rowBits].forEach((bit, gx) => {
+    if (bit === 'X') set(Math.round((W - badgeW) / 2) + i * 4 + gx, bandY + 1 + gy, C.badgeInk)
+  })))
+
+  // the control strip: a dark inset panel, lit along its top, holding (left to right) a power
+  // button and its light, AV sockets (yellow, white, red, as in the reference), four buttons,
+  // a speaker grille and two knobs
+  const p = { x: TV_SIDE + 1, y: bandY + 7, width: W - 2 * (TV_SIDE + 1), height: 11 }
+  for (let y = p.y; y < p.y + p.height; y++) {
+    for (let x = p.x; x < p.x + p.width; x++) {
+      if (!inRounded(x, y, p.x, p.y, p.width, p.height, [1])) continue
+      const edge = !inRounded(x - 1, y, p.x, p.y, p.width, p.height, [1]) || !inRounded(x + 1, y, p.x, p.y, p.width, p.height, [1])
+        || y === p.y || y === p.y + p.height - 1
+      set(x, y, edge ? C.outline : y === p.y + 1 ? C.panelLight : C.panel)
+    }
+  }
+  const cy = p.y + 5 // the strip's middle row
+  const round = (cx: number, r2: number, body: string, light: string, dark: string) => {
+    for (let dy = -3; dy <= 3; dy++) {
+      for (let dx = -3; dx <= 3; dx++) {
+        const d = dx * dx + dy * dy
+        if (d > r2) continue
+        set(cx + dx, cy + dy, d > r2 - 4 ? C.outline : dx + dy < -1 ? light : dx + dy > 2 ? dark : body)
+      }
+    }
+  }
+  round(p.x + 5, 6, C.button, C.buttonLight, C.knobDark) // power button
+  fill(p.x + 10, cy - 1, 2, 1, C.led); fill(p.x + 10, cy, 2, 1, C.ledDark) // its light
+  for (const [i, color] of [C.jackYellow, C.jackWhite, C.jackRed].entries()) { // sockets: a ring round a hole
+    const jx = p.x + 17 + i * 5
+    fill(jx - 1, cy - 1, 3, 3, color)
+    set(jx, cy, C.hole)
+  }
+  for (let i = 0; i < 4; i++) { // push buttons
+    const bx = p.x + 35 + i * 9
+    fill(bx, cy - 1, 6, 3, C.button)
+    fill(bx, cy - 1, 6, 1, C.buttonLight)
+    fill(bx, cy + 2, 6, 1, C.hole)
+  }
+  for (let x = p.x + 75; x < p.x + p.width - 24; x += 2) fill(x, cy - 3, 1, 7, C.hole) // grille
+  for (const kx of [p.x + p.width - 17, p.x + p.width - 7]) { // knobs, with a pointer
+    round(kx, 12, C.knob, C.knobLight, C.knobDark)
+    set(kx, cy, C.outline); set(kx + 1, cy - 1, C.outline)
   }
 
   const canvas = document.createElement('canvas')

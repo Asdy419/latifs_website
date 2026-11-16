@@ -70,7 +70,8 @@ Component/scene CSS sits next to its `.ts` file and is imported by it.
     the `--hud-*` variables). Long titles cover the title banner's right end; the user is
     fine with that overlap. It's a pixel-art banner (the user's call: pixelated like the
     rest of the site): `paintBanner` sizes it to whole art pixels and draws its background
-    (a staircase end with a yellow stripe, black outline, lit rim, dark fill).
+    (a dark fill with a staircase end, nothing else: the user had its grey rim, black
+    outline and yellow stripe removed in turn).
 - **Scenes**: implement `render()` + `onMount()`. Register listeners with
   `{ signal: this.signal }`; it aborts when the scene is replaced, so nothing leaks.
 - **Navigation**: `navigateTo('/x.html')` between pages, `transitionTo(scene, in, out)`
@@ -348,28 +349,47 @@ Component/scene CSS sits next to its `.ts` file and is imported by it.
     Everything inside is measured in `--pp` (the panel's art pixel), and every gap is one
     of four steps (`--gap-xs/s/m/l`: 2, 4, 8, 12; 16 between the TV and the text), with one
     layout for every project (no per-project variants). Header: the project's picture, the
-    title (large text-font text) over a subtitle line (kind, when); at the right, the
+    title (large text-font text) over a subtitle line (kind, when; it wraps to a second
+    line when long, as CompanionAI's and Horses' do beside the bars); at the right, the
     language logos and the language bar, a pixel-art meter (in pp: black frame with
     notched corners, each segment with a lit top row and a shaded bottom row, 1 pp black
     dividers, a 2 pp minimum so a 0.6% share still shows) with its legend under it (flat
-    square keys, no stroke: the user's call). No year in the header (the user's call: no
-    repeats): it heads the Timeline tab, big, on a pixel-art pennant (`yearFlag`, drawn
-    in the digits' own font pixels; its pole stands on the timeline's line). The footer's
-    right end: "Built with" and the tools (`tech`). Left column: a pixel-art wooden TV
-    with rabbit-ear antennas (`tvArt()`, drawn in code, 160 wide, its casing 88 tall with
-    a 150 x 78 screen, `ANTENNA` rows above; the user cares about the antennas and the
-    frame, so the frame is thin and the screen as big as it can be) showing the project's
-    pictures (`shots`, one per tab, wrapping round). The TV fills the middle's height
-    (column 228 pp; 226 on phones; 166 on the narrower phones, where the text needs the
-    width), top-aligned: the antennas' tips level with the tabs, the casing level with the
-    section's first line (the user asked for both). The section's text is a touch smaller
-    (4.4 pp, the 8px floor on phones; line pitch 1.3 on the narrower phones) and its block
-    is centred on the TV's middle (`centreOnTV`: a bottom spacer, which long text squeezes
-    away first). Opening tunes the TV in from static (`OPEN_TUNE_MS`); switching tabs
-    tunes it (`tuneTV`): rolling static for at least `TUNE_MS` and until the next picture
-    has decoded, then the picture; no pictures means still static. The Features bullets
-    and the Timeline's milestones are 8 pp apart, closing up (to 4 and 2 pp) where a long
-    list needs the room (spacer items that shrink).
+    square keys, no stroke). Every bar is the same length, the Portfolio's (its four
+    languages' legend on one line: 158 pp; 164 on phones; 108 on the narrower phones,
+    which have no height for a wrapped subtitle). No year in the header (the user's call:
+    no repeats): it heads the Timeline tab, big, on a pixel-art pennant (`yearFlag`, drawn
+    in the digits' own font pixels; its pole stands on the timeline's line).
+    Footer, on the middle's two columns: "Built with" and the tools (`tech`) under the TV,
+    the buttons at the right (white with a black outline and the red pixel shadow; GitHub
+    yellow with a black shadow; keys ↵ and B in small black caps).
+    Left column: a grey CRT TV after the user's reference, with rabbit-ear antennas
+    (`tvArt()`, drawn in code: 164 x 122, a 150 x 78 screen inside a thick dark bezel, a
+    LATIF badge band and a control strip under it: power button and light, AV sockets,
+    buttons, a grille, knobs; a closer copy with a curved bottom and cables was turned
+    down) showing the project's pictures (`shots`, one per tab, wrapping round). The
+    screen element is one art pixel bigger than the TV's hole all round (under the bezel):
+    flush, its edge landed mid-pixel and the panel showed through as a light line. The TV
+    fills the middle's height: as wide as its column (`--tv-column`: 196 pp; 194 on phones;
+    166 on the narrower phones, where the text needs the width) unless that would make it
+    taller than the middle, then as tall (a container query), top-aligned, the antennas'
+    tips level with the tabs. The section's text is a touch smaller (4.4 pp, the 8px floor
+    on phones; line pitch 1.3 on the narrower phones) and its block is centred on the TV's
+    middle (`centreOnTV`: a bottom spacer, which long text squeezes away first). The
+    Overview's tagline is big (1.7em; 1.4 on the narrower phones), wrapping. Opening tunes
+    the TV in from static (`OPEN_TUNE_MS`); switching tabs tunes it (`tuneTV`): rolling
+    static for at least `TUNE_MS` and until the next picture has decoded, then the
+    picture; no pictures means still static. The Overview's parts, the Features bullets
+    and the Timeline's milestones are 8 pp apart, closing up (to 2, 4 and 2 pp) where a
+    tab needs the room (spacer items that shrink).
+  - The parallelogram experiment (`SLANTED` in ProjectPopup.ts, on): the user is trying a
+    Sonic Mania dialog look, and asked for it to be easy to revert (set `SLANTED` false;
+    its CSS is one block at the end of ProjectPopup.css). The pop-up becomes a dark
+    rectangle over the whole screen with a light parallelogram across it, cutting off the
+    top-left and bottom-right corners as far as the content allows (the content stays
+    exactly where it is: the user's call); the tabs, the Fun fact box and the buttons
+    (black bars with a pink shadow, just the word, like the reference's OK) lean at the
+    same angle (`--lean`, about 27 degrees: the user wanted one angle for every shape).
+    A version that skewed the whole panel (its rows stepping along the lean) was replaced.
     Right: tabs Overview (tagline, gist, fun fact) / Features / Numbers /
     Timeline (left/right or click; up/down scroll), from the Project Files' sections.
     Footer: View on GitHub, other links, Close. Every section of every project fits
