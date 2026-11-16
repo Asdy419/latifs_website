@@ -31,7 +31,7 @@ src/
   scenes/            TitleScreen (the titleEmblem medal over TitleBackground's spinning island) → Menu (screens inside index.html)
   components/        Hud (corner HUD) + HudButton (one badge), ButtonMenu, NowPlaying,
                      CircleAnimation, TvOverlay + its shows (GithubHop, SocialDrift, CameraFlash,
-                     SleepyCat: the menu TV), pfpArt (the user's pfp sprite),
+                     SleepyZs: the menu TV), pfpArt (the user's pfp sprite),
                      TitleBackground + titleEmblem + titleArt + pressArt (the title screen),
                      PixelCanvas + PixelText,
                      ProjectCarousel + ProjectCard,
@@ -336,17 +336,16 @@ Component/scene CSS sits next to its `.ts` file and is imported by it.
   - Behind them, something plain and abstract (the user's call): a pale blue-grey screen with
     three big, slightly darker flat discs drifting slowly, wandering a little past the sides.
     With reduced motion: the first frame, still.
-  - Exit's show is the sleepy cat (`SleepyCat.ts`, the user's idea), all the user's
-    calls. An orange cat sits on a floor, its body side on and its face to the screen,
-    swishing its tail. The hop's grey fades slowly (2.6 s) to a really dark grey
-    `#1e2024`, not black, the floor with it.
-  - Only once it's dark does the cat yawn, crouch and lie down. It rests its head forward
-    on its paws, side on, and sleeps, breathing. Zs drift up slowly, one every 1.1 s,
-    each for 3 s.
-  - Only the sleeping loops; the intro replays only when the TV tunes back to Exit.
-  - The cat is designed on a 64 × 56 grid and drawn 1.4× (each shape tested in the
-    design's units), so its outline and details stay single art pixels. Doubled pixel
-    for pixel it was too big; it's centred in the TV's visible part.
+  - Exit's show is the sleepy Zs (`SleepyZs.ts`, the user's call: "remove the cat from exit and
+    instead just make it a bunch of big zs floating around after the room goes dark"). The
+    room is the sleepy cat's (now deleted): the hop's grey with a floor, fading slowly (2.6 s
+    after 1.3 s awake) to a really dark grey `#1e2024`, not black, the floor with it. Only once
+    it's dark do the Zs come: pixel-art Zs (a dark outline) rising slowly from low on the
+    screen, swaying as they go and growing the higher they float (10 to 38 px in eight steps:
+    the user's call), each dim as it appears, bright in the middle of its life and dim again
+    before it goes, one every 700 ms for 4.5 s, so about six float at once.
+    Only the Zs loop; the room darkens again only when the TV tunes back to Exit. With reduced
+    motion: the dark room with a few Zs, still.
   - Loading order on the home page: "press any button" image (fetchpriority high; the logo
     and backdrop are drawn in code) → sounds (`loadSounds()`) → menu images
     (`Menu.preload()`, which must list every menu image). Keep big downloads out of the

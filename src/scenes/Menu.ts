@@ -5,7 +5,7 @@ import { Scene, transitionTo } from '../core/Scene'
 import { navigateTo } from '../core/pageTransition'
 import { ButtonMenu } from '../components/ButtonMenu'
 import { CameraFlash } from '../components/CameraFlash'
-import { SleepyCat } from '../components/SleepyCat'
+import { SleepyZs } from '../components/SleepyZs'
 import { SocialDrift } from '../components/SocialDrift'
 import { CircleAnimation } from '../components/CircleAnimation'
 import { GithubHop } from '../components/GithubHop'
@@ -68,7 +68,7 @@ export class Menu extends Scene {
   private readonly hop     = new GithubHop(TV_SCREEN)
   private readonly camera  = new CameraFlash(TV_SCREEN)
   private readonly drift   = new SocialDrift(TV_SCREEN)
-  private readonly cat     = new SleepyCat(TV_SCREEN)
+  private readonly zs      = new SleepyZs(TV_SCREEN)
   private readonly hud     = new Hud()
   private readonly buttons: ButtonMenu
 
@@ -110,9 +110,9 @@ export class Menu extends Scene {
 
     // The TV previews the highlighted button, as in the game's menu (the user's picks): Projects has
     // the GitHub hop, Socials the logo drift, Photo Gallery the camera flash, Exit (after the
-    // sub-pages) the cat falling asleep; About me static for now
+    // sub-pages) the room going dark and Zs floating up; About me static for now
     const shows: Partial<Record<string, TvShow>> = { projects: this.hop, socials: this.drift, gallery: this.camera }
-    const preview = (i: number) => (i === SUBPAGES.length ? this.cat : shows[SUBPAGES[i]?.id ?? ''] ?? null)
+    const preview = (i: number) => (i === SUBPAGES.length ? this.zs : shows[SUBPAGES[i]?.id ?? ''] ?? null)
     this.buttons.onChange = i => this.tv.tune(preview(i))
     this.tv.tune(preview(this.buttons.selected), OPEN_TUNE_MS)
 
