@@ -345,7 +345,7 @@ Component/scene CSS sits next to its `.ts` file and is imported by it.
     removed: the user's call), a bed with its
     plump pillow at the left end (a wooden rounded headboard and frame, the user's call; everything
     on it blue, also their call: the duvet lit along its top and running a little past the foot
-    at its own level, that end's corners rounded, the pale sheet turned down at the head, the mattress's side, a pale blue
+    at its own level, that end's top corner rounded and its bottom cut off square, the pale sheet turned down at the head, the mattress's side, a pale blue
     pillow; a folded blanket at the foot went: their call), a
     bedside table with a lamp, two posters and a clock, a window on the
     night sky and the moon between pink curtains up on the right, a wooden floor and a round pink

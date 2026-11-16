@@ -196,14 +196,13 @@ function roomCanvas(): HTMLCanvasElement {
   rect(58, 108, 92, 108, '#a9c0ea')
   rect(54, 125, 178, 133, '#8fb0e6')
   rect(54, 133, 178, 133, '#6a8cd0')
-  // the duvet laid on top, running past the foot of the bed at its own level, its end's corners
-  // rounded (the user's calls)
+  // the duvet laid on top, running past the foot of the bed at its own level, its end's top corner
+  // rounded but its bottom cut off square (the user's calls)
   rect(176, 108, 181, 124, '#4a74c8')
   rect(176, 108, 181, 110, '#6f94dd')
   rect(176, 123, 181, 124, '#3a5ca6')
   rect(179, 113, 179, 121, '#3f64b4') // a fold at the end
   for (const [x, y] of [[181, 108], [180, 108], [181, 109]]) rect(x, y, x, y, '#7a68b4')
-  for (const [x, y] of [[181, 124], [180, 124], [181, 123]]) rect(x, y, x, y, '#9a6a45')
   rect(52, 134, 180, 139, '#5a3a22')
   rect(52, 134, 180, 134, '#7a5232')
   rect(54, 140, 59, 150, '#5a3a22')
