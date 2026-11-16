@@ -1,57 +1,41 @@
 import type { TvShow } from './TvOverlay'
-import { drawColorGrid } from '../utils/pixelArt'
 
 /*
- * The sleepy Zs: the main menu TV's picture while Exit is highlighted (the user's call: the sleepy
- * cat that used to be here is gone; "just a bunch of big zs floating around after the room goes
- * dark", on "pixel art of a bedroom"). A cosy bedroom, lit: a lavender wall with a pink LED strip
- * along its top and a string of fairy lights twinkling, a bed with its pillow at the left end, a
- * bedside table with a lamp, two posters and a clock on the wall, a window on the night sky and
- * the moon between pink curtains, a wooden floor and a round pink rug. Nothing stirs for a moment;
- * then the lights go down slowly (the room fades to a dark blue-grey, the window still moonlit),
- * and once it's dark Zs set off from the pillow, each on its own straight heading anywhere
- * between two bounds (steeply up, or shallowly off to the right: the user drew them), flying
- * slowly with a little sway, growing as they go, dim at first, right off the screen (the user's
- * calls). Only the Zs loop; the room darkens again only when the TV tunes back to Exit. Flat pixel
- * art with dark outlines, like the other shows. With reduced motion: the dark room with a few Zs,
- * still.
+ * Lights out: the main menu TV's picture while Exit is highlighted (the user's calls: a sleepy cat
+ * came first, then Zs floating up through the dark, then "remove the zs, just keep the background
+ * turning dark and that's it"). A cosy pixel-art bedroom, lit: a lavender wall with a pink LED
+ * strip along its top and a string of fairy lights twinkling, a bed with its pillow at the left
+ * end, a bedside table with a lamp, two posters and a clock on the wall, a window on the night sky
+ * and the moon between pink curtains, a wooden floor and a round pink rug. Nothing stirs for a
+ * moment; then the lights go down slowly (the room fades to a dark blue-grey, the window still
+ * moonlit), and that's it: the dark room, still, until the TV tunes back to Exit. Flat pixel art
+ * with dark outlines, like the other shows. With reduced motion: the dark room from the start.
  *
- * Drawn in code, one pixel per art pixel like the TV's static; the room and the Zs are drawn once.
- * The room is laid out for what shows of the screen (rows 11–168, columns 37 to 337 − row: wide at
- * the top, narrow at the floor), so the bed and rug sit low on the left and the window high up.
+ * Drawn in code, one pixel per art pixel like the TV's static; the room is drawn once, and the
+ * frame loop stops once it's dark. The room is laid out for what shows of the screen (rows 11–168,
+ * columns 37 to 337 − row: wide at the top, narrow at the floor), so the bed and rug sit low on
+ * the left and the window high up.
  */
 
 const OUT = '#15171b'
-/** The room's lights going down: how dark it gets (over everything but the window). */
-const NIGHT = 'rgb(8 6 20 / 0.82)'
+/** The room's lights going down: how dark it gets (nearly black: the user wanted it darker), and the window pane, which stays moonlit but dims a little. */
+const NIGHT = 'rgb(5 4 12 / 0.94)', NIGHT_PANE = 'rgb(5 4 12 / 0.35)'
 /** The LED strip's pink, lit and after dark. */
 const LED = ['#ff7ac0', '#5a2a48']
 /** The fairy lights' colours, round and round the string. */
 const BULBS = ['#ffd84a', '#ff8a7a', '#7ef0ff', '#c7ff7a']
 /** The window pane (kept moonlit after dark). */
 const PANE = { x0: 216, y0: 34, x1: 288, y1: 80 }
-/** A Z's tones: dim as it appears and goes, bright between. */
-const TONES = ['#6d7690', '#e8eeff']
-/** The Zs' sizes (px square), small to big: each Z grows through them as it rises. */
-const SIZES = [10, 14, 18, 22, 26, 30, 34, 38]
 
-/** In ms: the lit room, then the lights going down slowly, then the Zs. */
+/** In ms: the lit room, then the lights going down slowly. */
 const AWAKE = 1300, FADE = 2600
 const DARK = AWAKE + FADE
-/** One Z every Z_EVERY ms, each dim for its first DIM_FOR ms, flying at SPEED px/s until it's off the screen. */
-const Z_EVERY = 1800, DIM_FOR = 900, SPEED = 27
-/** Each Z's heading, degrees above horizontal, anywhere between these (the user's bounds, drawn on a screenshot). */
-const HEADING = { min: 13, max: 56 }
-/** The longest flight (steeply to the top edge) in px, over which a Z grows through SIZES; and the most Zs ever in flight. */
-const FLIGHT = 180, IN_FLIGHT = 10
 
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)')
 
-export class SleepyZs implements TvShow {
+export class LightsOut implements TvShow {
   readonly canvas = document.createElement('canvas')
   private readonly ctx: CanvasRenderingContext2D | null
-  /** The Z sprites, by size then tone. */
-  private readonly zs = SIZES.map(n => TONES.map(tone => zCanvas(n, tone)))
   private readonly room = roomCanvas()
   private frame = 0
   private started = 0
@@ -64,15 +48,16 @@ export class SleepyZs implements TvShow {
     this.ctx = this.canvas.getContext('2d')
   }
 
-  /** Plays from the top (the grey room); with reduced motion, the dark room with its Zs, still. */
+  /** Plays from the top (the lit room) until it's dark; with reduced motion, the dark room straight away. */
   start(): void {
     this.stop()
-    if (reducedMotion.matches) return this.drawAt(DARK + 2600)
+    if (reducedMotion.matches) return this.drawAt(DARK)
     this.started = performance.now()
     this.drawAt(0)
     const tick = () => {
-      this.drawAt(performance.now() - this.started)
-      this.frame = requestAnimationFrame(tick)
+      const t = performance.now() - this.started
+      this.drawAt(t)
+      if (t < DARK) this.frame = requestAnimationFrame(tick) // dark: nothing moves any more
     }
     this.frame = requestAnimationFrame(tick)
   }
@@ -106,29 +91,13 @@ export class SleepyZs implements TvShow {
       ctx.fillRect(0, PANE.y1 + 1, width, height - PANE.y1 - 1)
       ctx.fillRect(0, PANE.y0, PANE.x0, PANE.y1 - PANE.y0 + 1)
       ctx.fillRect(PANE.x1 + 1, PANE.y0, width - PANE.x1 - 1, PANE.y1 - PANE.y0 + 1)
+      ctx.fillStyle = NIGHT_PANE
+      ctx.fillRect(PANE.x0, PANE.y0, PANE.x1 - PANE.x0 + 1, PANE.y1 - PANE.y0 + 1)
       ctx.restore()
       ctx.fillStyle = LED[1]
       ctx.globalAlpha = dark
       ctx.fillRect(0, 11, width, 2)
       ctx.globalAlpha = 1
-    }
-    // the Zs, once it's dark: each sets off from the pillow on its own straight heading, anywhere
-    // between the bounds, flies slowly (a little sway) and grows as it goes, dim at first, and
-    // keeps going until it's off the screen (the user's calls)
-    if (t < DARK) return
-    const newest = Math.floor((t - DARK) / Z_EVERY)
-    for (let k = Math.max(0, newest - IN_FLIGHT); k <= newest; k++) {
-      const age = t - DARK - k * Z_EVERY
-      if (age < 0) continue
-      const heading = ((HEADING.min + hash(k * 3 + 1) * (HEADING.max - HEADING.min)) * Math.PI) / 180
-      const dist = (age / 1000) * SPEED
-      const cx = 62 + hash(k * 3 + 2) * 14 + Math.cos(heading) * dist + Math.sin(age / 700 + hash(k * 3 + 3) * 6.3) * 4
-      const cy = 100 - Math.sin(heading) * dist
-      const step = Math.min(SIZES.length - 1, Math.floor((dist / FLIGHT) * SIZES.length))
-      const sprite = this.zs[step][age < DIM_FOR ? 0 : 1]
-      const half = sprite.width / 2
-      if (cy + half < 0 || cx - half + cy - half > 337) continue // past the top, or the slanted right edge
-      ctx.drawImage(sprite, Math.round(cx - half), Math.round(cy - half))
     }
   }
 }
@@ -220,35 +189,5 @@ function roomCanvas(): HTMLCanvasElement {
   disc(140, 160, 43, 8, '#e089b8')
   disc(140, 160, 36, 6, '#cc6fa0')
   disc(140, 160, 28, 4, '#e089b8')
-  return canvas
-}
-
-/** A deterministic 0–1 number for `n` (the same Zs every time). */
-function hash(n: number): number {
-  let h = (n * 2654435761) >>> 0
-  h ^= h >>> 15
-  h = Math.imul(h, 2246822519) >>> 0
-  h ^= h >>> 13
-  return h / 4294967296
-}
-
-/** A chunky Z `n` pixels square in `tone`, its strokes about a fifth of it thick, outlined in dark. */
-function zCanvas(n: number, tone: string): HTMLCanvasElement {
-  const t = Math.max(3, Math.round(n / 5))
-  const grid: (string | null)[][] = Array.from({ length: n + 2 }, () => Array<string | null>(n + 2).fill(null))
-  for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
-    const bar = y < t || y >= n - t
-    const diagonal = Math.abs(x - (n - 1 - y)) <= t * 0.62
-    if (bar || diagonal) grid[y + 1][x + 1] = tone
-  }
-  const filled = grid.map(row => row.map(c => c !== null))
-  for (let y = 0; y < n + 2; y++) for (let x = 0; x < n + 2; x++) {
-    if (!filled[y][x] && (filled[y - 1]?.[x] || filled[y + 1]?.[x] || filled[y][x - 1] || filled[y][x + 1])) grid[y][x] = OUT
-  }
-  const canvas = document.createElement('canvas')
-  canvas.width = n + 2
-  canvas.height = n + 2
-  const ctx = canvas.getContext('2d')
-  if (ctx) drawColorGrid(ctx, grid, 1)
   return canvas
 }

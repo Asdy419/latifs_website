@@ -31,7 +31,7 @@ src/
   scenes/            TitleScreen (the titleEmblem medal over TitleBackground's spinning island) → Menu (screens inside index.html)
   components/        Hud (corner HUD) + HudButton (one badge), ButtonMenu, NowPlaying,
                      CircleAnimation, TvOverlay + its shows (GithubHop, SocialDrift, CameraFlash,
-                     SleepyZs: the menu TV), pfpArt (the user's pfp sprite),
+                     LightsOut: the menu TV), pfpArt (the user's pfp sprite),
                      TitleBackground + titleEmblem + titleArt + pressArt (the title screen),
                      PixelCanvas + PixelText,
                      ProjectCarousel + ProjectCard,
@@ -296,7 +296,7 @@ Component/scene CSS sits next to its `.ts` file and is imported by it.
     stays on static (About me, for now), and the static stops rolling under a show.
   - The shows' backgrounds differ on purpose. The user wanted scenes, not the hop's grey
     everywhere: the hop keeps its grey; Socials gets a pale abstract screen, Photo Gallery a
-    starry night, and Exit the hop's grey fading to a really dark grey, with a floor. Each
+    starry night, and Exit a bedroom whose lights go down. Each
     show reads `performance.now()` in its frame loop, not the frame's timestamp
     (Playwright's fake clock gives the two different origins).
   - Projects' show is the GitHub hop (`GithubHop.ts`, the user's pick, from the video
@@ -336,22 +336,18 @@ Component/scene CSS sits next to its `.ts` file and is imported by it.
   - Behind them, something plain and abstract (the user's call): a pale blue-grey screen with
     three big, slightly darker flat discs drifting slowly, wandering a little past the sides.
     With reduced motion: the first frame, still.
-  - Exit's show is the sleepy Zs (`SleepyZs.ts`, the user's calls: "remove the cat from exit and
-    instead just make it a bunch of big zs floating around after the room goes dark", on "pixel
-    art of a bedroom"). A cosy bedroom drawn once, flat with dark outlines, laid out for what
-    shows of the screen (wide at the top, narrow at the floor): a lavender wall with a pink LED
-    strip along its top and a string of fairy lights twinkling (drawn live), a bed with its pillow
-    at the left end, a bedside table with a lamp, two posters and a clock, a window on the night
-    sky and the moon between pink curtains up on the right, a wooden floor and a round pink rug.
-    After 1.3 s the lights go down over 2.6 s (a dark blue-grey overlay over everything but the
-    window pane, which stays moonlit; the LED strip dims to a dull pink). Only once it's dark do
-    the Zs come: pixel-art Zs (a dark outline) setting off from the pillow, each on its own
-    straight heading anywhere between 13 and 56 degrees above horizontal (the user drew the two
-    bounds on a screenshot), flying slowly (27 px/s, a little sway), growing as they go (10 to
-    38 px in eight steps over the longest flight), dim for their first 0.9 s, and off the screen
-    past the top or the slanted right edge (the user's calls), one every 1.8 s. Only the Zs loop;
-    the room darkens again only when the TV tunes back to Exit. With reduced motion: the dark
-    room with a few Zs, still.
+  - Exit's show is lights out (`LightsOut.ts`; the user's calls, in turn: a sleepy cat, then
+    Zs floating up through the dark, then "remove the zs, just keep the background turning dark
+    and that's it"). A cosy pixel-art bedroom drawn once, flat with dark outlines, laid out for
+    what shows of the screen (wide at the top, narrow at the floor): a lavender wall with a pink
+    LED strip along its top and a string of fairy lights twinkling (drawn live), a bed with its
+    pillow at the left end, a bedside table with a lamp, two posters and a clock, a window on the
+    night sky and the moon between pink curtains up on the right, a wooden floor and a round pink
+    rug. After 1.3 s the lights go down over 2.6 s (a near-black overlay, 94%, over everything
+    but the window pane, which stays moonlit under a 35% one; the LED strip dims to a dull pink:
+    the user wanted it "more darker"), and that's it: the
+    frame loop stops once it's dark, and the room lights up again only when the TV tunes back to
+    Exit. With reduced motion: the dark room from the start.
   - Loading order on the home page: "press any button" image (fetchpriority high; the logo
     and backdrop are drawn in code) → sounds (`loadSounds()`) → menu images
     (`Menu.preload()`, which must list every menu image). Keep big downloads out of the
