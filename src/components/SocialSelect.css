@@ -1,0 +1,159 @@
+/*
+ * The Socials page's boxes (SocialSelect.ts), after the user's character-select clip
+ * (reference/), in art pixels of the 424 × 240 screen (--px): 96 × 96 boxes, 16 apart as in the
+ * clip (8 when there are four, which don't fit the screen 16 apart: SocialSelect.ts), centred,
+ * their tops 92 down. A box: a 3px frame (black; selected, red pulsing to pink) round
+ * a 90 × 90 inside: a see-through panel (the rings show through it) with the picture over its
+ * top 68 rows, a black name strip under that (16 rows) and 6 more see-through rows. A 3px shadow
+ * runs along the inside's top and left edges, and a drop shadow sits 3px down-right outside,
+ * both a see-through dark grey. (Two-class selectors on the canvases: .pixel-canvas sizes them
+ * to fill their parents otherwise.)
+ */
+.social-select {
+  --px: var(--art-px);
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(50% - 28 * var(--px)); /* box tops 92px down the 240px-tall screen */
+  height: calc(99 * var(--px)); /* box + drop shadow */
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  z-index: 1;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* (--pitch, --half: the boxes' spacing and the row's half width, from SocialSelect.ts) */
+.social-box {
+  position: absolute;
+  top: 0;
+  left: calc(50% + (var(--i) * var(--pitch) - var(--half)) * var(--px));
+  width: calc(96 * var(--px));
+  height: calc(96 * var(--px));
+  cursor: pointer;
+}
+
+/* the drop shadow: only the strips that stick out past the box's right and bottom (the panel is
+   see-through, so a whole shadow under the box would grey it) */
+.social-box-shadow {
+  position: absolute;
+  inset: 0;
+  translate: calc(3 * var(--px)) calc(3 * var(--px));
+  background: rgb(70 70 70 / 0.7);
+  clip-path: polygon(calc(93 * var(--px)) 0, 100% 0, 100% 100%, 0 100%, 0 calc(93 * var(--px)),
+    calc(93 * var(--px)) calc(93 * var(--px)));
+}
+
+.social-box-frame {
+  position: absolute;
+  inset: 0;
+  border: calc(3 * var(--px)) solid #000;
+}
+
+/* selected, the frame pulses red ↔ pink in the clip's 8 shades (its own colour: a layer over it
+   wouldn't line up with a border rounded to whole screen pixels) */
+.social-box.selected .social-box-frame {
+  border-color: #c20f00;
+  animation: social-pulse 0.267s steps(7, jump-none) infinite alternate;
+}
+
+@keyframes social-pulse {
+  from { border-color: #c20f00; }
+  to   { border-color: #eab9e7; }
+}
+
+/* exactly inside the frame's border (its padding box), whatever that border was rounded to */
+.social-box-inside {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: rgb(255 255 255 / 0.43);
+}
+
+/* the shadow along the inside's top and left edges, over everything in it */
+.social-box-inside::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  box-shadow: inset calc(3 * var(--px)) calc(3 * var(--px)) 0 rgb(70 70 70 / 0.7);
+  pointer-events: none;
+}
+
+/* the selected bands: out of their corners in 7 frames (the clip's), and back when it's left */
+.social-box .social-box-band {
+  position: absolute;
+  width: calc(var(--w) * var(--px));
+  height: calc(var(--h) * var(--px));
+  transform: scale(0);
+  transition: transform 0.117s linear;
+}
+
+.social-box .social-box-band.red {
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+}
+
+.social-box .social-box-band.blue {
+  right: 0;
+  bottom: 0;
+  transform-origin: 100% 100%;
+}
+
+.social-box.selected .social-box-band {
+  transform: none;
+}
+
+.social-box-picture {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: calc(68 * var(--px));
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.social-box .social-box-art {
+  width: calc(var(--w) * var(--px));
+  height: calc(var(--h) * var(--px));
+}
+
+/* selected, the picture lifts 2px up-left over a dark copy of its shape */
+.social-box.selected .social-box-art {
+  translate: calc(-2 * var(--px)) calc(-2 * var(--px));
+  filter: drop-shadow(calc(4 * var(--px)) calc(4 * var(--px)) 0 #153e65);
+}
+
+.social-box-name {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(68 * var(--px));
+  height: calc(16 * var(--px));
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  padding-top: calc(4 * var(--px));
+  background: #000;
+}
+
+.social-box .social-box-label {
+  width: calc(var(--w) * var(--px));
+  height: calc(var(--h) * var(--px));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .social-box .social-box-band {
+    transition: none;
+  }
+
+  .social-box.selected .social-box-frame {
+    animation: none;
+  }
+}
