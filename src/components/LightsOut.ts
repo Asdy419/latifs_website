@@ -175,7 +175,7 @@ function roomCanvas(): HTMLCanvasElement {
 
   // the bed, side on, its head at the left: a wooden headboard with a rounded top and a lighter
   // inner panel; the mattress one light blue all over, its top lower than the blanket's (the user's
-  // calls), the pillow sitting on it against the headboard, short of the blanket; the blanket laid
+  // calls), the pillow propped against the headboard, short of the blanket; the blanket laid
   // over the far part of the bed only, from past the pillow to a little beyond the foot (the user
   // drew where), lit along its top, darker at its edges, a few folds, the top corner of its end
   // rounded and its bottom cut off square; a plump pale pillow; the frame and legs wood
@@ -193,11 +193,21 @@ function roomCanvas(): HTMLCanvasElement {
   for (const [x0, x1] of [[104, 112], [128, 136]]) rect(x0, 113, x1 + 10, 113, '#3f64b4') // folds
   rect(179, 113, 179, 121, '#3f64b4')
   for (const [x, y] of [[181, 108], [180, 108], [181, 109]]) rect(x, y, x, y, '#7a68b4')
-  rect(56, 103, 85, 114, '#d7e4f7')
-  rect(57, 102, 84, 102, '#d7e4f7')
-  rect(55, 104, 55, 113, '#d7e4f7')
-  rect(86, 104, 86, 113, '#d7e4f7')
-  rect(70, 105, 70, 112, '#bcd0ee') // its crease
+  // the pillow: a plump lozenge, both sides sloping out towards its base and its corners well
+  // rounded (not a square: the user's calls), propped against the headboard, sunk a little into
+  // the mattress; its sides shaded
+  const PILLOW = { top: 106, bottom: 117, cx: 70.5, halfTop: 10, halfBottom: 16, r: 4 }
+  for (let y = PILLOW.top; y <= PILLOW.bottom; y++) {
+    const t = (y - PILLOW.top) / (PILLOW.bottom - PILLOW.top)
+    const half = PILLOW.halfTop + (PILLOW.halfBottom - PILLOW.halfTop) * t
+    const d = Math.min(y - PILLOW.top, PILLOW.bottom - y) + 0.5 // rows in from the nearer edge
+    const inset = d < PILLOW.r ? PILLOW.r - Math.sqrt(PILLOW.r * PILLOW.r - (PILLOW.r - d) ** 2) : 0
+    const x0 = Math.round(PILLOW.cx - half + inset), x1 = Math.round(PILLOW.cx + half - inset) - 1
+    if (x1 < x0) continue
+    rect(x0, y, x1, y, '#d7e4f7')
+    if (inset === 0) { rect(x0, y, x0, y, '#bcd0ee'); rect(x1, y, x1, y, '#bcd0ee') }
+  }
+  rect(70, 109, 70, 114, '#bcd0ee') // its crease
   rect(52, 134, 180, 139, '#5a3a22')
   rect(52, 134, 180, 134, '#7a5232')
   rect(54, 140, 59, 150, '#5a3a22')
