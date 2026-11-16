@@ -193,11 +193,11 @@ function roomCanvas(): HTMLCanvasElement {
   for (const [x0, x1] of [[104, 112], [128, 136]]) rect(x0, 113, x1 + 10, 113, '#3f64b4') // folds
   rect(179, 113, 179, 121, '#3f64b4')
   for (const [x, y] of [[181, 108], [180, 108], [181, 109]]) rect(x, y, x, y, '#7a68b4')
-  rect(58, 103, 92, 114, '#d7e4f7')
-  rect(59, 102, 91, 102, '#d7e4f7')
-  rect(57, 104, 57, 113, '#d7e4f7')
-  rect(93, 104, 93, 113, '#d7e4f7')
-  rect(74, 105, 74, 112, '#bcd0ee') // its crease
+  rect(56, 103, 90, 114, '#d7e4f7')
+  rect(57, 102, 89, 102, '#d7e4f7')
+  rect(55, 104, 55, 113, '#d7e4f7')
+  rect(91, 104, 91, 113, '#d7e4f7')
+  rect(72, 105, 72, 112, '#bcd0ee') // its crease
   rect(52, 134, 180, 139, '#5a3a22')
   rect(52, 134, 180, 134, '#7a5232')
   rect(54, 140, 59, 150, '#5a3a22')
