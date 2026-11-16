@@ -340,9 +340,9 @@ Component/scene CSS sits next to its `.ts` file and is imported by it.
     instead just make it a bunch of big zs floating around after the room goes dark"). The
     room is the sleepy cat's (now deleted): the hop's grey with a floor, fading slowly (2.6 s
     after 1.3 s awake) to a really dark grey `#1e2024`, not black, the floor with it. Only once
-    it's dark do the Zs come: pixel-art Zs (a dark outline) drifting slowly up from the bottom
-    left towards the top right, swaying as they go and growing the higher they float (10 to
-    38 px in eight steps: the user's calls), each dim as it appears, bright in the middle of its life and dim again
+    it's dark do the Zs come: pixel-art Zs (a dark outline) drifting slowly up from low on the
+    left, each aimed loosely at the screen's top right corner, swaying as they go and growing
+    the higher they float (10 to 38 px in eight steps: the user's calls), each dim as it appears, bright in the middle of its life and dim again
     before it goes, one every 700 ms for 4.5 s, so about six float at once.
     Only the Zs loop; the room darkens again only when the TV tunes back to Exit. With reduced
     motion: the dark room with a few Zs, still.
@@ -650,6 +650,15 @@ Component/scene CSS sits next to its `.ts` file and is imported by it.
   crop (`c_fill,g_auto,f_auto,q_auto`) at one of a few fixed sizes (`SIZES` in
   PhotoGrid.ts) so Cloudinary's cache and free-plan credits go further; resized copies
   carry no GPS data. The caption is the photo's `caption` context (Title in Cloudinary).
+  - The pin board (`pinboardArt.ts`, the user's idea after a picture of a framed board): a
+    deep red felt in a pixel-art light-oak frame behind the photos, sized round them by
+    `PhotoGrid.placeBoard` whenever the grid's size changes, so it grows with the photos. The
+    frame is a 9-slice drawn in code (outline, lit edge, oak with two grain lines, inner edge,
+    mitred corners) for CSS border-image, its slice the border width in art px, so it stays one
+    pixel per art pixel at any size; the felt shows 8 art px past the columns, 10 above the
+    pins and 12 below the last row, with a darker felt line inside the frame's top and left and
+    a drop shadow like the polaroids'. The grid's padding leaves room for it and a little page
+    round it.
   - `PhotoGrid`: a CSS grid of 68 × 78 art px `Polaroid`s (5 across at 16:9, more on
     phones) in a scroller that starts under the banner. Selection: arrows (2D, scrolls
     into view), mouse hover, tap. Each polaroid hangs at a slight tilt (hashed from

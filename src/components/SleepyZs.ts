@@ -93,8 +93,10 @@ export class SleepyZs implements TvShow {
       const u = age / Z_LIFE
       const step = Math.min(SIZES.length - 1, Math.floor(u * SIZES.length))
       const sprite = this.zs[step][age < DIM_FOR || age > Z_LIFE - DIM_FOR ? 0 : 1]
-      // from the bottom left up towards the top right (the user's call), with a little sway
-      const cx = 45 + hash(k * 3 + 2) * 95 + u * 115 + Math.sin(u * 9 + hash(k * 3 + 3) * 6.3) * 7
+      // from low on the left, each aimed loosely at the screen's top right corner (the user's
+      // call; the visible screen's corner is at about (326, 11)), with a little sway
+      const x0 = 45 + hash(k * 3 + 2) * 70, x1 = 285 + hash(k * 3 + 1) * 35
+      const cx = x0 + u * (x1 - x0) + Math.sin(u * 9 + hash(k * 3 + 3) * 6.3) * 7
       const cy = 160 - u * 150
       ctx.drawImage(sprite, Math.round(cx - sprite.width / 2), Math.round(cy - sprite.height / 2))
     }

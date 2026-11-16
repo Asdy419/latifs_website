@@ -38,9 +38,31 @@
   justify-content: center;
   gap: calc(20 * var(--art-px)) calc(14 * var(--art-px)); /* rows leave room for the pins */
   margin: 0;
-  /* top: room for a pin and the selected frame's lift (PhotoGrid.scrollIntoView keeps it too) */
-  padding: calc(15 * var(--art-px)) calc(12 * var(--art-px)) calc(18 * var(--art-px));
+  /* top: room for the board's frame, its felt above the pins, a pin and the selected frame's
+     lift (PhotoGrid.scrollIntoView keeps it too); sides and bottom: the frame and felt, plus a
+     little of the page round the board */
+  padding: calc(29 * var(--art-px)) calc(22 * var(--art-px)) calc(26 * var(--art-px));
   list-style: none;
+}
+
+/* ── The pin board ───────────────────────────────────────────────────────── */
+/* Behind the photos, sized round them by PhotoGrid.placeBoard (it grows with the photos): a
+   deep red felt in a pixel-art oak frame (pinboardArt.ts, a 9-slice the frame's width is the
+   slice of, so it's one pixel per art pixel at any size), a darker line of felt inside the
+   frame's top and left, a drop shadow down-right like the polaroids' */
+.pinboard {
+  position: absolute;
+  z-index: 0;
+  box-sizing: border-box;
+  border: calc(8 * var(--art-px)) solid transparent;
+  border-image: var(--pinboard-frame) 8 round;
+  image-rendering: pixelated;
+  background: #7a1515;
+  background-clip: padding-box;
+  box-shadow:
+    inset calc(2 * var(--art-px)) calc(2 * var(--art-px)) 0 #5e1010,
+    calc(3 * var(--art-px)) calc(3 * var(--art-px)) 0 rgb(0 0 0 / 0.25);
+  pointer-events: none;
 }
 
 /* ── A polaroid ──────────────────────────────────────────────────────────── */
