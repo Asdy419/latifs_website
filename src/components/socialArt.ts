@@ -106,3 +106,15 @@ export function instagramArt(): PixelArt {
   paint(grid, (x, y) => Math.hypot(x - 31.5, y - 15.5) <= 1.9, '#ffffff') // the dot
   return toArt(grid)
 }
+
+/** An envelope, for the user's email: cream, its flap closed over a little red seal. */
+export function envelopeArt(): PixelArt {
+  const grid = cells(52, 40)
+  const flap = (x: number, y: number) => y <= 21 - Math.abs(x - 25.5) * 0.84
+  paint(grid, roundRect(0, 0, 51, 39, 2), '#f6f1e4') // the body
+  paint(grid, (x, y) => x === 51 || y === 39, '#cfc6b4') // its far edges, a touch darker
+  paint(grid, flap, '#e8e2d2') // the flap
+  paint(grid, (x, y) => flap(x, y) && !flap(x, y + 1), '#cfc6b4') // its edge
+  paint(grid, (x, y) => Math.hypot(x - 25.5, y - 20.5) <= 3.2, '#d9534f') // the seal
+  return toArt(grid)
+}

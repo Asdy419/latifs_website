@@ -29,10 +29,13 @@ export class SocialSelect {
     const start = first >= 0 ? first : Math.floor(socials.length / 2)
     this.index = start
     this.element.className = 'social-select'
-    // the clip's 16 px gaps fit three boxes in the 424 px screen; four need them at 8
+    // the clip's 16 px gaps fit three boxes in the 424 px screen; four need them at 8, and more
+    // than four need the whole row (boxes, gaps, pictures and names) scaled down to fit 416 px
     const gap = socials.length > 3 ? 8 : 16
+    const row = socials.length * 96 + (socials.length - 1) * gap
+    if (row > 416) this.element.style.setProperty('--px', `calc(var(--art-px) * ${(416 / row).toFixed(4)})`)
     this.element.style.setProperty('--pitch', String(96 + gap))
-    this.element.style.setProperty('--half', String((socials.length * 96 + (socials.length - 1) * gap) / 2))
+    this.element.style.setProperty('--half', String(row / 2))
     this.element.setAttribute('role', 'listbox')
     this.element.setAttribute('aria-label', 'Socials')
     this.boxes = socials.map((social, i) => this.box(social, i))

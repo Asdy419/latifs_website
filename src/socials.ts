@@ -1,5 +1,5 @@
 import type { PixelArt } from './utils/pixelArt'
-import { bustArt, cameraArt, githubArt, tiktokArt } from './components/socialArt'
+import { bustArt, cameraArt, envelopeArt, githubArt, tiktokArt } from './components/socialArt'
 
 /** One of the user's accounts, as a box on the Socials page (SocialSelect). */
 export interface Social {
@@ -24,4 +24,6 @@ export const SOCIALS: readonly Social[] = [
   { label: 'LATIF', name: 'Latif on Instagram', url: 'https://www.instagram.com/ahmedlatif.4/', art: bustArt, first: true },
   { label: "LATIF'S LENS", name: "Latif's Lens, photography on Instagram", url: 'https://www.instagram.com/latifs.lens/', art: cameraArt },
   { label: 'TIKTOK', name: 'Latif on TikTok', url: 'https://www.tiktok.com/@lordasdy', art: tiktokArt },
+  // (the user's email, on the site at their request)
+  { label: 'EMAIL', name: 'Email Latif', url: 'mailto:ahmedlatif261@gmail.com', art: envelopeArt },
 ]

@@ -683,10 +683,12 @@ Component/scene CSS sits next to its `.ts` file and is imported by it.
     cut is `staircase()`, a clip-path of the art pixels whose middles the turned box
     covers, untilted into the box's own coordinates. The pin is 9 × 9 pixel art (one
     data URL per colour), beside the frame so its clip can't cut it.
-- **Socials**: four boxes (`SocialSelect`, data in src/socials.ts) after the user's clip
+- **Socials**: five boxes (`SocialSelect`, data in src/socials.ts; the fifth, the user's email as
+  a `mailto:` link with an envelope picture, is there at their request) after the user's clip
   of a character-select screen (`reference/Desktop 2026.11.16 - 05.41.25.04.mp4`),
   measured frame by frame (4 screen px per art px): 96 × 96 art px boxes (16 apart in
-  the clip; 8 here, as four don't fit the 424 px screen otherwise), tops 92 down; a
+  the clip; 8 here, as four don't fit the 424 px screen otherwise; with more than four the row's
+  `--px` is scaled down so boxes, gaps, pictures and names all shrink to fit 416 px), tops 92 down; a
   3px frame round a see-through panel (white at 43%: the rings show through), a 3px
   see-through dark shadow inside along the top and left, a drop shadow outside only
   where it sticks out (the panel is see-through), the picture over the top 68 rows,
