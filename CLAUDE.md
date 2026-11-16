@@ -318,9 +318,10 @@ Component/scene CSS sits next to its `.ts` file and is imported by it.
     which fades back; 3.3 s a loop.
   - It's drawn flat (three silvers, flat black leather, flat glow rings): the user found a
     shaded take too busy. No brand name, only marks. Behind it, a starry night sky and nothing
-    else (the user's call; a lake with the moon's path on it and a treeline came first): bands
-    dark at the top and lighter towards the bottom, 190 stars twinkling between white and a dim
-    blue on their own periods, every ninth flaring into a little cross. With reduced motion it
+    else, as if looking straight up (the user's calls; a lake with the moon's path on it and a
+    treeline came first, then a banded sky): one deep blue, 230 stars everywhere, most twinkling
+    between white and a dim blue on their own periods, every ninth flaring into a little cross,
+    a third of them faint. With reduced motion it
     holds the camera at rest: no shake, no flash. Its cost on a 4x-throttled phone is within a
     few ms/s of static.
   - Socials' show is the logo drift (`SocialDrift.ts`, the user's idea, in place of a phone

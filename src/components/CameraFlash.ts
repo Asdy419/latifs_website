@@ -8,10 +8,10 @@ import { drawColorGrid } from '../utils/pixelArt'
  * (the small round lamp the user circled): the lamp brightens from amber to white in flat steps and
  * golden sparks stream into it while the camera shakes harder and faster. At the climax a burst
  * from the lamp whites out the screen, which fades back to the camera at rest. One charge is one
- * seamless loop. It's set against a starry night sky and nothing else (the user's call: a lake
- * with the moon's path on it and a treeline came first; "just make it a starry night sky as the
- * background and that's it", "add more stars"). With reduced motion it's just the camera at
- * rest: no shaking, no flash.
+ * seamless loop. It's set against a starry night sky and nothing else, as if looking straight
+ * up (the user's calls: a lake with the moon's path on it and a treeline came first, then a
+ * banded sky; "the entire background should just be stars in the sky like I'm looking directly
+ * up", "add more stars"). With reduced motion it's just the camera at rest: no shaking, no flash.
  *
  * Drawn in code, one pixel per art pixel like the TV's static; the camera itself is drawn once.
  */
@@ -125,23 +125,25 @@ export class CameraFlash implements TvShow {
 
 /*
  * The night sky behind it, over the TV's whole screen (its visible part: rows 11–168, columns 37
- * to 337 − row): bands dark at the top and lighter towards the bottom, thick with stars that
- * twinkle between white and a dim blue on their own periods, every ninth flaring into a little
- * cross while bright. Nothing else (the user's call).
+ * to 337 − row): one deep blue, as if looking straight up (no horizon, no bands: the user's
+ * call), thick with stars everywhere. Most twinkle between white and a dim blue on their own
+ * periods, every ninth flaring into a little cross while bright; a third are faint, far ones.
  */
-const SKY = [[0, 44, '#0b1433'], [44, 44, '#111d4a'], [88, 46, '#1a2a63'], [134, 46, '#22367a']] as const
-const STARS = Array.from({ length: 190 }, (_, i) => ({
+const SKY = '#0b1433'
+const STARS = Array.from({ length: 230 }, (_, i) => ({
   x: 37 + Math.floor(hash(i * 3 + 1) * 293),
   y: 2 + Math.floor(hash(i * 3 + 2) * 164),
   period: 900 + Math.floor(hash(i * 3 + 3) * 1600),
   big: i % 9 === 0,
+  faint: i % 3 === 1,
 }))
 
 function drawNight(ctx: CanvasRenderingContext2D, now: number): void {
-  for (const [y, h, colour] of SKY) { ctx.fillStyle = colour; ctx.fillRect(0, y, 330, h) }
+  ctx.fillStyle = SKY
+  ctx.fillRect(0, 0, 330, 180)
   for (const s of STARS) {
     const bright = ((now + s.x * 37) % s.period) / s.period < 0.55
-    ctx.fillStyle = bright ? '#ffffff' : '#7f93c9'
+    ctx.fillStyle = s.faint ? (bright ? '#6b7db3' : '#46558a') : bright ? '#ffffff' : '#7f93c9'
     ctx.fillRect(s.x, s.y, 1, 1)
     if (s.big && bright) { // a bigger one twinkles into a little cross
       ctx.fillStyle = '#c9d6ff'
