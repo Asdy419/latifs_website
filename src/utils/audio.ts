@@ -9,8 +9,8 @@ import menuBleepUrl from '../assets/shared/MenuBleep.wav'
  * Mute only affects background music (see music.ts), never these.
  */
 
-/** Sound effects sit a little under the background music. */
-const SFX_VOLUME = 0.8
+/** Sound effects sit under the background music (0.45 ≈ -5 dB below the old 0.8, which the user found too loud). */
+const SFX_VOLUME = 0.45
 
 export interface SoundEffect {
   readonly url: string
@@ -96,6 +96,26 @@ export function playSfx(sound: SoundEffect): void {
 export function durationOf(sound: SoundEffect, fallback: number): number {
   return sound.buffer?.duration ?? fallback
 }
+
+/**
+ * Fades the sound effects still playing to silence over `ms`: used just
+ * before leaving the page (core/pageTransition.ts), which would otherwise cut
+ * the confirm sound's tail off with a click.
+ */
+export function fadeOutEffects(ms: number): void {
+  if (!context || !output) return
+  const now = context.currentTime
+  output.gain.cancelScheduledValues(now)
+  output.gain.setValueAtTime(output.gain.value, now)
+  output.gain.linearRampToValueAtTime(0, now + ms / 1000)
+}
+
+// Back on this page from the browser's back/forward cache: effects at full volume again
+window.addEventListener('pageshow', e => {
+  if (!e.persisted || !context || !output) return
+  output.gain.cancelScheduledValues(context.currentTime)
+  output.gain.value = SFX_VOLUME
+})
 
 // ── Mute (background music only; remembered across pages and visits) ───────
 

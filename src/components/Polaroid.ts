@@ -1,12 +1,17 @@
 import { PixelLabel } from './PixelText'
 import { drawColorGrid } from '../utils/pixelArt'
+import { playSelectJump } from '../utils/selectJump'
 import type { Photo } from '../utils/cloudinary'
 
 /** Each photo hangs at one of these angles (deg), picked from its ID so it never changes. */
 const TILTS = [-3, -2.2, -1.4, 1.4, 2.2, 3]
-/** The swing when it's selected: it overshoots to the other side and settles straight (deg, from its tilt's side). */
-const SWING = [-5, 3, -1.5, 0]
-const SWING_MS = 500
+/**
+ * A quick little wobble on its pin when it's selected: a slight overshoot to
+ * the other side, then straight (deg, from its tilt's side). Toned right down
+ * at the user's request: small and short, alongside the menu's jump.
+ */
+const WOBBLE = [-1.5, 0.6, 0]
+const WOBBLE_MS = 180
 
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)')
 
@@ -14,15 +19,15 @@ const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)')
  * One photo on the gallery wall: a cartoony polaroid (thick black outline,
  * white frame with a deep bottom edge, the caption written there) held up by
  * a pixel-art pin, hanging slightly tilted. Selected, it gets the main menu's
- * highlight and swings on its pin until it hangs straight; the one left behind
- * springs back to its tilt (PhotoGrid.css).
+ * highlight, does the menu buttons' jump and a quick little wobble as it
+ * straightens; the one left behind tilts back (PhotoGrid.css).
  */
 export class Polaroid {
   readonly element = document.createElement('li')
   readonly photo: Photo
   private readonly img: HTMLImageElement
   private readonly tilt: number
-  private swing: Animation | null = null
+  private jump: Animation[] = []
 
   constructor(photo: Photo, index: number) {
     this.photo = photo
@@ -61,22 +66,26 @@ export class Polaroid {
     this.element.setAttribute('aria-selected', String(on))
   }
 
-  /** Swings on its pin, from its tilt to hanging straight (a quick pop in size as it starts). */
+  /** The jump the menu buttons do when they're selected (utils/selectJump.ts), with a quick wobble on its pin. */
   bounce(): void {
     this.stopBounce()
+    const frame = this.element.querySelector('.polaroid-frame')!
+    this.jump = playSelectJump({
+      bar: [frame],
+      highlight: this.element.querySelector('.polaroid-highlight')!,
+    }, frame.getBoundingClientRect().height / 78) // the frame is 78 art px tall
     if (reducedMotion.matches) return
     const side = this.tilt < 0 ? -1 : 1
-    const angles = [this.tilt, ...SWING.map(a => a * side)]
-    this.swing = this.element.animate(angles.map((a, i) => ({
-      transform: `rotate(${a}deg) scale(${i === 1 ? 1.06 : i === 2 ? 1.02 : 1})`,
-      easing: 'ease-in-out', // each swing slows at its ends, like a pendulum
-    })), { duration: SWING_MS })
+    this.jump.push(this.element.animate(
+      [this.tilt, ...WOBBLE.map(a => a * side)].map(a => ({ transform: `rotate(${a}deg)`, easing: 'ease-in-out' })),
+      { duration: WOBBLE_MS },
+    ))
   }
 
-  /** Stops a swing mid-way. */
+  /** Stops a jump mid-way (the frame drops straight back). */
   stopBounce(): void {
-    this.swing?.cancel()
-    this.swing = null
+    for (const a of this.jump) a.cancel()
+    this.jump = []
   }
 }
 

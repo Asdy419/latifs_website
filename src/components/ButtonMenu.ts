@@ -4,6 +4,7 @@ import type { CoverShape } from './HudButton'
 import { menuTextArt, menuTextWidth } from '../utils/menuFont'
 import { sfx, playSfx } from '../utils/audio'
 import { playSelectJump } from '../utils/selectJump'
+import { playConfirmFlash } from '../utils/confirmFlash'
 
 export interface MenuItem {
   /** Button text, drawn in the menu font (utils/menuFont.ts). */
@@ -24,18 +25,6 @@ const BAR_SLANT = BAR_HEIGHT - 1
 const BAR_LENGTH = 175
 /** Space a label needs on its bar: the reference's longest label (COMPETITION) fits exactly. */
 const LABEL_CLEARANCE = 29
-
-/** Confirm flash: the selected label blinks off/on this many times, each phase this long (ms). */
-const FLASH_BLINKS = 14
-const FLASH_PHASE_MS = 25 // ~1.5 frames at 60Hz (17 = one frame, the fastest a screen can show)
-// Hidden for the first half of each blink, visible for the second (hard cuts, no fade),
-// so it vanishes the instant you press and always ends visible.
-const FLASH_KEYFRAMES: Keyframe[] = [
-  { opacity: 0, offset: 0 },
-  { opacity: 0, offset: 0.5 },
-  { opacity: 1, offset: 0.5 },
-  { opacity: 1, offset: 1 },
-]
 
 /**
  * The main menu's diagonal stack of slanted buttons. ↑/↓ move the selection
@@ -150,14 +139,10 @@ export class ButtonMenu {
     this.items[this.selectedIndex].onSelect()
   }
 
-  /**
-   * Blink the selected label on and off (the classic "selected!" flash).
-   * Uses the Web Animations API on opacity, so it runs alongside the CSS jump
-   * animations instead of replacing them.
-   */
+  /** Blink the selected label on and off (utils/confirmFlash.ts), alongside its jump. */
   private flashLabel(): void {
     const label = this.buttonEls[this.selectedIndex]?.querySelector('.menu-btn-label-hop')
-    label?.animate(FLASH_KEYFRAMES, { duration: FLASH_PHASE_MS * 2, iterations: FLASH_BLINKS })
+    if (label) playConfirmFlash(label)
   }
 
   /** The selected button's jump (utils/selectJump.ts). Any jump still playing stops at once. */

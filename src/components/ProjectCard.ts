@@ -1,6 +1,27 @@
 import { PixelText } from './PixelText'
 import { playSelectJump } from '../utils/selectJump'
 
+/**
+ * Where a box's picture goes, in art px of its 86 × 93 picture panel: centred
+ * on (CENTER_X, CENTER_Y), inside MAX_W × MAX_H (6px from the top and sides;
+ * the language logos sit in the bottom-right corner, below it). Every picture
+ * gets the same area (AREA), whatever its shape, so wide, tall and square ones
+ * look the same size; the build crops each to its visible pixels first
+ * (cardArt in vite.config.ts), so their margins don't count.
+ */
+const ART = { CENTER_X: 43, CENTER_Y: 38, MAX_W: 74, MAX_H: 64, AREA: 54 * 54 }
+
+/** A picture's size in art px: AREA in its own proportions, shrunk to fit MAX_W × MAX_H. */
+function artSize(naturalWidth: number, naturalHeight: number): { width: number; height: number } {
+  const ratio = naturalWidth > 0 && naturalHeight > 0 ? naturalWidth / naturalHeight : 1
+  let width = Math.sqrt(ART.AREA * ratio)
+  let height = width / ratio
+  const fit = Math.min(1, ART.MAX_W / width, ART.MAX_H / height)
+  width *= fit
+  height *= fit
+  return { width, height }
+}
+
 export interface Language {
   name: string
   /** % of the code (from GitHub). Leave it out when there's no repo to measure: the bar splits evenly and no % is shown. */
@@ -34,17 +55,21 @@ export interface Project {
   numbers: { value: string; label: string }[]
   /** TIMELINE, oldest first. */
   milestones: { when: string; text: string }[]
-  /** The pop-up's picture slot (a screenshot…); it stays a blank panel until set. */
-  shot?: string
-  /** Fill the picture column with a wide screenshot, including when it needs upscaling. */
-  shotFullWidth?: boolean
-  /** Centre the image/details and tabbed write-up as two balanced groups. */
-  detailsLayout?: 'balanced'
+  /**
+   * The pop-up's pictures (screenshots…), shown on a pixel-art TV: one per
+   * tab (Overview, Features, Numbers, Timeline), wrapping round if there are
+   * fewer; switching tabs tunes the TV to the next. No pictures: static.
+   */
+  shots?: string[]
   /** Biggest first. Empty hides the pop-up's language section. */
   languages: Language[]
   /** Pixel-art language logos, small in the box's bottom-right corner (assets/projects/langs/, 16×16). */
   logos: string[]
-  /** The project's own logo/picture, in the middle of the box (optional: the space stays free until added). */
+  /**
+   * The project's own logo/picture, in the middle of the box and next to the
+   * pop-up's title (optional: the space stays free until added). Any size or
+   * margin: the build crops it to its visible pixels and the box sizes it.
+   */
   image?: string
   /** The public GitHub repo, if there is one (the pop-up's "View on GitHub"). */
   url?: string
@@ -88,8 +113,18 @@ export class ProjectCard {
     el.querySelector('.project-card-name')!.append(new PixelText(project.name).element)
     if (project.image) {
       const img = el.querySelector<HTMLImageElement>('.project-card-image')!
+      // shown once it has loaded and been given its size (see ART)
+      const place = () => {
+        const { width, height } = artSize(img.naturalWidth, img.naturalHeight)
+        const px = (n: number) => `calc(${+n.toFixed(2)} * var(--px))`
+        img.style.width = px(width)
+        img.style.height = px(height)
+        img.style.left = px(ART.CENTER_X - width / 2)
+        img.style.top = px(ART.CENTER_Y - height / 2)
+        img.hidden = false
+      }
+      img.addEventListener('load', place, { once: true })
       img.src = project.image
-      img.hidden = false
     }
     this.selected = false
   }
@@ -116,10 +151,10 @@ export class ProjectCard {
   }
 }
 
-/** A GitHub-style bar: one coloured segment per language, as wide as its share. */
 /** "C 99.4%", or just the name when the share isn't known. */
 export const languageLabel = (l: Language): string => l.share === undefined ? l.name : `${l.name} ${l.share}%`
 
+/** A GitHub-style bar: one coloured segment per language, as wide as its share. */
 export function languageBar(languages: Language[], className: string): string {
   const segments = languages.map(l =>
     `<span style="flex: ${l.share ?? 1} 0 0; background: ${l.color}" title="${languageLabel(l)}"></span>`).join('')

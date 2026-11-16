@@ -2,6 +2,7 @@ import './HudButton.css'
 import { PixelCanvas } from './PixelCanvas'
 import { isOpaqueAt } from '../utils/alphaMask'
 import { hudTextArt, HUD_TEXT_HEIGHT, type HudTextArt } from '../utils/hudArt'
+import { playConfirmFlash } from '../utils/confirmFlash'
 
 interface HudButtonOptions {
   /** Element id. */
@@ -70,6 +71,12 @@ export class HudButton {
 
   get image(): HTMLImageElement {
     return this.element.querySelector<HTMLImageElement>('.hud-btn-icon')!
+  }
+
+  /** Blinks the label like a confirmed menu button (utils/confirmFlash.ts). */
+  flash(): void {
+    const text = this.element.querySelector('.hud-btn-text')
+    if (text) playConfirmFlash(text)
   }
 
   /** Change the action written on the bar (e.g. MUTE ↔ UNMUTE). */

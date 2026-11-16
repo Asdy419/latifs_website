@@ -78,8 +78,4 @@
   height: 100%;
 }
 
-/* "Now Playing" sits just under the top-right badge (CONFIRM), on every page.
-   Long titles slide in over the title banner's right end (the user's call). */
-:root:has(.hud-right) .now-playing {
-  top: calc(var(--hud-top) + var(--hud-size) + 1.2vw);
-}
+/* ("Now Playing" sits just under the top-right badge, CONFIRM: NowPlaying.css) */

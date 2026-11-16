@@ -1,7 +1,6 @@
 import './Menu.css'
 import menuLogo from '../assets/menu/menu_logo.png'
 import tvOverlay from '../assets/menu/tv_overlay.png'
-import staticVideo from '../assets/menu/static.mp4'
 import { SUBPAGES } from '../config'
 import { Scene, transitionTo } from '../core/Scene'
 import { navigateTo } from '../core/pageTransition'
@@ -9,6 +8,7 @@ import { ButtonMenu } from '../components/ButtonMenu'
 import { CircleAnimation } from '../components/CircleAnimation'
 import { Hud, HUD_IMAGES } from '../components/Hud'
 import { TvOverlay } from '../components/TvOverlay'
+import { prepareStatic } from '../components/TvStatic'
 import { showNowPlaying } from '../components/NowPlaying'
 import { sfx, playSfx } from '../utils/audio'
 import { startMusic, stopMusic } from '../utils/music'
@@ -16,6 +16,13 @@ import { TitleScreen } from './TitleScreen'
 
 /** How long after the menu appears the "Now Playing" pop-up slides in. */
 const NOW_PLAYING_DELAY_MS = 1000
+
+/**
+ * The TV's screen in art px, the static's resolution (one speckle per art
+ * pixel): #tv-wrap is 336.9 art px wide (Menu.css), the frame image 1980 x 1080,
+ * and the screen 98% of the frame (TvOverlay.css).
+ */
+const TV_SCREEN = { width: 330, height: 180 }
 
 /**
  * The button you picked to leave for a sub-page, so BACK returns to it (per
@@ -40,21 +47,21 @@ export class Menu extends Scene {
    */
   static preload(): void {
     if (preloaded.length) return
-    const images = [menuLogo, tvOverlay, ...HUD_IMAGES] // the menu buttons are drawn in code
-    const decoded = images.map(src => {
+    const decoded = [menuLogo, tvOverlay, ...HUD_IMAGES].map(src => { // the menu buttons are drawn in code
       const img = new Image()
       img.decoding = 'async'
       img.src = src
       preloaded.push(img)
       return img.decode().catch(() => {})
     })
-    // Then warm the HTTP cache with the TV static (the biggest file) once the
-    // images are in, so it never slows them down.
-    Promise.all(decoded).then(() => fetch(staticVideo, { priority: 'low' })).catch(() => {})
+    // Then work out the TV static while the browser is idle, so the menu only copies it
+    // (Safari has no requestIdleCallback).
+    const prepare = () => prepareStatic(TV_SCREEN.width, TV_SCREEN.height)
+    Promise.all(decoded).then(() => 'requestIdleCallback' in window ? requestIdleCallback(prepare) : setTimeout(prepare, 200))
   }
 
   private readonly circles = new CircleAnimation()
-  private readonly tv      = new TvOverlay(staticVideo)
+  private readonly tv      = new TvOverlay(TV_SCREEN)
   private readonly hud     = new Hud()
   private readonly buttons: ButtonMenu
 
@@ -91,6 +98,7 @@ export class Menu extends Scene {
     const list = this.app.querySelector<HTMLUListElement>('#menu-buttons')!
 
     this.circles.start()
+    this.tv.mount(this.app)
     this.buttons.mount(list, signal)
 
     // [↵] CONFIRM = Enter (the button list handles the key itself);

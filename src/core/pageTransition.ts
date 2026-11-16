@@ -1,4 +1,5 @@
 import { lockInput } from './inputLock'
+import { fadeOutEffects } from '../utils/audio'
 
 /**
  * The three-band wipe used between HTML pages (copied from the reference clip:
@@ -6,6 +7,21 @@ import { lockInput } from './inputLock'
  *  - navigateTo(url): the bands sweep in to cover the screen, then the browser navigates
  *  - pageReveal():    on arrival, the bands start covering the screen and sweep away
  */
+
+/**
+ * The beat between confirming and the wipe, from the reference clip (0:26):
+ * the selected label blinks for 10 frames (1/3 s) while the confirm sound
+ * plays its loud start, then the bands sweep in, and the next screen comes in
+ * while the sound's quiet tail rings out.
+ */
+const WIPE_DELAY_MS = 333
+/** How long the bands take to cover the screen (pageTransition.css: three 133ms sweeps, 67ms apart). */
+const COVER_MS = 267
+/**
+ * Leaving the page stops its sounds, so the confirm sound's quiet tail (about
+ * -20 dB by then) is faded out over the end of the wipe instead of being cut.
+ */
+const SOUND_FADE_MS = 120
 
 function createPanels(mode: 'entering' | 'revealing' | 'covering'): HTMLDivElement {
   const wrap = document.createElement('div')
@@ -30,17 +46,18 @@ function onPanelsDone(wrap: HTMLElement, done: () => void): void {
 }
 
 /**
- * Wipe to another page. `replace: true` swaps this page out of the browser
- * history instead of adding to it (used by BACK, so the browser's own back
- * button doesn't ping-pong between the menu and a page).
+ * Wipe to another page, timed like the reference: WIPE_DELAY_MS after the
+ * press (the confirm flash and sound), the bands sweep in, and the browser
+ * navigates as soon as they cover the screen. `replace: true` swaps this page
+ * out of the browser history instead of adding to it (used by BACK, so the
+ * browser's own back button doesn't ping-pong between the menu and a page).
  */
 export function navigateTo(url: string, { replace = false } = {}): void {
-  const unlock = lockInput() // no double-navigation while the panels slide in
+  const unlock = lockInput() // no double-navigation during the beat and while the panels slide in
   // Coming back with the browser's back button restores this page from the
   // bfcache mid-transition, so give input back then.
   window.addEventListener('pageshow', e => { if (e.persisted) unlock() }, { once: true })
 
-  const wrap = createPanels('entering')
   let gone = false
   const go = () => {
     if (gone) return
@@ -48,10 +65,13 @@ export function navigateTo(url: string, { replace = false } = {}): void {
     if (replace) window.location.replace(url)
     else window.location.href = url
   }
-  onPanelsDone(wrap, go)
+  setTimeout(() => {
+    onPanelsDone(createPanels('entering'), go)
+    setTimeout(() => fadeOutEffects(SOUND_FADE_MS), COVER_MS - SOUND_FADE_MS)
+  }, WIPE_DELAY_MS)
   // Backup: animations don't run in a background tab (or may never report
   // finishing), so leave anyway once the wipe should have covered the screen.
-  setTimeout(go, 800)
+  setTimeout(go, WIPE_DELAY_MS + 800)
 }
 
 /** The main menu (index.html skips the title screen when it sees this hash). */

@@ -7,13 +7,14 @@ import { sfx, playSfx } from '../utils/audio'
 
 const carousel = new ProjectCarousel(PROJECTS)
 const popup = new ProjectPopup()
+const circles = new CircleAnimation(7250)
 
 // [↵] CONFIRM / Enter / tapping the selected box: show its details; again: open it on GitHub
 const confirm = () => {
   if (popup.isOpen) popup.openLink()
   else {
     popup.open(carousel.selected.project)
-    carousel.enabled = false
+    carousel.enabled = false // (the rings keep spinning round the pop-up: the user wants them moving)
   }
 }
 popup.onClose = () => {
@@ -31,7 +32,6 @@ const page = startSubpage('projects', {
   },
 })
 
-const circles = new CircleAnimation(7250)
 page.innerHTML = circles.markup()
 circles.start()
 

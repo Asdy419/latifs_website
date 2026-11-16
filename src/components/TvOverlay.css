@@ -27,13 +27,6 @@
   mask-size: 100% 100%;
   /* No filter here: CSS applies filters *before* masks, so a drop-shadow on
      this element gets cut away by the mask (never visible) while still being
-     re-computed on every video frame. */
+     re-computed on every frame of the static. */
   z-index: 2;
-}
-
-#tv-video {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
 }

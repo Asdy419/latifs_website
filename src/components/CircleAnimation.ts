@@ -9,6 +9,7 @@ import './CircleAnimation.css'
  *   const circles = new CircleAnimation()
  *   html += circles.markup()   // put the container in the DOM first
  *   circles.start()            // then start animating
+ *   circles.paused = true      // while something opaque covers the whole page
  *
  * Rendering: a tiny WebGL fragment shader tests every pixel against the exact
  * ring shapes, so a frame costs a few uniforms and one draw call instead of
@@ -41,6 +42,9 @@ export class CircleAnimation {
   private readonly colors: RingColors
   /** Largest ring radius — the ring edge just touches the screen's sides. */
   private maxR = 0
+  private isPaused = false
+  /** Restarts the running renderer's frame loop after a pause. */
+  private resume: (() => void) | null = null
 
   /**
    * @param timeOffset shifts the pulse phase (ms), so pages don't all start in sync
@@ -49,6 +53,22 @@ export class CircleAnimation {
   constructor(timeOffset: number = 0, { colors = RING_COLORS }: { colors?: RingColors } = {}) {
     this.timeOffset = timeOffset
     this.colors = colors
+  }
+
+  /**
+   * Stops drawing while something opaque covers the whole page (the project
+   * pop-up), so the page under it costs nothing; the rings carry on where
+   * they would have been when it's set back to false.
+   */
+  set paused(on: boolean) {
+    if (on === this.isPaused) return
+    this.isPaused = on
+    document.getElementById('circles')?.classList.toggle('circles-paused', on)
+    if (!on) this.resume?.()
+  }
+
+  get paused(): boolean {
+    return this.isPaused
   }
 
   markup(): string {
@@ -147,9 +167,11 @@ export class CircleAnimation {
     }, { once: true })
 
     const spinStart = performance.now()
+    let sleeping = false
     const frame = (time: number) => {
       if (lost) return
       if (!canvas.isConnected) { cleanup(); return }
+      if (this.isPaused) { sleeping = true; return } // no frames at all until resume()
       requestAnimationFrame(frame)
       // Nothing to draw while the screen guard covers the page
       if (document.documentElement.classList.contains('screen-blocked')) return
@@ -163,6 +185,11 @@ export class CircleAnimation {
       gl.uniform4f(uSpin, Math.cos(spin), Math.sin(spin), Math.cos(-spin), Math.sin(-spin))
       gl.uniform1f(uGap, Math.atan2(hTop, aTop))
       gl.drawArrays(gl.TRIANGLES, 0, 3)
+    }
+    this.resume = () => {
+      if (!sleeping || lost) return
+      sleeping = false
+      requestAnimationFrame(frame)
     }
     requestAnimationFrame(frame)
     return true
@@ -219,12 +246,19 @@ export class CircleAnimation {
     // at full refresh rate.
     let last = performance.now()
     draw(last)
+    let sleeping = false
     const loop = (time: number) => {
       if (!mainArc.isConnected) { onStop(); return }
+      if (this.isPaused) { sleeping = true; return } // (CSS pauses the spin: .circles-paused)
       if (time - last >= SVG_MIN_FRAME_MS) {
         last = time
         draw(time)
       }
+      requestAnimationFrame(loop)
+    }
+    this.resume = () => {
+      if (!sleeping) return
+      sleeping = false
       requestAnimationFrame(loop)
     }
     requestAnimationFrame(loop)

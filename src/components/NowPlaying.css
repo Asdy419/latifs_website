@@ -1,22 +1,27 @@
-/* Black slanted box at the top right, like the menu's bars. Slides in from the
-   right edge, holds, slides back out (one animation; removed on animationend).
-   Sized from the HUD's key cap size, so it scales with the screen like the
-   badges do — with a floor so the text stays readable on small phones.
-   Its height on the page is set by the HUD / menu CSS (below CONFIRM, or below the logo). */
+/* A pixel-art banner at the top right (the user's call: pixelated, like the rest
+   of the site): its background is drawn in art pixels by NowPlaying.ts (a stepped
+   slanted end with a yellow stripe, an outline and a lit rim), which also sizes it
+   to whole art pixels and sets its left padding. Slides in from the right edge,
+   holds, slides back out (one animation; removed on animationend). The text is
+   sized from the HUD's key cap size, so it scales with the screen like the badges
+   do, with a floor so it stays readable on small phones. It sits just under the
+   top-right badge (CONFIRM: --hud-* in HudButton.css) on every page that shows it;
+   long titles slide in over the title banner's right end (the user's call). */
 .now-playing {
+  --np-px: max(2px, var(--art-px)); /* one pixel of the banner's art */
   position: fixed;
-  top: 2.2vw;
+  top: calc(var(--hud-top, 1.88vw) + var(--hud-size, 2.89vw) + 1.2vw);
   right: 0;
   z-index: 50;
   display: flex;
   flex-direction: column;
+  justify-content: center;
   gap: 0.45em;
   max-width: 48vw;
-  padding: 0.55em 1.3em 0.6em 2.2em;
-  background: #111;
-  font-size: max(11px, calc(var(--hud-size, 2.89vw) * 0.42)); /* sets the em padding and slant */
-  /* slanted left edge, flush with the screen's right edge */
-  clip-path: polygon(1.3em 0, 100% 0, 100% 100%, 0 100%);
+  padding: calc(4 * var(--np-px)) calc(5 * var(--np-px)) calc(4 * var(--np-px)) 2.2em;
+  background: 0 0 / 100% 100% no-repeat; /* (the art, from NowPlaying.ts) */
+  image-rendering: pixelated;
+  font-size: max(11px, calc(var(--hud-size, 2.89vw) * 0.42)); /* sets the em gap */
   pointer-events: none;
   animation: now-playing 4.6s both;
 }

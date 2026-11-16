@@ -1,156 +1,254 @@
 /*
- * The project details pop-up (ProjectPopup.ts), in art pixels (--art-px).
- * All its text is PixelLabel canvases in the references' small text font
+ * The project details pop-up (ProjectPopup.ts): a panel over 88% of the
+ * screen's height, with the same margin at its sides (the page shows dimmed
+ * around it; the corner HUD and title banner hide meanwhile). It appears at
+ * once, with no animation; its TV warms up (static, then the picture).
+ * Everything inside is measured in --pp, the panel's own art pixel (--art-px
+ * scaled like the panel), so its layout is the same on every screen. Every
+ * project gets this same layout:
+ *
+ *   ┌──────────────────────────────────────────────────────────────┐
+ *   │ [pic] TITLE                       [logos] [▮▮▮▮▮▮▮▮▮▯▯] │
+ *   │       kind · when                         legend        │
+ *   ├──────────────────────────────────────────────────────────────┤
+ *   │   \  /              [OVERVIEW] [FEATURES] [NUMBERS] [TIMELINE] │
+ *   │ ┌──────────────────┐                                          │
+ *   │ │                  │  the section, its middle level with the   │
+ *   │ │    screenshot    │  TV's (or right under the tabs when it's  │
+ *   │ │    (on a TV)     │  long; it scrolls if it's even longer)    │
+ *   │ │                  │                                          │
+ *   │ └──────────────────┘                                          │
+ *   ├──────────────────────────────────────────────────────────────┤
+ *   │ [↵ View on GitHub] [Devlog] [B Close]     Built with tools… │
+ *   └──────────────────────────────────────────────────────────────┘
+ *
+ * The TV fills the middle's height; its antennas' tips are level with the tabs
+ * and its casing with the section's first line. The year heads the Timeline tab
+ * on a pixel-art flag.
+ *
+ * Spacing: every gap is one of four steps, --gap-xs/s/m/l (2, 4, 8, 12 px of
+ * --pp): l around the edge, m between blocks and either side of the rules, s
+ * between items in a block, xs inside small boxes; and 16 between the TV and
+ * the text, the one gap that's wider than the edge.
+ *
+ * All the text is PixelLabel canvases in the references' small text font
  * (utils/textFont.ts): font-size is the capitals' height, color the ink and
- * --pixel-shadow the shadow.
- *
- * It fills nearly the whole screen: from just under the corner HUD (worked out
- * from the HUD's own size variables, so it fits on phones too) to 4 art px
- * from the other edges. It covers the title banner (hidden meanwhile) but not
- * the HUD, which stays usable: BACK closes it, CONFIRM opens the repo.
- *
- *   ┌─────────────────────────────────────────────────────────┐
- *   │ TITLE                                                   │
- *   │ ┌─────────────┐  [OVERVIEW][FEATURES][NUMBERS][TIMELINE]│
- *   │ │ picture slot│  the section (scrolls if it's long)     │
- *   │ └─────────────┘                                         │
- *   │ kind / when / tech                                      │
- *   │ languages                                               │
- *   │ [↵ View on GitHub] [Devlog] [B Close]            [YEAR] │
- *   └─────────────────────────────────────────────────────────┘
+ * --pixel-shadow the shadow (a darker shade of what the text sits on).
  */
+/* The dimmed page around the panel (a click on it closes the pop-up) */
 .project-popup {
   position: fixed;
   inset: 0;
-  z-index: 10; /* the banner's and HUD's layer: it's placed between them in the page */
-  display: flex;
-  padding:
-    calc(var(--hud-top) + 2 * var(--hud-size) + var(--hud-gap) + 3 * var(--art-px))
-    calc(4 * var(--art-px))
-    calc(4 * var(--art-px));
+  z-index: 20; /* over the page and the title banner */
+  display: grid;
+  place-items: center;
   background: rgb(0 0 0 / 0.55);
-  animation: popup-dim 0.15s ease-out both;
 }
 
-.project-popup.closing {
-  animation: popup-dim 0.12s ease-in reverse both;
-  pointer-events: none;
+/* While it's open the corner HUD and the title banner step aside (the panel
+   has its own title and buttons), and the page under it stands still: its
+   rings pause (pages/projects.ts) and so does the selected box's pulse. */
+.project-popup-open .hud,
+.project-popup-open .page-banner {
+  visibility: hidden;
 }
 
-/* the title banner steps aside while the pop-up is open (the pop-up has its own title) */
-:root:has(.project-popup:not(.closing)) .page-banner {
-  opacity: 0;
-}
-
-@keyframes popup-dim {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+.project-popup-open .project-card-highlight::after {
+  animation-play-state: paused;
 }
 
 .project-popup-panel {
-  --project-side-width: calc(150 * var(--art-px));
-  position: relative;
+  --scale: 0.88; /* of the screen's height; the margin round the panel is the same on every side */
+  --pp: calc(var(--scale) * var(--art-px));
+  --gap-xs: calc(2 * var(--pp));
+  --gap-s: calc(4 * var(--pp));
+  --gap-m: calc(8 * var(--pp));
+  --gap-l: calc(12 * var(--pp));
+  --rule: max(1px, var(--pp)) solid #ddd6e0;
+  --pixel-line-height: 1.4; /* wrapped lines closer than the reference dialog's 1.8, so each point reads as one */
+
   display: flex;
   flex-direction: column;
-  gap: calc(5 * var(--art-px));
-  width: 100%;
-  height: 100%;
-  padding: calc(7 * var(--art-px)) calc(8 * var(--art-px));
+  gap: var(--gap-m);
+  /* as wide as leaves the same margin at the sides as above and below (the dimmed page shows
+     an even frame round it), up to a width that keeps lines readable on very wide screens */
+  width: min(calc(100vw - (1 - var(--scale)) * var(--screen-h)), calc(560 * var(--pp)));
+  height: calc(var(--scale) * var(--screen-h));
+  padding: var(--gap-l);
+  border: calc(2 * var(--pp)) solid #000;
   background: #f7f3f7;
-  border: calc(3 * var(--art-px)) solid #000;
-  box-shadow: calc(6 * var(--art-px)) calc(6 * var(--art-px)) 0 rgb(0 0 0 / 0.35);
+  box-shadow: calc(6 * var(--pp)) calc(6 * var(--pp)) 0 rgb(0 0 0 / 0.35);
   color: #000;
-  font-size: max(8px, calc(5 * var(--art-px)));
-  --pixel-line-height: 1.4; /* wrapped lines closer than the reference dialog's 1.8, so each point reads as one */
+  font-size: max(8px, calc(5 * var(--pp)));
   line-height: 0;
   outline: none;
-  animation: popup-pop 0.18s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
 }
 
-@keyframes popup-pop {
-  from { transform: translateY(calc(10 * var(--art-px))) scale(0.94); }
-  to   { transform: none; }
+/* Phones: more of the (small) screen, so the text can stay large enough to read
+   (its 8px floor takes more room on them); nearly all of it on the narrower
+   (16:9) ones, which have the least room across */
+@media (orientation: landscape) and (max-height: 500px) {
+  .project-popup-panel {
+    --scale: 0.94;
+  }
+
+  /* (the text can't get smaller on phones: its 8px floor) */
+  .project-popup-panel .project-popup-body { /* (more specific than the rule further down) */
+    grid-template-columns: calc(226 * var(--pp)) minmax(0, 1fr);
+  }
+
+  /* the 8px floor makes the section's text bigger in pp here, so a smaller flag */
+  .project-popup-panel .project-popup-flag {
+    font-size: 1.6em;
+  }
 }
 
-/* ── Title: large plain text (no menu-button bar: the user's call) ──────── */
-.project-popup-heading {
+@media (orientation: landscape) and (max-height: 500px) and (max-aspect-ratio: 2 / 1) {
+  .project-popup-panel {
+    --scale: 0.98;
+    padding-block: calc(10 * var(--pp)); /* (every pp of height counts on these) */
+  }
+
+  /* the narrowest: the text needs most of the width, so a smaller TV, and lines a little
+     closer (the 8px floor stops the text getting smaller) */
+  .project-popup-panel .project-popup-body {
+    grid-template-columns: calc(166 * var(--pp)) minmax(0, 1fr);
+    column-gap: var(--gap-l);
+  }
+
+  .project-popup-panel .project-popup-section {
+    --pixel-line-height: 1.3;
+  }
+
+  /* the narrower TV has shorter antennas: down a little, so its top still meets the text's */
+  .project-popup-panel .project-popup-shot {
+    margin-top: calc(4.5 * var(--pp));
+  }
+
+  /* a shorter languages bar, so the longest title line (CompanionAI's) still fits beside it */
+  .project-popup-panel .project-popup-langs-bar {
+    min-width: calc(64 * var(--pp));
+  }
+}
+
+/* ── Top: picture, title, year ────────────────────────────────────────── */
+.project-popup-header {
   flex: none;
-  width: var(--project-side-width);
+  display: flex;
+  align-items: center;
+  gap: var(--gap-m);
+  padding-bottom: var(--gap-m);
+  border-bottom: var(--rule);
+}
+
+/* the project's own picture (Project.image), as on its box, as tall as the title and the line under it */
+.project-popup-icon {
+  flex: none;
+  width: calc(20 * var(--pp));
+  height: calc(20 * var(--pp));
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.project-popup-titles {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-s);
+}
+
+.project-popup-heading {
   margin: 0;
-  font-size: min(2.4em, calc(var(--project-side-width) / var(--title-em-width)));
+  font-size: 2.2em;
   font-weight: normal;
   line-height: 0;
-  color: #000;
-  text-align: center;
 }
 
-/* ── Body: the picture side and the sections ────────────────────────────── */
+/* under the title: what kind of project (in red), and when */
+.project-popup-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap-xs) var(--gap-m);
+  font-size: 0.85em;
+}
+
+/* ── Middle: the picture side and the sections ────────────────────────── */
+/* The TV as big as the middle's height allows (it fills it, down to a 5 pp margin: the user
+   asked for no dead space under it), the text beside it, and a wider gap between them than
+   inside the text. The tightest tab has ~4 pp to spare at these sizes: re-check (the fit
+   loop) after adding text. */
 .project-popup-body {
   flex: 1;
   min-height: 0;
-  display: flex;
-  gap: calc(9 * var(--art-px));
+  display: grid;
+  grid-template-columns: calc(228 * var(--pp)) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  column-gap: calc(16 * var(--pp));
 }
 
+.project-popup-side,
+.project-popup-main {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-m);
+}
+
+/* the TV at the top of its column, lined up with the other column: the antennas' tips level
+   with the tabs, the set's top level with the first line of text (ANTENNA, ProjectPopup.ts) */
 .project-popup-side {
-  flex: none;
-  width: var(--project-side-width);
-  display: flex;
-  flex-direction: column;
-  gap: calc(4 * var(--art-px));
-  min-height: 0;
   overflow: hidden;
 }
 
-/* Empty slots stay 16:9; supplied pictures keep their own proportions. */
+.project-popup-side > * {
+  flex: none;
+}
+
+/* The pictures, on the screen of a pixel-art TV, the same for every project:
+   the TV (drawn in ProjectPopup.ts: tvArt) lies over the picture, which shows
+   through its screen, filling it. The TV's shape
+   and the screen's place come from ProjectPopup.ts (TV, TV_SCREEN). Each tab
+   has its own picture; switching tabs tunes the TV (tuneTV): static rolls over
+   the screen, then the new picture. With no picture, still static. */
 .project-popup-shot {
-  flex: none;
-  min-height: 0;
-  aspect-ratio: 16 / 9;
+  position: relative;
+  min-height: 0; /* (or a tall picture would stretch it: an aspect-ratio box grows to fit its content) */
+}
+
+.project-popup-shot::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--tv-art) center / 100% 100% no-repeat;
+  image-rendering: pixelated;
+  pointer-events: none;
+}
+
+.project-popup-screen {
+  position: absolute;
   overflow: hidden;
-  border: calc(2 * var(--art-px)) solid #000;
-  background: #9ad3df;
-  box-shadow: inset calc(3 * var(--art-px)) calc(3 * var(--art-px)) 0 rgb(0 0 0 / 0.15);
+  background: #000;
 }
 
-.project-popup-shot:has(img) {
-  flex: 0 1 auto;
-  min-height: 0;
-  aspect-ratio: auto;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  border: 0;
-  background: none;
-  box-shadow: none;
-}
-
-.project-popup-shot img {
-  display: block;
-  width: auto;
-  height: auto;
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-  border: calc(2 * var(--art-px)) solid #000;
-}
-
-/* Wide terminal captures align with the metadata and language bar below. */
-.project-popup-shot img.project-popup-shot-fill {
+/* (fills the screen: pictures are cropped to its shape, TV_SCREEN, beforehand) */
+.project-popup-picture {
+  position: absolute;
+  inset: 0;
   width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
-/* Let the picture shrink on short screens while keeping its details visible. */
-.project-popup-meta,
-.project-popup-langs {
-  flex: none;
+/* The static (a .tv-static box, TvStatic.ts/.css): still on a screen with no
+   picture; rolling while the TV tunes (tuneTV adds .rolling with .tuning) */
+.project-popup-static {
+  visibility: hidden;
 }
 
-.project-popup-meta {
-  display: flex;
-  flex-direction: column;
-  gap: 0.55em;
-  font-size: 0.85em;
+.project-popup-screen.no-signal .project-popup-static,
+.project-popup-screen.tuning .project-popup-static {
+  visibility: visible;
 }
 
 .project-popup-kind {
@@ -158,27 +256,110 @@
   --pixel-shadow: #e8c6cc;
 }
 
+/* Top right: the language logos, then the languages' pixel-art bar with its legend under it.
+   No taller than the title beside it, so the header keeps its height: on the smallest
+   phones the sections have only ~4 pp to spare. */
+.project-popup-langs {
+  flex: none;
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--gap-s);
+}
+
+.project-popup-langs-bar {
+  min-width: calc(80 * var(--pp));
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-xs);
+}
+
+/* Bottom right: what it was built with, on one line (shorter than the buttons) */
+.project-popup-builtwith {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--gap-s);
+  font-size: 0.85em;
+}
+
+.project-popup-builtwith-title {
+  color: #8d8aa0;
+  --pixel-shadow: #e3dde6;
+}
+
 .project-popup-tech {
   color: #4a496b;
 }
 
-.project-popup-main {
-  flex: 1;
-  min-width: 0;
+.project-popup-logos {
+  flex: none;
   display: flex;
-  flex-direction: column;
-  gap: calc(5 * var(--art-px));
+  gap: var(--gap-xs);
 }
 
-/* The section tabs: the selected one is black with the menu's red shadow */
+/* the 16×16 logos, 1 art px per pixel as on the boxes */
+.project-popup-logos img {
+  display: block;
+  width: calc(16 * var(--pp));
+  height: calc(16 * var(--pp));
+  image-rendering: pixelated;
+}
+
+/* The languages bar as a pixel-art meter, in pp so every line is one art pixel: a black
+   frame with notched corners (inside the box: an outline would be cut off by the column's
+   edge), each language a segment with a lit top row and a shaded bottom row, split by black
+   1 pp lines. A tiny share (Makefile's 0.6%) still shows as a 2 pp sliver. */
+.project-popup-bar-chart {
+  --c: var(--pp);
+  display: flex;
+  gap: var(--pp);
+  box-sizing: border-box;
+  height: calc(6 * var(--pp));
+  padding: var(--pp);
+  background: #000;
+  clip-path: polygon(var(--c) 0, calc(100% - var(--c)) 0, calc(100% - var(--c)) var(--c), 100% var(--c),
+    100% calc(100% - var(--c)), calc(100% - var(--c)) calc(100% - var(--c)), calc(100% - var(--c)) 100%,
+    var(--c) 100%, var(--c) calc(100% - var(--c)), 0 calc(100% - var(--c)), 0 var(--c), var(--c) var(--c));
+}
+
+.project-popup-bar-chart span {
+  min-width: calc(2 * var(--pp));
+  box-shadow: inset 0 var(--pp) 0 rgb(255 255 255 / 0.45), inset 0 calc(-1 * var(--pp)) 0 rgb(0 0 0 / 0.3);
+}
+
+.project-popup-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap-xs) var(--gap-s);
+  font-size: 0.75em;
+}
+
+.project-popup-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--gap-xs);
+}
+
+/* flat pixel squares, no stroke (the user's call) */
+.project-popup-legend span::before {
+  content: '';
+  flex: none;
+  width: calc(4 * var(--pp));
+  height: calc(4 * var(--pp));
+  background: var(--dot);
+}
+
+/* The section tabs: the selected one is black with the menu's red highlight */
 .project-popup-tabs {
   flex: none;
   display: flex;
-  gap: calc(4 * var(--art-px));
+  flex-wrap: wrap;
+  gap: var(--gap-s);
 }
 
 .project-popup-tab {
-  padding: 0.45em 0.75em;
+  padding: var(--gap-xs) var(--gap-s);
   border: none;
   background: #ddd6e0;
   color: #000;
@@ -192,58 +373,102 @@
 .project-popup-tab.selected {
   background: #000;
   color: #fff;
-  box-shadow: calc(2 * var(--art-px)) calc(2 * var(--art-px)) 0 #b00206;
+  box-shadow: var(--gap-xs) var(--gap-xs) 0 #b00206;
   --pixel-shadow: #4a496b;
 }
 
+/* The section shows its parts as one block (.project-popup-section-parts), centred on the TV's
+   middle (the user's call): centred over a space at the bottom as tall as twice the drop from
+   the TV's middle to the section's (--tv-centre, set by ProjectPopup.centreOnTV). The space
+   gives way first when the text is long, and the text then starts right under the tabs. */
 .project-popup-section {
   flex: 1;
   min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: safe center;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding-right: calc(3 * var(--art-px));
+  padding-right: var(--gap-xs); /* just room for the boxes' 2 pp shadows, so the text lines up with the header's and footer's right edge */
   scrollbar-width: thin;
   scrollbar-color: #000 transparent;
+  font-size: max(8px, calc(4.4 * var(--pp))); /* a touch under the panel's 5 pp, beside the bigger TV */
+}
+
+.project-popup-section::after {
+  content: '';
+  flex: 0 1000 var(--tv-centre, 0px); /* (shrinks long before the text's own spacing does) */
+  min-height: 0;
+}
+
+.project-popup-section-parts {
+  flex: 0 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-m);
+}
+
+.project-popup-section-parts > * {
+  flex: none;
 }
 
 /* Overview */
 .project-popup-tagline {
-  margin-bottom: 0.8em;
   font-size: 1.15em;
 }
 
 .project-popup-fact {
-  margin-top: 1em;
-  padding: 0.75em 0.85em;
-  border: calc(2 * var(--art-px)) solid #000;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-s);
+  padding: var(--gap-s) var(--gap-m);
+  border: var(--gap-xs) solid #000;
   background: #efc400;
-  box-shadow: calc(2 * var(--art-px)) calc(2 * var(--art-px)) 0 rgb(0 0 0 / 0.25);
+  box-shadow: var(--gap-xs) var(--gap-xs) 0 rgb(0 0 0 / 0.25);
   --pixel-shadow: #a88a00;
 }
 
 .project-popup-fact-title {
-  display: block;
-  margin-bottom: 0.55em;
+  font-size: 0.85em;
   color: #b00206;
 }
 
-/* Features */
+/* Features: pixel bullets in the highlight's red, 2 x --gap-s apart (the user asked for
+   airier bullets). The space is a spacer item between bullets that can shrink back to
+   --gap-s: the list may shrink to the section, so a long list on a small screen still
+   fits without scrolling. */
 .project-popup-points {
+  display: flex;
+  flex-direction: column;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
+.project-popup-section-parts > .project-popup-points,
+.project-popup-section-parts > .project-popup-timeline-block,
+.project-popup-timeline-block > .project-popup-timeline {
+  flex: 0 1 auto;
+  min-height: 0;
+}
+
 .project-popup-points li {
   position: relative;
-  padding-left: 1.1em;
+  padding-left: 1.2em;
+  flex: none;
 }
 
-.project-popup-points li + li {
-  margin-top: 0.65em;
+.project-popup-points .project-popup-points-space {
+  flex: 0 1 calc(2 * var(--gap-s));
+  min-height: var(--gap-s);
+  padding: 0;
 }
 
-/* pixel bullets in the highlight's red */
+.project-popup-points .project-popup-points-space::before {
+  content: none;
+}
+
 .project-popup-points li::before {
   content: '';
   position: absolute;
@@ -259,31 +484,79 @@
 .project-popup-numbers {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.9em;
-  padding: 0 calc(2 * var(--art-px)) calc(2 * var(--art-px)) 0; /* room for the tiles' shadows */
+  gap: var(--gap-s);
 }
 
 .project-popup-number {
-  padding: 0.8em 0.9em;
-  border: calc(2 * var(--art-px)) solid #000;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-s);
+  padding: var(--gap-s) var(--gap-m);
+  border: var(--gap-xs) solid #000;
   background: #fff;
-  box-shadow: calc(2 * var(--art-px)) calc(2 * var(--art-px)) 0 #b00206;
+  box-shadow: var(--gap-xs) var(--gap-xs) 0 #b00206;
 }
 
 .project-popup-number-value {
-  display: block;
-  margin-bottom: 0.5em;
   font-size: 2.2em;
   color: #b00206;
   --pixel-shadow: #e8c6cc;
 }
 
-/* Timeline: a line down the left with a dot per milestone */
+/* Timeline: the project's year, big, on a pixel-art pennant at its head (it was in the
+   header's corner; the user moved it here, as the dates belong to the timeline), then the
+   timeline's line down the left, carrying on from the flag's pole, a dot per milestone */
+.project-popup-timeline-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--gap-s);
+}
+
+/* drawn in the digits' own font pixels (ProjectPopup.ts: yearFlag), its pole over the line */
+.project-popup-flag {
+  position: relative;
+  font-size: 2em;
+  background: var(--flag-art) 0 0 / 100% 100% no-repeat;
+  image-rendering: pixelated;
+}
+
+.project-popup-flag-year {
+  position: absolute;
+  color: #efc400;
+  --pixel-shadow: #5c0003;
+}
+
+.project-popup-timeline-block .project-popup-timeline {
+  align-self: stretch;
+}
+
+.project-popup-timeline-block .project-popup-timeline::before {
+  top: calc(-1 * var(--gap-s)); /* up to the flag's pole */
+}
+
+/* the milestones 2 x --gap-s apart, closing to --gap-xs where a long timeline needs the room
+   (a spacer between each two, as on Features) */
 .project-popup-timeline {
   position: relative;
+  display: flex;
+  flex-direction: column;
   margin: 0;
   padding: 0 0 0 1.4em;
   list-style: none;
+}
+
+.project-popup-timeline li {
+  flex: none;
+}
+
+.project-popup-timeline .project-popup-timeline-space {
+  flex: 0 1 calc(2 * var(--gap-s));
+  min-height: var(--gap-xs);
+}
+
+.project-popup-timeline .project-popup-timeline-space::before {
+  content: none;
 }
 
 .project-popup-timeline::before {
@@ -292,16 +565,15 @@
   left: 0.3em;
   top: 0.3em;
   bottom: 0.3em;
-  width: calc(1 * var(--art-px));
+  width: max(1px, var(--pp));
   background: #000;
 }
 
 .project-popup-timeline li {
   position: relative;
-}
-
-.project-popup-timeline li + li {
-  margin-top: 0.75em;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-xs);
 }
 
 .project-popup-timeline li::before {
@@ -312,89 +584,31 @@
   width: 0.65em;
   height: 0.65em;
   background: #b00206;
-  border: calc(1 * var(--art-px)) solid #000;
+  border: max(1px, var(--pp)) solid #000;
 }
 
 .project-popup-when {
-  display: block;
-  margin-bottom: 0.4em;
   font-size: 0.85em;
   color: #b00206;
   --pixel-shadow: #e8c6cc;
 }
 
-/* ── Languages: the logos with the bar beside them (centred on them), the legend below ── */
-.project-popup-langs {
-  display: flex;
-  flex-direction: column;
-  gap: calc(3 * var(--art-px));
-}
-
-.project-popup-langrow {
-  display: flex;
-  align-items: center;
-  gap: calc(5 * var(--art-px));
-}
-
-.project-popup-logos {
-  display: flex;
-  flex: none;
-  gap: calc(3 * var(--art-px));
-}
-
-/* the 16×16 logos, 1 art px per pixel as on the boxes */
-.project-popup-logos img {
-  display: block;
-  width: calc(16 * var(--art-px));
-  height: calc(16 * var(--art-px));
-  image-rendering: pixelated;
-}
-
-/* A GitHub-style bar, outlined on all four sides (a border, inside its box:
-   an outline would be cut off by the column's edge) */
-.project-popup-bar-chart {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  height: calc(7 * var(--art-px));
-  border: calc(1 * var(--art-px)) solid #000;
-  background: #000;
-}
-
-.project-popup-legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5em 1em;
-  font-size: 0.75em;
-}
-
-.project-popup-legend span {
-  display: inline-flex;
-  align-items: center;
-}
-
-.project-popup-legend span::before {
-  content: '';
-  width: 0.8em;
-  height: 0.8em;
-  margin-right: 0.4em;
-  background: var(--dot);
-  outline: 1px solid #000;
-}
-
-/* ── Buttons ─────────────────────────────────────────────────────────────── */
+/* ── Bottom: the buttons ──────────────────────────────────────────────── */
 .project-popup-actions {
   flex: none;
   display: flex;
   flex-wrap: wrap;
-  gap: calc(5 * var(--art-px));
+  align-items: center;
+  gap: var(--gap-m);
+  padding-top: var(--gap-m);
+  border-top: var(--rule);
 }
 
 .project-popup-btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.5em;
-  padding: 0.35em 0.8em;
+  gap: var(--gap-s);
+  padding: var(--gap-xs) var(--gap-m);
   border: none;
   background: #000;
   color: #fff;
@@ -402,74 +616,32 @@
   line-height: 0;
   text-decoration: none;
   cursor: pointer;
-  box-shadow: calc(2 * var(--art-px)) calc(2 * var(--art-px)) 0 #b00206;
+  box-shadow: var(--gap-xs) var(--gap-xs) 0 #b00206;
+  --pixel-shadow: #4a496b;
 }
 
 .project-popup-btn.primary {
   background: #0066ff;
-  box-shadow: calc(2 * var(--art-px)) calc(2 * var(--art-px)) 0 #000;
+  box-shadow: var(--gap-xs) var(--gap-xs) 0 #000;
+  --pixel-shadow: #0b3a8c;
 }
 
-/* key caps: [↵] [B] */
+/* key caps, [↵] [B]: as far from the button's left edge as from its top */
 .project-popup-btn b {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   min-width: 1.4em;
+  margin-left: calc(var(--gap-xs) - var(--gap-m));
   padding: 0.2em 0.25em;
   background: #fff;
   color: #000;
   font-size: 0.85em;
+  --pixel-shadow: #c6c0d2;
 }
-
-/* bottom-right, on the buttons' row */
-.project-popup-year {
-  align-self: center;
-  margin-left: auto;
-  padding: 0.35em 0.5em;
-  background: #000;
-  color: #efc400;
-}
-
-/* text shadows (PixelLabel): darker shades of what the text sits on */
-.project-popup-btn.primary { --pixel-shadow: #0b3a8c; }
-.project-popup-btn:not(.primary),
-.project-popup-year        { --pixel-shadow: #4a496b; }
-.project-popup-btn b       { --pixel-shadow: #c6c0d2; }
 
 .project-popup-btn:hover,
 .project-popup-btn:focus-visible,
 .project-popup-tab:hover {
-  transform: translate(calc(-1 * var(--art-px)), calc(-1 * var(--art-px)));
-}
-
-/* The earlier custom arrangement for Mystic Messaging and Mars Allocator. */
-.project-popup-balanced .project-popup-body {
-  align-items: center;
-  gap: calc(12 * var(--art-px));
-  padding-block: calc(6 * var(--art-px));
-}
-
-.project-popup-balanced .project-popup-side {
-  max-height: 100%;
-  gap: calc(6 * var(--art-px));
-}
-
-.project-popup-balanced .project-popup-main {
-  height: calc(128 * var(--art-px));
-  min-height: 0;
-  max-height: 100%;
-  gap: calc(6 * var(--art-px));
-}
-
-.project-popup-balanced .project-popup-actions {
-  padding-top: calc(6 * var(--art-px));
-  border-top: calc(1 * var(--art-px)) solid #ddd6e0;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .project-popup,
-  .project-popup-panel {
-    animation-duration: 0.01s;
-  }
+  transform: translate(calc(-1 * var(--pp)), calc(-1 * var(--pp)));
 }

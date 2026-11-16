@@ -54,6 +54,8 @@ export class PixelLabel extends PixelCanvas {
   private text: string
   private readonly wrap: boolean
   private lines = ''
+  /** What the canvas shows now (text, size, colours…), so drawing the same again is skipped. */
+  private drawn = ''
 
   constructor(text: string, { wrap = false } = {}) {
     super(boxFontArt(''), text) // placeholder: render() draws the text itself
@@ -101,16 +103,24 @@ export class PixelLabel extends PixelCanvas {
     if (!boxHeight) return
     const align = css.textAlign === 'center' ? 'center' : css.textAlign === 'right' || css.textAlign === 'end' ? 'right' : 'left'
     const ink = css.color
-    const art = textArt(text, { ink, shadow: css.getPropertyValue('--pixel-shadow').trim() || defaultShadow(ink), align, lineHeight })
+    const shadow = css.getPropertyValue('--pixel-shadow').trim() || defaultShadow(ink)
     const dpr = window.devicePixelRatio || 1
-    const canvas = this.element
-    canvas.width = Math.max(1, Math.round(boxWidth * dpr))
-    canvas.height = Math.max(1, Math.round(boxHeight * dpr))
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
+    const width = Math.max(1, Math.round(boxWidth * dpr))
+    const height = Math.max(1, Math.round(boxHeight * dpr))
     // device px per font pixel: from the font size, not canvas.height / art.height,
     // whose rounding grew across a long line and cut off its last letter
     const scale = fontPx * dpr
+    // Already showing exactly this? (A wrapped label is always measured twice:
+    // once laid out, then again after it sets its own height.)
+    const key = `${text}\n${width}x${height}@${scale} ${ink} ${shadow} ${align} ${lineHeight}`
+    if (key === this.drawn) return
+    this.drawn = key
+    const art = textArt(text, { ink, shadow, align, lineHeight })
+    const canvas = this.element
+    canvas.width = width
+    canvas.height = height
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
     const room = canvas.width - art.width * scale
     ctx.save()
     ctx.translate(Math.round(align === 'left' ? 0 : align === 'right' ? room : room / 2), 0)

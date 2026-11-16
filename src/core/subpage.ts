@@ -46,6 +46,7 @@ export function startSubpage(id: SubpageId, { onConfirm, onBack }: SubpageOption
     onBack: () => {
       if (onBack?.()) return // the page dealt with it
       playSfx(sfx.accept)
+      hud.back.flash() // like a confirmed menu button, during the beat before the wipe
       stopMusic() // fades out under the wipe
       navigateTo(MENU_URL, { replace: true })
     },

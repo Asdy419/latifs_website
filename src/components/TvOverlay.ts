@@ -1,27 +1,31 @@
 import './TvOverlay.css'
 import tvOverlay from '../assets/menu/tv_overlay.png'
+import { staticCanvas } from './TvStatic'
 
 /**
- * TV-shaped frame with an optional looping video playing inside the screen.
+ * TV-shaped frame with static rolling on its screen: the site's TV static
+ * (TvStatic.ts, the same as the Projects pop-up's TV), one speckle per art pixel.
  * Position it from the scene's CSS via #tv-wrap.
  */
 export class TvOverlay {
-  private readonly videoSrc: string | null
+  /** The screen's size in art pixels, which is the static's resolution. */
+  private readonly screen: { width: number; height: number }
 
-  constructor(videoSrc: string | null = null) {
-    this.videoSrc = videoSrc
+  constructor(screen: { width: number; height: number }) {
+    this.screen = screen
   }
 
   markup(): string {
-    const video = this.videoSrc
-      ? `<video id="tv-video" src="${this.videoSrc}" autoplay loop muted playsinline></video>`
-      : ''
-
     return `
       <div id="tv-wrap" style="--tv-mask: url('${tvOverlay}')">
         <img id="tv-frame" src="${tvOverlay}" decoding="async" />
-        <div id="tv-white">${video}</div>
+        <div id="tv-white"><div class="tv-static rolling"></div></div>
       </div>
     `
+  }
+
+  /** Puts the static on the screen (once the markup is in the page). */
+  mount(root: ParentNode): void {
+    root.querySelector('#tv-white .tv-static')?.append(staticCanvas(this.screen.width, this.screen.height))
   }
 }

@@ -37,6 +37,11 @@
   animation: rotate-ccw 6s linear infinite;
 }
 
+/* CircleAnimation.paused (something opaque covers the page) */
+.circles-paused .circle-layer {
+  animation-play-state: paused;
+}
+
 @keyframes rotate-cw {
   from { transform: rotate(0deg); }
   to   { transform: rotate(360deg); }

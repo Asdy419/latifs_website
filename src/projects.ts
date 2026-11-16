@@ -7,17 +7,64 @@ import typescript from './assets/projects/langs/typescript.png'
 import javascript from './assets/projects/langs/javascript.png'
 import css from './assets/projects/langs/css.png'
 import csharp from './assets/projects/langs/csharp.png'
-import marsAllocatorShot from './assets/projects/shots/mars_allocator_code.png'
-import bitcoinClassifierShot from './assets/projects/shots/bitcoin_classifier_distribution.png'
-import zeroShotEegShot from './assets/projects/shots/zero_shot_eeg_analysis.png'
-import mysticMessagingShot from './assets/projects/shots/mystic_messaging_terminal.png'
-import tspShot from './assets/projects/shots/tsp_genetic_algorithm.png'
-import toxicityBiasAuditShot from './assets/projects/shots/toxicity_bias_audit.png'
-import horsesFromNoiseShot from './assets/projects/shots/horses_from_noise_samples.png'
-import kinemechanicsShot from './assets/projects/shots/kinemechanics_projectile_motion.png'
-import unityClashShot from './assets/projects/shots/unity_clash_menu.png'
-import xrayRestorationShot from './assets/projects/shots/xray_restoration.png'
-import companionAiShot from './assets/projects/shots/companion_ai_daily_check_in.png'
+// Mars Allocator: the top of allocator.c in an editor, a real run of its test driver (runme),
+// then Table 2 and Fig. 9 of its report (allocator_report.pdf in the repo):
+import marsCode from './assets/projects/shots/mars_code.png'
+import marsRecovery from './assets/projects/shots/mars_recovery.png'
+import marsStormTable from './assets/projects/shots/mars_storm_table.png'
+import marsSpeedSketch from './assets/projects/shots/mars_speed_sketch.png'
+// Figures from the Zero-Shot EEG report (reference/expanded_imgs/), at the TV screen's shape:
+import zeroShotEegCycle from './assets/projects/shots/zero_shot_eeg_cycle.png'
+import zeroShotEegCca from './assets/projects/shots/zero_shot_eeg_cca.png'
+import zeroShotEegResults from './assets/projects/shots/zero_shot_eeg_results.png'
+import zeroShotEegErrors from './assets/projects/shots/zero_shot_eeg_errors.png'
+// The Mystic Messaging app's real output (run from its repo), drawn as Windows Terminal windows:
+import mysticChat from './assets/projects/shots/mystic_chat.png'
+import mysticHelp from './assets/projects/shots/mystic_help.png'
+import mysticFiles from './assets/projects/shots/mystic_files.png'
+import mysticGroups from './assets/projects/shots/mystic_groups.png'
+// Slides from the Bias in AI presentation (reference/expanded_imgs/), at the TV screen's shape:
+import toxicityOverview from './assets/projects/shots/toxicity_overview.png'
+import toxicityRepresentation from './assets/projects/shots/toxicity_representation.png'
+import toxicityMean from './assets/projects/shots/toxicity_mean.png'
+import toxicityVsd from './assets/projects/shots/toxicity_vsd.png'
+// Horses From Noise (Y3 deep learning, lab 5): 325 of its generated horses, then its code and
+// results file in an editor (real line numbers):
+import horsesSamples from './assets/projects/shots/horses_samples.png'
+import horsesModel from './assets/projects/shots/horses_model.png'
+import horsesResults from './assets/projects/shots/horses_results.png'
+import horsesAbstract from './assets/projects/shots/horses_abstract.png'
+// Kinemechanics: its menu, collisions and projectile screens (title bar off, shaped to the TV
+// without cutting anything), then a SUVAT diagram from Wikimedia Commons:
+import physicsMenu from './assets/projects/shots/physics_menu.png'
+import physicsCollisions from './assets/projects/shots/physics_collisions.png'
+import physicsProjectile from './assets/projects/shots/physics_projectile.png'
+import physicsSuvat from './assets/projects/shots/physics_suvat.png'
+// Unity Clash: its title screen, menu and stage (the last two in the Unity editor), each widened
+// or heightened with its own edge colours, then PlayerMovement.cs's jump logic in an editor:
+import clashTitle from './assets/projects/shots/clash_title.png'
+import clashMenu from './assets/projects/shots/clash_menu.png'
+import clashStage from './assets/projects/shots/clash_stage.png'
+import clashCode from './assets/projects/shots/clash_code.png'
+// Figures from the X-ray restoration report (reference/expanded_imgs/), in pairs at the TV screen's shape:
+import xrayRestored from './assets/projects/shots/xray_restored.png'
+import xrayGeometry from './assets/projects/shots/xray_geometry.png'
+import xraySnr from './assets/projects/shots/xray_snr.png'
+import xrayInpaint from './assets/projects/shots/xray_inpaint.png'
+// Slides from the CompanionAI product presentation (reference/expanded_imgs/), whole, at the TV screen's shape:
+import companionCheckin from './assets/projects/shots/companion_checkin.png'
+import companionInteractions from './assets/projects/shots/companion_interactions.png'
+import companionResults from './assets/projects/shots/companion_results.png'
+import companionHandover from './assets/projects/shots/companion_handover.png'
+// Pictures from Wikimedia Commons at the TV screen's shape (credits and licences in README.md):
+import tspSolvedTours from './assets/projects/shots/tsp_solved_tours.png'
+import tspGaDiagram from './assets/projects/shots/tsp_ga_diagram.png'
+import tspPsoSwarm from './assets/projects/shots/tsp_pso_swarm.png'
+import tspBranchBound from './assets/projects/shots/tsp_branch_bound.png'
+import bitcoinBlockChain from './assets/projects/shots/bitcoin_block_chain.png'
+import bitcoinVoronoi from './assets/projects/shots/bitcoin_voronoi.png'
+import bitcoinHashTree from './assets/projects/shots/bitcoin_hash_tree.png'
+import bitcoinPaymentChannel from './assets/projects/shots/bitcoin_payment_channel.png'
 import marsAllocatorImage from './assets/projects/container_imgs/mars_allocator.png'
 import companionAiImage from './assets/projects/container_imgs/companion_ai.png'
 import bitcoinClassifierImage from './assets/projects/container_imgs/bitcoin_classifier.png'
@@ -38,8 +85,7 @@ import unityClashImage from './assets/projects/container_imgs/unity_clash.png'
  * milestones and fun fact for each project). To add one, copy an entry:
  *  - name: on the box, in the pixel font (A–Z, 0–9, . , : ' ! ? - + / ( )).
  *    Up to about 4 letters show at full size; longer names shrink to fit.
- *  - title: the pop-up's heading, in the menu font. Keep it under about 19
- *    letters, or its bar runs out of the pop-up.
+ *  - title: the pop-up's heading, in large text-font letters along its top.
  *  - tagline, kind, when, tech, gist, funFact, features, numbers, milestones:
  *    the pop-up's text, in the small text font, which has no ~ ° & * < > [ ]
  *    (they'd show as "?"): write "about", "degrees", "and"…
@@ -50,14 +96,21 @@ import unityClashImage from './assets/projects/container_imgs/unity_clash.png'
  *  - url: the public GitHub repo (leave it out for private or no repo: the
  *    pop-up then has no GitHub button).
  *  - image (optional): the project's own logo/picture, in the middle of the box
- *    (fitted into 78×70, not cropped). Put the PNG in assets/projects/container_imgs/, import
- *    it at the top like the logos, and add `image: myPicture,` to the entry.
- *  - shot (optional): the picture inside the expanded pop-up only, with a
- *    frame that follows its proportions. Store it in
- *    assets/projects/shots/ and import it above; until then the slot is blank.
- *    This never sets the box's image.
- *    Curated crops live in assets/projects/shots/crops.ts and are applied by
- *    Vite without changing the original PNGs.
+ *    and beside the pop-up's title. Put the PNG in assets/projects/container_imgs/,
+ *    import it at the top like the logos, and add `image: myPicture,` to the
+ *    entry. Any canvas size or margin is fine: the build crops it to its
+ *    visible pixels and every box draws its picture with the same area.
+ *  - shots (optional): the pictures inside the expanded pop-up only, shown on
+ *    the screen of the same pixel-art TV on every project, one per tab
+ *    (Overview, Features, Numbers, Timeline; they wrap round if there are
+ *    fewer). Switching tabs plays a little static, then the next picture. Store
+ *    them in assets/projects/shots/ and import them above; with none, the TV
+ *    shows static. These never set the box's image.
+ *    The screen is 150:78 (about 1.92:1, e.g. 960 × 499 px) and each picture
+ *    fills it, trimmed equally from both sides if it's another shape, so a
+ *    picture of that shape shows whole. Curated crops live in
+ *    assets/projects/shots/crops.ts and are applied by Vite without changing
+ *    the original PNGs. Photos go in LOSSY_SHOTS in vite.config.ts.
  */
 
 const PYTHON = { name: 'Python', color: '#3572A5' }
@@ -68,8 +121,7 @@ export const PROJECTS: Project[] = [
     name: 'Mars Alloc',
     title: 'Mars Allocator',
     image: marsAllocatorImage,
-    shot: marsAllocatorShot,
-    detailsLayout: 'balanced',
+    shots: [marsCode, marsRecovery, marsStormTable, marsSpeedSketch],
     year: 2025,
     tagline: 'A crash-proof malloc for Mars rovers. Cosmic rays? Not a problem.',
     kind: 'Systems programming',
@@ -101,318 +153,6 @@ export const PROJECTS: Project[] = [
     languages: [{ name: 'C', share: 99.4, color: '#555555' }, { name: 'Makefile', share: 0.6, color: '#427819' }],
     logos: [c],
     url: 'https://github.com/Asdy419/Mars-Allocator',
-  },
-  {
-    name: 'Companion',
-    title: 'CompanionAI',
-    image: companionAiImage,
-    shot: companionAiShot,
-    year: 2026,
-    tagline: 'A wellness virtual pet with a mind of its own, built for an IBM brief.',
-    kind: 'Game dev, team project for an IBM client',
-    when: 'Nov 2025 to Apr 2026, team of five',
-    tech: ['JavaScript', 'Phaser 3', 'Supabase'],
-    gist: "A five-person university team took on a live brief from IBM: a wellness app built around an interactive virtual pet. As the only developer on the team with game-framework experience, I built the pet's core interaction layer in Phaser 3, then reorganised the architecture so the pet's behaviour logic and its rendering could change independently. The finished build was presented to five IBM stakeholders.",
-    funFact: "The pet doesn't follow a script. A Markov chain rolls the dice on its next move, so no two sessions play out quite the same.",
-    features: [
-      'Behaviour on a Markov chain. A state machine with probabilistic transitions decides what the pet does next, so it never just loops through a script.',
-      'Core interactions. Feeding, patting and animated movement.',
-      'Clean architecture. State, Factory and Observer patterns decouple behaviour logic from rendering.',
-      'LLM integration, with its constraints documented for the client.',
-      'Plain-English design docs. Framework-agnostic diagrams let non-technical teammates and IBM sign off architectural decisions.',
-      'Team rhythm. Weekly meetings, organised by me, kept five people building one app.',
-    ],
-    numbers: [
-      { value: '5', label: 'people on the team' },
-      { value: '5', label: 'IBM stakeholders at the final presentation' },
-      { value: '3', label: 'design patterns in the refactor' },
-      { value: '6', label: 'months from brief to delivery' },
-    ],
-    milestones: [
-      { when: 'Nov 2025', text: 'Live brief from IBM; team of five formed.' },
-      { when: 'Build', text: 'Picked up Phaser 3 and built the interaction layer: Markov behaviour, movement, feeding and patting.' },
-      { when: 'Mar 2026', text: 'Pet class wired to the full state machine, so any pet can be spawned and behave correctly.' },
-      { when: 'Refactor', text: 'State, Factory and Observer patterns split behaviour from rendering.' },
-      { when: 'Apr 2026', text: 'Delivered and presented to five IBM stakeholders.' },
-    ],
-    languages: [{ name: 'JavaScript', color: '#f1e05a' }],
-    logos: [javascript],
-  },
-  {
-    name: 'Bitcoin',
-    title: 'Bitcoin Classifier',
-    image: bitcoinClassifierImage,
-    shot: bitcoinClassifierShot,
-    year: 2026,
-    tagline: 'One deadline, four people, one prize.',
-    kind: 'Side quest, hackathon',
-    when: '2026, hackathon team lead',
-    gist: 'At ETH Hack Oxford 2026 I led a team of four through scoping, splitting the work and delivering a Bitcoin classification system before the event deadline. It took home the Best Trust and Safety Tool prize.',
-    features: [
-      'Scoped to ship. An idea sized for four people and one deadline.',
-      'Split by strength. Work delegated across the team so everything landed in time.',
-      'Built for trust and safety, the category it went on to win.',
-    ],
-    numbers: [
-      { value: '4', label: 'people, me leading' },
-      { value: '1', label: 'prize: Best Trust and Safety Tool' },
-    ],
-    milestones: [
-      { when: 'Team', text: 'Four people, me leading.' },
-      { when: 'Scope', text: 'Idea settled, work split.' },
-      { when: 'Build', text: 'Classifier delivered on deadline.' },
-      { when: 'Prize', text: 'Best Trust and Safety Tool.' },
-    ],
-    languages: [JUPYTER], // no repo to measure
-    logos: [jupyter],
-  },
-  {
-    name: 'Brain AI',
-    title: 'Zero-Shot EEG',
-    image: zeroShotEegImage,
-    shot: zeroShotEegShot,
-    year: 2025,
-    tagline: 'Guessing what someone saw, from their brainwaves alone.',
-    kind: 'Machine learning, brain decoding',
-    when: 'Oct to Dec 2025, coursework',
-    tech: ['Python', 'Jupyter', 'NumPy', 'scikit-learn'],
-    gist: 'Can a model tell what image someone was looking at from 17 channels of EEG, even for objects it never trained on? This project maps brain signals into two "meaning spaces", CLIP text embeddings and CORnet-S image embeddings, using ridge regression. A new trial is classified by finding the closest class prototype, so the model recognises 200 unseen classes without a single labelled EEG example of them.',
-    funFact: "Its mistakes aren't random. The model mostly confuses classes whose prototypes sit close together, with a correlation of about 0.35 between prototype similarity and confusion frequency.",
-    features: [
-      'Analysis before modelling. PCA, covariance spectra and CCA showed ill-conditioned EEG features and a stronger link to image embeddings than to text.',
-      'Ridge regression to tame the ill-conditioning, with alpha tuned on a leakage-free, class-wise 90/10 split.',
-      'Visual-heavy fusion. Text and image scores are blended 0.1 to 0.9, a weighting picked on validation and backed by the CCA result.',
-      'Prototype matching. Cosine similarity against the 200 unseen class prototypes.',
-      'Evaluation beyond accuracy. Ablations, macro precision, recall and F1, precision-recall curves, confusion matrices and t-SNE error analysis.',
-    ],
-    numbers: [
-      { value: '200', label: 'classes it never trained on' },
-      { value: '160,000', label: 'unseen test trials' },
-      { value: '10.65%', label: 'top-1 accuracy, about 21 times chance' },
-      { value: '8.94%', label: 'macro F1 with the fusion, up from 5.52%' },
-    ],
-    milestones: [
-      { when: 'Start', text: 'Explored the data: each 17 x 100 trial flattened into a 1,700-dimensional vector.' },
-      { when: 'Baseline', text: 'Plain least squares with equal fusion (model A).' },
-      { when: 'Upgrades', text: 'Ridge (model B), then the 0.1 / 0.9 fusion (model C).' },
-      { when: 'Dec 2025', text: 'Evaluated on all 10 subjects and written up as a report.' },
-      { when: 'Aug 2026', text: 'README polished on GitHub.' },
-    ],
-    languages: [{ ...JUPYTER, share: 100 }],
-    logos: [jupyter, python],
-    url: 'https://github.com/Asdy419/Zero-Shot-Brain-Stimuli-Classification',
-  },
-  {
-    name: 'Mystic',
-    title: 'Mystic Messaging',
-    image: mysticMessagingImage,
-    shot: mysticMessagingShot,
-    shotFullWidth: true,
-    detailsLayout: 'balanced',
-    year: 2025,
-    tagline: 'A command-line chat room with a few magic words.',
-    kind: 'Networking',
-    when: 'Dec 2025, coursework',
-    tech: ['Python', 'sockets', 'threading'],
-    gist: 'A multi-user chat app that lives entirely in the terminal. A threaded TCP server routes messages between clients across a global chat, private messages and groups, and serves shared files that clients can download over TCP or UDP. Every command starts with the magic word "mystic", and "mystic help" lists the lot.',
-    funFact: 'The last two commits are titled "Final" and "Final final". A classic.',
-    features: [
-      'Threads everywhere. One server thread per client; each client runs separate send and receive threads, plus a temporary thread for UDP downloads.',
-      'Four ways to talk. Global chat, private messages, broadcasts and named groups. Join a group and the global chat goes quiet.',
-      'Tagged protocol. Every message carries a tag like SERVER or PM, so the client knows how to show it.',
-      'Two-protocol file transfer. TCP uses start and end markers with size checks; UDP uses a temporary socket, a UDP_READY handshake and 4-byte sequence numbers to put packets back in order.',
-      'Split-proof buffering. Bytes are stitched together across recv() calls, so a half-arrived file marker never leaks into the chat.',
-      'Graceful edges. Unexpected disconnects are handled and duplicate usernames are turned away.',
-    ],
-    numbers: [
-      { value: '11', label: 'mystic commands' },
-      { value: '4', label: 'message channels' },
-      { value: '2', label: 'file transfer protocols' },
-      { value: '100%', label: 'marks for the assignment' },
-    ],
-    milestones: [
-      { when: 'Start', text: 'Socket server broadcasting between clients.' },
-      { when: 'Commands', text: 'The mystic command parser, later rewritten with match-case.' },
-      { when: 'Groups', text: 'Create, join and leave; a group deletes itself when its last member leaves.' },
-      { when: 'Files', text: 'Downloads over TCP, then UDP with sequencing.' },
-      { when: 'Dec 2025', text: "Final version pushed on New Year's Eve. Full marks." },
-    ],
-    languages: [{ ...PYTHON, share: 100 }],
-    logos: [python],
-    url: 'https://github.com/Asdy419/Mystic-Messaging-App',
-  },
-  {
-    name: 'X-Ray',
-    title: 'X-Ray Restoration',
-    image: xrayRestorationImage,
-    shot: xrayRestorationShot,
-    year: 2026,
-    tagline: 'Ten steps of classical image surgery to rescue wrecked X-rays.',
-    kind: 'Computer vision, classical image processing',
-    when: 'Feb 2026, coursework',
-    tech: ['Python', 'OpenCV', 'NumPy'],
-    gist: 'A set of 256 x 256 chest X-rays arrived badly damaged: tilted, warped, speckled with salt noise and colour noise, punched with dark circular holes and low on contrast. The images feed a pneumonia classifier, so the job was to restore them without throwing away the detail a classifier relies on. The answer was a ten-stage pipeline built entirely from classical signal processing, no deep learning, that cleans a whole folder of images in one command.',
-    funFact: 'The rotation fix borrows a trick from document scanners: in the frequency domain, a rib cage looks like a tilted cross.',
-    features: [
-      'Rotation fixed in Fourier space. Ribs and spine show up as a cross in the frequency spectrum, so the pipeline scans radial lines every 0.1 degrees and averages the rib and spine deviations to find the tilt.',
-      'Selective de-salting. Only pixels that are both extreme and far from their local median get replaced, so fine anatomy survives.',
-      'Perspective correction. The largest four-cornered contour is found and warped back to a clean square.',
-      'Colour denoising with CBM3D. An adapted, self-contained CBM3D implementation with its own DCT routines denoises in the OPP colour space.',
-      'Hole repair. Dark circular artefacts are detected and filled in with Navier-Stokes inpainting.',
-      'Finishing pass. Chroma low-pass in YCrCb, non-local means, CLAHE on the lightness channel and an unsharp mask on luminance only.',
-    ],
-    numbers: [
-      { value: '10', label: 'stages in the pipeline' },
-      { value: '0.1', label: 'degree rotation search step' },
-      { value: '10%', label: 'gain in signal-to-noise ratio, roughly' },
-      { value: '0', label: 'neural networks used' },
-    ],
-    milestones: [
-      { when: 'Feb 2026', text: 'Got BM3D running, after learning the hard way that it wants one channel, not three.' },
-      { when: 'Pivot', text: 'Dropped the Anscombe transform: the noise was impulse (salt) noise, not Poisson, so it did more harm than good.' },
-      { when: 'Geometry', text: 'Built the Fourier rotation fix and the contour-based perspective warp.' },
-      { when: 'Holes', text: "Masked the dark circles so they couldn't skew contrast enhancement, then inpainted them." },
-      { when: 'Shipped', text: 'Ten-stage pipeline, written report and README, with signal-to-noise up by around 10%.' },
-    ],
-    languages: [PYTHON], // no repo to measure
-    logos: [python],
-  },
-  {
-    name: 'TSP',
-    title: 'TSP Solvers',
-    image: tspImage,
-    shot: tspShot,
-    year: 2026,
-    tagline: 'Evolution versus a swarm, racing to find the shortest round trip.',
-    kind: 'Optimisation, metaheuristics',
-    when: 'Jan to Feb 2026, coursework',
-    tech: ['Python standard library only'],
-    gist: "The Travelling Salesman Problem asks for the shortest route that visits every city once and returns home. The number of possible routes explodes factorially, so brute force is hopeless. This project built two nature-inspired solvers inside a strict coursework skeleton, a Genetic Algorithm and a discrete Particle Swarm Optimiser, then pushed both well beyond their lecture versions with custom operators and local search. Both run under time limits on nothing but Python's standard library.",
-    funFact: 'Particle swarms were designed for smooth, continuous spaces. Here the particles "fly" through permutations, so a velocity is really a to-do list of city swaps.',
-    features: [
-      'Breeding. OX4 crossover and tournament selection make good tours from good parents.',
-      'Two-phase mutation. Improving 2-opt moves paired with inverted displacement.',
-      'A head start. Nearest-neighbour tours seed about 5% of the first generation, enough to help without killing diversity, and elitism keeps the best tours alive.',
-      'Velocity, redefined. For permutations a velocity is a list of city swaps, built with custom ODOT, SUB, ADD_VEL and MULT_VEL operators.',
-      'Follow the leader. The social pull targets the global best, with iterative 2-opt refinement on top.',
-      'Two moods. Attractor and depressor modes switch on swarm diversity to escape local optima.',
-    ],
-    numbers: [
-      { value: '2', label: 'algorithms, one problem' },
-      { value: '7', label: "city files with the cohort's best tour" },
-      { value: '0', label: 'third-party libraries' },
-      { value: '5%', label: 'of generation one seeded by nearest neighbour' },
-    ],
-    milestones: [
-      { when: 'Jan 2026', text: 'Genetic algorithm built inside the skeleton, with nearest-neighbour seeding.' },
-      { when: 'Feb 2026', text: 'Particle swarm rebuilt around discrete velocity operators and 2-opt.' },
-      { when: 'Debug', text: 'Found why the mode switch never fired: with 20 particles, diversity tops out near 0.44, below the 0.7 trigger. Thresholds retuned.' },
-      { when: 'Result', text: 'Best tours in the cohort on 7 of the city files.' },
-    ],
-    languages: [PYTHON], // no repo to measure
-    logos: [python],
-  },
-  {
-    name: 'Bias Audit',
-    title: 'Toxicity Bias Audit',
-    image: toxicityBiasAuditImage,
-    shot: toxicityBiasAuditShot,
-    year: 2026,
-    tagline: 'Does a moderation dataset teach models that mentioning certain identities is "toxic"?',
-    kind: 'Responsible AI, data audit',
-    when: 'Mar 2026, coursework',
-    tech: ['Python', 'pandas', 'seaborn', 'Jupyter'],
-    gist: 'Framed as an audit for the Trust and Safety team of a fictional platform, CivicSphere, this project took apart the Jigsaw Unintended Bias dataset, the kind of data used to train comment-moderation models. The core question: are comments that simply mention certain identity groups labelled toxic more often? Value Sensitive Design framed the ethics, a stakeholder analysis mapped who gets hurt, and a hands-on data audit supplied the evidence, all squeezed into an eight-minute presentation.',
-    funFact: 'Every label in the dataset was made by a human, which is exactly why the missing annotator demographics matter so much.',
-    features: [
-      'Class balance check. The 10,000-row sample is split 50/50, while the full dataset runs about 11:1 non-toxic to toxic, which changes how every result should be read.',
-      'Annotation coverage. 76% of comments carry no identity labels at all, so bias can only be measured on about a quarter of the data.',
-      'Subgroup sizes. Some groups have as few as 13 labelled examples, far too few for confident conclusions.',
-      'Label skew. Toxic rates swing from 32% to 85% across identity subgroups against a 50% baseline, with marginalised groups sitting well above it.',
-      'Documentation critique. No annotator demographics, a dropped "Hard to Say" option and loosely defined subtype labels.',
-      'Two recommendations. A bias-monitoring dashboard in the spirit of Model Cards, and counterfactual data augmentation, each with its limitations spelled out.',
-    ],
-    numbers: [
-      { value: '24', label: 'identity groups audited' },
-      { value: '76%', label: 'of comments with no identity labels' },
-      { value: '32-85%', label: 'toxic rate across subgroups' },
-      { value: '13', label: 'examples in the smallest groups' },
-    ],
-    milestones: [
-      { when: 'Mar 2026', text: 'Explored the data and checked the class balance: an artificially even 50/50 split.' },
-      { when: 'Coverage', text: 'Mapped which comments carry any identity labels at all (about 24%).' },
-      { when: 'Core finding', text: 'Measured the toxic rate per identity group, the "quiet error" the brief was hunting for.' },
-      { when: 'The story', text: 'Built the stakeholder analysis, audit table and recommendations, backed by the literature (Friedman, Dixon, Mitchell, Borkan and colleagues).' },
-      { when: 'Presented', text: 'Eight minutes, one fictional client, two recommendations.' },
-    ],
-    languages: [{ ...JUPYTER, share: 100 }],
-    logos: [jupyter, python],
-  },
-  {
-    name: 'Horses',
-    title: 'Horses From Noise',
-    image: horsesFromNoiseImage,
-    shot: horsesFromNoiseShot,
-    year: 2026,
-    tagline: 'A generator and a discriminator in an arms race over 32 × 32 horses.',
-    kind: 'Generative models, deep learning coursework',
-    when: 'Oct to Nov 2026, coursework',
-    tech: ['Python', 'PyTorch', 'torch-fidelity'],
-    gist: 'Two assessed Deep Learning practicals, one brief: train from scratch on 4,000 CIFAR-10 horse photos, stay under a million parameters, and generate 1,000 new 32 x 32 horses, scored by Kernel Inception Distance (KID, lower is better). First a DCGAN, where a generator and a discriminator train against each other; then the same horses with flow matching.',
-    features: [
-      'Wider, smoother DCGAN. 96- and 128-channel networks (925,734 parameters and buffers), with a normalised 8 x 8 projection and nearest-neighbour upsampling in place of transposed convolutions.',
-      'A harder critic to fool. Half the real horses are mirrored, and everything the discriminator sees is shifted by up to 4 pixels, differentiably, so gradients still reach the generator.',
-      'Adaptive augmentation (ADA). Geometric and colour transforms fire with probability p, which rises whenever the discriminator gets too sure of itself on real horses (target 0.3).',
-      'The sequel: a small U-Net for flow matching. Residual blocks with self-attention at 16 x 16 (922,803 parameters), logit-normal training times and averaged (EMA) weights.',
-      'Autoguidance. Sampling steers away from a deliberately weakened copy of the same network, so guidance costs no extra parameters.',
-    ],
-    numbers: [
-      { value: '203.5', label: 'KID x1000, the unmodified starter GAN (lower is better)' },
-      { value: '35.2', label: 'KID x1000, my GAN, mean of runs (best 29.3)' },
-      { value: '2.7', label: 'KID x1000, the flow model, best of two seeds' },
-    ],
-    milestones: [
-      { when: 'Oct 2026', text: 'Starter GAN as a baseline: KID x1000 of 203.5.' },
-      { when: 'GAN', text: 'Wider nets, mirroring and shifts: 39.0. With ADA added: a mean of 35.2.' },
-      { when: 'Nov 2026', text: 'Flow matching; autoguidance cut KID x1000 from about 18 to about 5.' },
-      { when: 'Best', text: '16 x 16 attention and shifted training times: 2.7 and 3.1 over two seeds.' },
-    ],
-    languages: [PYTHON],
-    logos: [python],
-  },
-  {
-    name: 'Physics',
-    title: 'Kinemechanics',
-    image: kinemechanicsImage,
-    shot: kinemechanicsShot,
-    year: 2023,
-    tagline: 'Physics homework that actually moves.',
-    kind: 'Simulation, desktop app',
-    when: 'Built around 2023, on GitHub Mar 2026',
-    tech: ['C++', 'SFML', 'CMake'],
-    gist: 'A desktop physics simulator for A-level style mechanics, written in C++ with SFML. One mode animates projectile motion and works through the kinematic (SUVAT) equations step by step; the other sends two objects into each other for elastic and inelastic collisions. Any simulation can be saved to a text file and loaded back later.',
-    funFact: 'Every projectile weighs exactly 22.5 kg. It says so, right there on the screen.',
-    features: [
-      'SUVAT solver. Enter what you know about displacement, velocity, acceleration and time, and it works out the rest through the rearranged equations.',
-      'Live vectors. Horizontal, vertical and resultant velocity arrows, plus acceleration and force arrows, toggled with checkboxes.',
-      'Collision lab. Set two masses and velocities, then slide the elasticity between inelastic and elastic.',
-      'Save and import. Simulations export to .txt files and load back in.',
-      'Hand-built UI. Custom button and checkbox components, with a state manager switching between the menu, projectile and collision screens.',
-      'One-command build. CMake fetches and compiles SFML automatically.',
-    ],
-    numbers: [
-      { value: '3', label: 'screens: menu, projectiles, collisions' },
-      { value: '5', label: 'SUVAT variables' },
-      { value: '2,500', label: 'lines of C++, roughly' },
-    ],
-    milestones: [
-      { when: 'Around 2023', text: 'Originally written. The clean-up commit later called it "3 year old code".' },
-      { when: 'Mar 2026', text: 'Uploaded to GitHub, cleaned up, given a CMake build that fetches SFML, and screenshotted.' },
-      { when: 'Nov 2026', text: 'Joined the portfolio as the Physics card.' },
-    ],
-    languages: [{ name: 'C++', share: 98.9, color: '#f34b7d' }, { name: 'CMake', share: 1.1, color: '#DA3434' }],
-    logos: [cpp],
-    url: 'https://github.com/Asdy419/SFMLPhysicsProject',
   },
   {
     name: 'Portfolio',
@@ -452,10 +192,293 @@ export const PROJECTS: Project[] = [
     url: 'https://github.com/Asdy419/latifs_website',
   },
   {
+    name: 'Brain AI',
+    title: 'Zero-Shot EEG',
+    image: zeroShotEegImage,
+    shots: [zeroShotEegCycle, zeroShotEegCca, zeroShotEegResults, zeroShotEegErrors],
+    year: 2025,
+    tagline: 'Guessing what someone saw, from their brainwaves alone.',
+    kind: 'Machine learning, brain decoding',
+    when: 'Oct to Dec 2025, coursework',
+    tech: ['Python', 'Jupyter', 'NumPy', 'scikit-learn'],
+    gist: 'Can a model tell what image someone was looking at from 17 channels of EEG, even for objects it never trained on? Working on the ThingsEEG-Text dataset (10 subjects), this project maps brain signals into two "meaning spaces", CLIP text embeddings and CORnet-S image embeddings, using ridge regression. A new trial is classified by finding the closest class prototype, so the model recognises 200 unseen classes without a single labelled EEG example of them.',
+    funFact: "Its mistakes aren't random. The model mostly confuses classes whose prototypes sit close together, with a correlation of about 0.35 between prototype similarity and confusion frequency.",
+    features: [
+      'Analysis before modelling. PCA, covariance spectra and CCA showed ill-conditioned EEG features and a stronger link to image embeddings than to text.',
+      'Ridge regression to tame the ill-conditioning, with alpha tuned on a leakage-free, class-wise 90/10 split.',
+      'Visual-heavy fusion. Text and image scores are blended 0.1 to 0.9, a weighting picked on validation and backed by the CCA result.',
+      'Prototype matching. Cosine similarity against the 200 unseen class prototypes.',
+      'No leakage. All exploration and tuning used the seen classes only; the unseen EEG was touched once, at test time.',
+      'Evaluation beyond accuracy. Ablations, macro precision, recall and F1, precision-recall curves, confusion matrices and t-SNE error analysis.',
+    ],
+    numbers: [
+      { value: '200', label: 'classes it never trained on' },
+      { value: '160,000', label: 'unseen test trials' },
+      { value: '10.65%', label: 'top-1 accuracy, about 21 times chance' },
+      { value: '8.94%', label: 'macro F1 with the fusion, up from 5.52%' },
+    ],
+    milestones: [
+      { when: 'Start', text: 'Explored the data: each trial, 17 channels by 100 samples of 70 to 400 ms after the image, flattened into a 1,700-dimensional vector.' },
+      { when: 'Baseline', text: 'Plain least squares with equal fusion (model A).' },
+      { when: 'Upgrades', text: 'Ridge (model B), then the 0.1 / 0.9 fusion (model C).' },
+      { when: 'Dec 2025', text: 'Evaluated on all 10 subjects and written up as a report.' },
+      { when: 'Aug 2026', text: 'README polished on GitHub.' },
+    ],
+    languages: [{ ...JUPYTER, share: 100 }],
+    logos: [jupyter, python],
+    url: 'https://github.com/Asdy419/Zero-Shot-Brain-Stimuli-Classification',
+  },
+  {
+    name: 'Mystic',
+    title: 'Mystic Messaging',
+    image: mysticMessagingImage,
+    shots: [mysticChat, mysticHelp, mysticFiles, mysticGroups],
+    year: 2025,
+    tagline: 'A command-line chat room with a few magic words.',
+    kind: 'Networking',
+    when: 'Dec 2025, coursework',
+    tech: ['Python', 'sockets', 'threading'],
+    gist: 'A multi-user chat app that lives entirely in the terminal. A threaded TCP server routes messages between clients across a global chat, private messages and groups, and serves shared files that clients can download over TCP or UDP. Every command starts with the magic word "mystic", and "mystic help" lists the lot.',
+    funFact: 'The last two commits are titled "Final" and "Final final". A classic.',
+    features: [
+      'Threads everywhere. One server thread per client; each client runs separate send and receive threads, plus a temporary thread for UDP downloads.',
+      'Four ways to talk. Global chat, private messages, broadcasts and named groups. Join a group and the global chat goes quiet.',
+      'Tagged protocol. Every message carries a tag like SERVER or PM, so the client knows how to show it.',
+      'Two-protocol file transfer. TCP uses start and end markers with size checks; UDP uses a temporary socket, a UDP_READY handshake and 4-byte sequence numbers to put packets back in order.',
+      'Split-proof buffering. Bytes are stitched together across recv() calls, so a half-arrived file marker never leaks into the chat.',
+      'Graceful edges. Unexpected disconnects are handled and duplicate usernames are turned away.',
+    ],
+    numbers: [
+      { value: '11', label: 'mystic commands' },
+      { value: '4', label: 'message channels' },
+      { value: '2', label: 'file transfer protocols' },
+      { value: '100%', label: 'marks for the assignment' },
+    ],
+    milestones: [
+      { when: 'Start', text: 'Socket server broadcasting between clients.' },
+      { when: 'Commands', text: 'The mystic command parser, later rewritten with match-case.' },
+      { when: 'Groups', text: 'Create, join and leave; a group deletes itself when its last member leaves.' },
+      { when: 'Files', text: 'Downloads over TCP, then UDP with sequencing.' },
+      { when: 'Dec 2025', text: "Final version pushed on New Year's Eve. Full marks." },
+    ],
+    languages: [{ ...PYTHON, share: 100 }],
+    logos: [python],
+    url: 'https://github.com/Asdy419/Mystic-Messaging-App',
+  },
+  {
+    name: 'X-Ray',
+    title: 'X-Ray Restoration',
+    image: xrayRestorationImage,
+    shots: [xrayRestored, xrayGeometry, xraySnr, xrayInpaint],
+    year: 2026,
+    tagline: 'Ten steps of classical image surgery to rescue wrecked X-rays.',
+    kind: 'Computer vision, classical image processing',
+    when: 'Feb 2026, coursework',
+    tech: ['Python', 'OpenCV', 'NumPy'],
+    gist: 'A set of 256 x 256 chest X-rays arrived badly damaged: tilted, warped, speckled with salt noise and colour noise, punched with dark circular holes and low on contrast. The images feed a pneumonia classifier, so the job was to restore them without throwing away the detail a classifier relies on. The answer was a ten-stage pipeline built entirely from classical signal processing, no deep learning, that cleans a whole folder of images in one command.',
+    funFact: 'The rotation fix borrows a trick from document scanners: in the frequency domain, a rib cage looks like a tilted cross.',
+    features: [
+      'Rotation fixed in Fourier space. Ribs and spine show up as a cross in the frequency spectrum, so the pipeline scans radial lines every 0.1 degrees and averages the rib and spine deviations to find the tilt.',
+      'Selective de-salting. Only pixels that are both extreme and far from their local median get replaced, so fine anatomy survives.',
+      'Perspective correction. The largest four-cornered contour is found and warped back to a clean square.',
+      'Colour denoising with CBM3D. An adapted, self-contained CBM3D implementation with its own DCT routines denoises in the OPP colour space.',
+      'Hole repair. Dark circular artefacts are detected and filled in with Navier-Stokes inpainting.',
+      'Finishing pass. Chroma low-pass in YCrCb, non-local means, CLAHE on the lightness channel and an unsharp mask on luminance only.',
+    ],
+    numbers: [
+      { value: '10', label: 'stages in the pipeline' },
+      { value: '0.1', label: 'degree rotation search step' },
+      { value: '10%', label: 'gain in signal-to-noise ratio, roughly' },
+      { value: '0', label: 'neural networks used' },
+    ],
+    milestones: [
+      { when: 'Feb 2026', text: 'Got BM3D running, after learning the hard way that it wants one channel, not three.' },
+      { when: 'Pivot', text: 'Dropped the Anscombe transform: the noise was impulse (salt) noise, not Poisson, so it did more harm than good.' },
+      { when: 'Geometry', text: 'Built the Fourier rotation fix and the contour-based perspective warp.' },
+      { when: 'Holes', text: "Masked the dark circles so they couldn't skew contrast enhancement, then inpainted them." },
+      { when: 'Shipped', text: 'Ten-stage pipeline, written report and README, with signal-to-noise up by around 10%.' },
+    ],
+    languages: [PYTHON], // no repo to measure
+    logos: [python],
+  },
+  {
+    name: 'Horses',
+    title: 'Horses From Noise',
+    image: horsesFromNoiseImage,
+    shots: [horsesSamples, horsesModel, horsesResults, horsesAbstract],
+    year: 2026,
+    tagline: 'A generator and a discriminator in an arms race over 32 × 32 horses.',
+    kind: 'Generative models, deep learning coursework',
+    when: 'Oct to Nov 2026, coursework',
+    tech: ['Python', 'PyTorch', 'torch-fidelity'],
+    gist: 'Two assessed Deep Learning practicals, one brief: train from scratch on 4,000 CIFAR-10 horse photos, stay under a million parameters, and generate 1,000 new 32 x 32 horses, scored by Kernel Inception Distance (KID, lower is better). First a DCGAN, where a generator and a discriminator train against each other; then the same horses with flow matching.',
+    features: [
+      'Wider, smoother DCGAN. 96- and 128-channel networks (925,734 parameters and buffers), with a normalised 8 x 8 projection and nearest-neighbour upsampling in place of transposed convolutions.',
+      'A harder critic to fool. Half the real horses are mirrored, and everything the discriminator sees is shifted by up to 4 pixels, differentiably, so gradients still reach the generator.',
+      'Adaptive augmentation (ADA). Geometric and colour transforms fire with probability p, which rises whenever the discriminator gets too sure of itself on real horses (target 0.3).',
+      'The sequel: a small U-Net for flow matching. Residual blocks with self-attention at 16 x 16 (922,803 parameters), logit-normal training times and averaged (EMA) weights.',
+      'Autoguidance. Sampling steers away from a deliberately weakened copy of the same network, so guidance costs no extra parameters.',
+    ],
+    numbers: [
+      { value: '203.5', label: 'KID x1000, the unmodified starter GAN (lower is better)' },
+      { value: '35.2', label: 'KID x1000, my GAN, mean of runs (best 29.3)' },
+      { value: '2.7', label: 'KID x1000, the flow model, best of two seeds' },
+    ],
+    milestones: [
+      { when: 'Oct 2026', text: 'Starter GAN as a baseline: KID x1000 of 203.5.' },
+      { when: 'GAN', text: 'Wider nets, mirroring and shifts: 39.0. With ADA added: a mean of 35.2.' },
+      { when: 'Nov 2026', text: 'Flow matching; autoguidance cut KID x1000 from about 18 to about 5.' },
+      { when: 'Best', text: '16 x 16 attention and shifted training times: 2.7 and 3.1 over two seeds.' },
+    ],
+    languages: [PYTHON],
+    logos: [python],
+  },
+  {
+    name: 'Physics',
+    title: 'Kinemechanics',
+    image: kinemechanicsImage,
+    shots: [physicsMenu, physicsCollisions, physicsProjectile, physicsSuvat],
+    year: 2023,
+    tagline: 'Physics homework that actually moves.',
+    kind: 'Simulation, desktop app',
+    when: 'Built around 2023, on GitHub Mar 2026',
+    tech: ['C++', 'SFML', 'CMake'],
+    gist: 'A desktop physics simulator for A-level style mechanics, written in C++ with SFML. One mode animates projectile motion and works through the kinematic (SUVAT) equations step by step; the other sends two objects into each other for elastic and inelastic collisions. Any simulation can be saved to a text file and loaded back later.',
+    funFact: 'Every projectile weighs exactly 22.5 kg. It says so, right there on the screen.',
+    features: [
+      'SUVAT solver. Enter what you know about displacement, velocity, acceleration and time, and it works out the rest through the rearranged equations.',
+      'Live vectors. Horizontal, vertical and resultant velocity arrows, plus acceleration and force arrows, toggled with checkboxes.',
+      'Collision lab. Set two masses and velocities, then slide the elasticity between inelastic and elastic.',
+      'Save and import. Simulations export to .txt files and load back in.',
+      'Hand-built UI. Custom button and checkbox components, with a state manager switching between the menu, projectile and collision screens.',
+      'One-command build. CMake fetches and compiles SFML automatically.',
+    ],
+    numbers: [
+      { value: '3', label: 'screens: menu, projectiles, collisions' },
+      { value: '5', label: 'SUVAT variables' },
+      { value: '2,500', label: 'lines of C++, roughly' },
+    ],
+    milestones: [
+      { when: 'Around 2023', text: 'Originally written. The clean-up commit later called it "3 year old code".' },
+      { when: 'Mar 2026', text: 'Uploaded to GitHub, cleaned up, given a CMake build that fetches SFML, and screenshotted.' },
+      { when: 'Nov 2026', text: 'Joined the portfolio as the Physics card.' },
+    ],
+    languages: [{ name: 'C++', share: 98.9, color: '#f34b7d' }, { name: 'CMake', share: 1.1, color: '#DA3434' }],
+    logos: [cpp],
+    url: 'https://github.com/Asdy419/SFMLPhysicsProject',
+  },
+  {
+    name: 'TSP',
+    title: 'TSP Solvers',
+    image: tspImage,
+    shots: [tspSolvedTours, tspGaDiagram, tspPsoSwarm, tspBranchBound],
+    year: 2026,
+    tagline: 'Evolution versus a swarm, racing to find the shortest round trip.',
+    kind: 'Optimisation, metaheuristics',
+    when: 'Jan to Feb 2026, coursework',
+    tech: ['Python standard library only'],
+    gist: "The Travelling Salesman Problem asks for the shortest route that visits every city once and returns home. The number of possible routes explodes factorially, so brute force is hopeless. This project built two nature-inspired solvers inside a strict coursework skeleton, a Genetic Algorithm and a discrete Particle Swarm Optimiser, then pushed both well beyond their lecture versions with custom operators and local search. Both run under time limits on nothing but Python's standard library.",
+    funFact: 'Particle swarms were designed for smooth, continuous spaces. Here the particles "fly" through permutations, so a velocity is really a to-do list of city swaps.',
+    features: [
+      'Breeding. OX4 crossover and tournament selection make good tours from good parents.',
+      'Two-phase mutation. Improving 2-opt moves paired with inverted displacement.',
+      'A head start. Nearest-neighbour tours seed about 5% of the first generation, enough to help without killing diversity, and elitism keeps the best tours alive.',
+      'Velocity, redefined. For permutations a velocity is a list of city swaps, built with custom ODOT, SUB, ADD_VEL and MULT_VEL operators.',
+      'Follow the leader. The social pull targets the global best, with iterative 2-opt refinement on top.',
+      'Two moods. Attractor and depressor modes switch on swarm diversity to escape local optima.',
+    ],
+    numbers: [
+      { value: '2', label: 'algorithms, one problem' },
+      { value: '7', label: "city files with the cohort's best tour" },
+      { value: '0', label: 'third-party libraries' },
+      { value: '5%', label: 'of generation one seeded by nearest neighbour' },
+    ],
+    milestones: [
+      { when: 'Jan 2026', text: 'Genetic algorithm built inside the skeleton, with nearest-neighbour seeding.' },
+      { when: 'Feb 2026', text: 'Particle swarm rebuilt around discrete velocity operators and 2-opt.' },
+      { when: 'Debug', text: 'Found why the mode switch never fired: with 20 particles, diversity tops out near 0.44, below the 0.7 trigger. Thresholds retuned.' },
+      { when: 'Result', text: 'Best tours in the cohort on 7 of the city files.' },
+    ],
+    languages: [PYTHON], // no repo to measure
+    logos: [python],
+  },
+  {
+    name: 'Companion',
+    title: 'CompanionAI',
+    image: companionAiImage,
+    shots: [companionCheckin, companionInteractions, companionResults, companionHandover],
+    year: 2026,
+    tagline: 'A wellness virtual pet with a mind of its own, built for an IBM brief.',
+    kind: 'Game dev, team project for an IBM client',
+    when: 'Nov 2025 to Apr 2026, team of five',
+    tech: ['JavaScript', 'Phaser 3', 'Supabase'],
+    gist: "A five-person university team took on a live brief from IBM: a wellness app built around an interactive virtual pet. As the only developer on the team with game-framework experience, I built the pet's core interaction layer in Phaser 3, then reorganised the architecture so the pet's behaviour logic and its rendering could change independently. The finished build was presented to five IBM stakeholders.",
+    funFact: "The pet doesn't follow a script. A Markov chain rolls the dice on its next move, so no two sessions play out quite the same.",
+    features: [
+      'Behaviour on a Markov chain. A state machine with probabilistic transitions decides what the pet does next, so it never just loops through a script.',
+      'Core interactions. Feeding, patting and animated movement.',
+      'Clean architecture. State, Factory and Observer patterns decouple behaviour logic from rendering.',
+      'LLM integration, with its constraints documented for the client.',
+      'Plain-English design docs. Framework-agnostic diagrams let non-technical teammates and IBM sign off architectural decisions.',
+      'Team rhythm. Weekly meetings, organised by me, kept five people building one app.',
+    ],
+    numbers: [
+      { value: '5', label: 'people on the team' },
+      { value: '5', label: 'IBM stakeholders at the final presentation' },
+      { value: '3', label: 'design patterns in the refactor' },
+      { value: '6', label: 'months from brief to delivery' },
+    ],
+    milestones: [
+      { when: 'Nov 2025', text: 'Live brief from IBM; team of five formed.' },
+      { when: 'Build', text: 'Picked up Phaser 3 and built the interaction layer: Markov behaviour, movement, feeding and patting.' },
+      { when: 'Mar 2026', text: 'Pet class wired to the full state machine, so any pet can be spawned and behave correctly.' },
+      { when: 'Refactor', text: 'State, Factory and Observer patterns split behaviour from rendering.' },
+      { when: 'Apr 2026', text: 'Delivered and presented to five IBM stakeholders.' },
+    ],
+    languages: [{ name: 'JavaScript', color: '#f1e05a' }],
+    logos: [javascript],
+  },
+  {
+    name: 'Bias Audit',
+    title: 'Toxicity Bias Audit',
+    image: toxicityBiasAuditImage,
+    shots: [toxicityOverview, toxicityRepresentation, toxicityMean, toxicityVsd],
+    year: 2026,
+    tagline: 'Does a moderation dataset teach models that mentioning certain identities is "toxic"?',
+    kind: 'Responsible AI, data audit',
+    when: 'Mar 2026, coursework',
+    tech: ['Python', 'pandas', 'seaborn', 'Jupyter'],
+    gist: 'Framed as an audit for the Trust and Safety team of a fictional platform, CivicSphere, this project took apart the Jigsaw Unintended Bias dataset, the kind of data used to train comment-moderation models. The core question: are comments that simply mention certain identity groups labelled toxic more often? Value Sensitive Design framed the ethics, a stakeholder analysis mapped who gets hurt, and a hands-on data audit supplied the evidence, all squeezed into an eight-minute presentation.',
+    funFact: 'Every label in the dataset was made by a human, which is exactly why the missing annotator demographics matter so much.',
+    features: [
+      'Class balance check. The 10,000-row sample is split 50/50, while the full dataset runs about 11:1 non-toxic to toxic, which changes how every result should be read.',
+      'Annotation coverage. 76% of comments carry no identity labels at all, so bias can only be measured on about a quarter of the data.',
+      'Subgroup sizes. Some groups have as few as 13 labelled examples, far too few for confident conclusions.',
+      'Label skew. Toxic rates swing from 32% to 85% across identity subgroups against a 50% baseline, with marginalised groups sitting well above it.',
+      'Documentation critique. No annotator demographics, a dropped "Hard to Say" option and loosely defined subtype labels.',
+      'Two recommendations. A bias-monitoring dashboard in the spirit of Model Cards, and counterfactual data augmentation, each with its limitations spelled out.',
+    ],
+    numbers: [
+      { value: '24', label: 'identity groups audited' },
+      { value: '76%', label: 'of comments with no identity labels' },
+      { value: '32-85%', label: 'toxic rate across subgroups' },
+      { value: '13', label: 'examples in the smallest groups' },
+    ],
+    milestones: [
+      { when: 'Mar 2026', text: 'Explored the data and checked the class balance: an artificially even 50/50 split.' },
+      { when: 'Coverage', text: 'Mapped which comments carry any identity labels at all (about 24%).' },
+      { when: 'Core finding', text: 'Measured the toxic rate per identity group, the "quiet error" the brief was hunting for.' },
+      { when: 'The story', text: 'Built the stakeholder analysis, audit table and recommendations, backed by the literature (Friedman, Dixon, Mitchell, Borkan and colleagues).' },
+      { when: 'Presented', text: 'Eight minutes, one fictional client, two recommendations.' },
+    ],
+    languages: [{ ...JUPYTER, share: 100 }],
+    logos: [jupyter, python],
+  },
+  {
     name: 'Clash',
     title: 'Unity Clash',
     image: unityClashImage,
-    shot: unityClashShot,
+    shots: [clashTitle, clashMenu, clashStage, clashCode],
     year: 2022,
     tagline: 'An arena platformer, still in the workshop.',
     kind: 'Game dev',
@@ -482,5 +505,39 @@ export const PROJECTS: Project[] = [
     logos: [csharp],
     url: 'https://github.com/Asdy419/Unity-Clash',
     links: [{ label: 'Devlog', url: 'https://youtu.be/3bcJZl15AQw' }],
+  },
+  {
+    name: 'Bitcoin',
+    title: 'Bitcoin Classifier',
+    image: bitcoinClassifierImage,
+    shots: [bitcoinBlockChain, bitcoinVoronoi, bitcoinHashTree, bitcoinPaymentChannel],
+    year: 2026,
+    tagline: 'One deadline, four people, one prize.',
+    kind: 'Side quest, hackathon',
+    when: '2026, hackathon team lead',
+    gist: "At ETH Hack Oxford 2026 I led a team of four through scoping, splitting the work and delivering a classifier that flags likely rug pulls, the crypto scam where a project's creators cash out and vanish with investors' money. It uses k-nearest neighbours, and other team members built a website to deploy it. It took home the Best Trust and Safety Tool prize.",
+    funFact: "k-nearest neighbours never trains. It keeps every labelled example, and each new case is decided by a vote among the ones it sits closest to.",
+    features: [
+      'Rug-pull detection. A k-nearest-neighbours classifier labels each new case, rug pull or not, by a vote of the k most similar known cases.',
+      'Easy to explain. A flag comes down to which known cases a new one looks most like.',
+      'Deployed on the web. Other team members built a website to deploy the classifier.',
+      'Scoped to ship. An idea sized for four people and one deadline.',
+      'Split by strength. Work delegated across the team so everything landed in time.',
+      'Built for trust and safety, the category it went on to win.',
+    ],
+    numbers: [
+      { value: '4', label: 'people, me leading' },
+      { value: '2', label: 'parts: the classifier and the website deploying it' },
+      { value: '1', label: 'prize: Best Trust and Safety Tool' },
+    ],
+    milestones: [
+      { when: 'Team', text: 'Four people, me leading.' },
+      { when: 'Scope', text: 'Settled on rug-pull detection and split the work.' },
+      { when: 'Build', text: 'k-nearest-neighbours classifier delivered on deadline.' },
+      { when: 'Deploy', text: 'Teammates built a website to deploy it.' },
+      { when: 'Prize', text: 'Best Trust and Safety Tool.' },
+    ],
+    languages: [JUPYTER], // no repo to measure
+    logos: [jupyter],
   },
 ]

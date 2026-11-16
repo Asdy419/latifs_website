@@ -132,15 +132,11 @@
   box-shadow: inset calc(3 * var(--px)) calc(3 * var(--px)) 0 rgb(0 0 0 / 0.15);
 }
 
-/* The project's picture (Project.image): most of the panel, 78×70 art px,
-   fitted without cropping (the language logos tuck into the corner below) */
+/* The project's picture (Project.image): its size and place are set by
+   ProjectCard.ts (ART), so every picture is centred on the same spot with
+   about the same area */
 .project-card-image {
   position: absolute;
-  left: calc(4 * var(--px));
-  top: calc(4 * var(--px));
-  width: calc(78 * var(--px));
-  height: calc(70 * var(--px));
-  object-fit: contain;
   image-rendering: pixelated;
 }
 

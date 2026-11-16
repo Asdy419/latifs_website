@@ -45,8 +45,8 @@
 
 /* ── A polaroid ──────────────────────────────────────────────────────────── */
 /* Each hangs from its pin at its own slight tilt (--tilt, from Polaroid.ts).
-   Selected, it swings until it hangs straight (Polaroid.bounce); the one left
-   behind springs back to its tilt. */
+   Selected, it does the menu buttons' jump and a quick little wobble as it
+   straightens (Polaroid.bounce); the one left behind tilts back. */
 .polaroid {
   position: relative;
   width: calc(68 * var(--art-px));
@@ -54,7 +54,7 @@
   cursor: pointer;
   transform: rotate(var(--tilt, 0deg));
   transform-origin: 50% 0; /* the pin */
-  transition: transform 0.45s cubic-bezier(0.3, 1.6, 0.5, 1);
+  transition: transform 0.2s ease-out;
 }
 
 .polaroid.selected {
@@ -136,7 +136,8 @@
 
 /* ── Selected: the main menu's highlight (see ButtonMenu.css) ────────────────
    A red copy of the frame sits 2px down-right while the frame lifts 2px
-   up-left; the copy pulses red ↔ pink. The jump is utils/selectJump.ts. */
+   up-left; the copy pulses red ↔ pink. The jump is utils/selectJump.ts, as
+   on the menu. */
 .polaroid.selected .polaroid-frame {
   transform: translate(calc(-2 * var(--art-px)), calc(-2 * var(--art-px)));
   box-shadow: inset calc(-2 * var(--art-px)) calc(-2 * var(--art-px)) 0 #ddd5cc; /* the highlight replaces the shadow */
@@ -147,6 +148,13 @@
   inset: 0;
   background: #b00206;
   opacity: 0;
+}
+
+/* the selected one's frame and highlight get layers of their own while they
+   jump (only that one: a gallery can hold dozens of photos) */
+.polaroid.selected .polaroid-frame,
+.polaroid.selected .polaroid-highlight {
+  will-change: transform;
 }
 
 .polaroid.selected .polaroid-highlight {
