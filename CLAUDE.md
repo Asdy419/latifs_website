@@ -234,7 +234,9 @@ Component/scene CSS sits next to its `.ts` file and is imported by it.
     would ship a second PNG copy). Masks take the URL from a CSS variable set in TS
     (`--tv-mask`).
   - Audio isn't converted automatically: `MenuAccept` is MP3, and short UI blips stay WAV
-    (MP3 adds start latency). Encode new sounds the same way.
+    (MP3 adds start latency). Encode new sounds the same way. `MenuWoosh` (WAV) plays when a
+    project's details open, in place of the confirm sound (the user's pick: copied from
+    `reference/` with its silent last 0.23 s trimmed); Enter again (GitHub) still confirms.
   - TV static is drawn in code, not a video (`TvStatic.ts`): the same static on every TV
     (the menu's and the Projects pop-up's, as the user asked), one speckle per art pixel,
     drawn once into a 4-frame canvas strip and rolled at 30fps by a CSS transform (on the
@@ -348,10 +350,15 @@ Component/scene CSS sits next to its `.ts` file and is imported by it.
     title and buttons; B / Enter / M still work); the background rings keep moving.
     Everything inside is measured in `--pp` (the panel's art pixel), and every gap is one
     of four steps (`--gap-xs/s/m/l`: 2, 4, 8, 12; 16 between the TV and the text), with one
-    layout for every project (no per-project variants). Header: the project's picture, the
-    title (large text-font text) over a subtitle line (kind, when; it wraps to a second
-    line when long, as CompanionAI's and Horses' do beside the bars); at the right, the
-    language logos and the language bar, a pixel-art meter (in pp: black frame with
+    layout for every project (no per-project variants). Header: the project's picture
+    (24 pp, centred beside both lines, reaching 2 pp past them without making the header
+    taller), the title (large text-font text) over a subtitle line lined up with it (kind,
+    when; it wraps to a second line when long, as CompanionAI's and Horses' do beside the
+    bars). The title is centred over the TV's antennas (`centreNameOnTV`: it moves the
+    picture and both lines right together, never past the panel's edge, so long names on
+    the narrowest phones stop short; twice, as a rewrapped subtitle can shrink the TV). At
+    the right, the language logos, their middle level with the bar's (the user's call), and
+    the language bar, a pixel-art meter (in pp: black frame with
     notched corners, each segment with a lit top row and a shaded bottom row, 1 pp black
     dividers, a 2 pp minimum so a 0.6% share still shows) with its legend under it (flat
     square keys, no stroke). Every bar is the same length, the Portfolio's (its four
@@ -371,26 +378,55 @@ Component/scene CSS sits next to its `.ts` file and is imported by it.
     flush, its edge landed mid-pixel and the panel showed through as a light line. The TV
     fills the middle's height: as wide as its column (`--tv-column`: 196 pp; 194 on phones;
     166 on the narrower phones, where the text needs the width) unless that would make it
-    taller than the middle, then as tall (a container query), top-aligned, the antennas'
-    tips level with the tabs. The section's text is a touch smaller (4.4 pp, the 8px floor
-    on phones; line pitch 1.3 on the narrower phones) and its block is centred on the TV's
-    middle (`centreOnTV`: a bottom spacer, which long text squeezes away first). The
-    Overview's tagline is big (1.7em; 1.4 on the narrower phones), wrapping. Opening tunes
-    the TV in from static (`OPEN_TUNE_MS`); switching tabs tunes it (`tuneTV`): rolling
-    static for at least `TUNE_MS` and until the next picture has decoded, then the
-    picture; no pictures means still static. The Overview's parts, the Features bullets
-    and the Timeline's milestones are 8 pp apart, closing up (to 2, 4 and 2 pp) where a
-    tab needs the room (spacer items that shrink).
+    taller than the middle, then as tall (a container query), top-aligned, raised 4 pp
+    above the tabs' top (the user's call; level with them on phones). The tabs are big
+    (1.25em: the user wanted them to fill the room). The section's text is a touch smaller
+    (4.4 pp, the 8px floor on phones; line pitch 1.3 on the narrower phones) and its block
+    is centred on the TV's middle (`centreOnTV`: a top and a bottom spacer, which long text
+    squeezes away first), except the Overview's, under the tabs (the user's call); every
+    tab's text sits `--text-lower` (4 pp) lower than that (the user's call), through the
+    same spacers, so it gives the room back when a tab is full.
+    The Overview's tagline is big (1.7em; 1.4 on the narrower phones), wrapping; its fun
+    fact is out of the section, a yellow box under it whose bottom is level with the TV's
+    (`--tv-under`, set by `centreOnTV`; at the column's bottom on phones, which have no
+    height to spare: the narrowest leave ~27 pp under the TV), its red title ("Fun fact!!")
+    as big as the tagline (only the title: the user's call). The text column's blocks are
+    4 pp apart.
+    Opening tunes the TV in from static (`OPEN_TUNE_MS`, after the opening animation when
+    there is one); switching tabs tunes it
+    (`tuneTV`): rolling static for at least `TUNE_MS` and until the next picture has
+    decoded, then the picture; no pictures means still static. The Overview's parts, the
+    Features bullets and the Timeline's milestones are 8 pp apart, closing up (to 2, 4 and
+    2 pp) where a tab needs the room (spacer items that shrink).
   - The parallelogram experiment (`SLANTED` in ProjectPopup.ts, on): the user is trying a
     Sonic Mania dialog look, and asked for it to be easy to revert (set `SLANTED` false;
-    its CSS is one block at the end of ProjectPopup.css). The pop-up becomes a dark
-    rectangle over the whole screen with a light parallelogram across it, cutting off the
-    top-left and bottom-right corners as far as the content allows (the content stays
-    exactly where it is: the user's call); the tabs, the Fun fact box and the buttons
-    (black bars with a pink shadow, just the word, like the reference's OK) lean at the
-    same angle (`--lean`, about 27 degrees: the user wanted one angle for every shape).
+    its CSS is one block at the end of ProjectPopup.css). The panel becomes a dark band
+    across the screen's whole width but only as tall as the panel always was, the dimmed
+    page showing above and below (the user's call: a version over the whole screen was
+    rejected), with a blue parallelogram along it (#259cfb, the user's swatch), cutting off
+    the band's top-left and bottom-right corners as far as the content allows (the content
+    stays exactly where it is: the user's call), and white text on it (#f7f3f7 with
+    PixelText's default shadow; text on its own box keeps its colours). The tabs and the
+    buttons lean at the same angle (`--lean`, about 27 degrees: the user wanted one angle
+    for every shape); the Fun fact was a parallelogram too, then went back to its yellow
+    box. The buttons are big black bars with the words well inside (the user tried them
+    standing out of the bar's top, like the reference's OK, and preferred them inside),
+    a little apart and in from the right, their shadow the site's pulsing red highlight
+    (red, with a pink `.project-popup-btn-pulse` layer fading in and out over it: the
+    boxes' compositor-only pulse; not on the parallelogram itself, which the user turned
+    down). A negative margin keeps the footer as tall as with the plain buttons, and they
+    and "Built with" sit midway between the footer's rule and the band's bottom (the
+    user's call: nudged down, as there's more room under them than over them); three
+    buttons (Unity Clash's Devlog) sit closer together so they stay on one row at 16:9.
     A version that skewed the whole panel (its rows stepping along the lean) was replaced.
-    Right: tabs Overview (tagline, gist, fun fact) / Features / Numbers /
+    Opening (every time a box opens): copied from the user's clip `reference/Desktop
+    2026.11.16 - 02.41.16.02.DVR - Trim.mp4` (a Sonic Mania dialog), measured frame by
+    frame: a line about one art pixel tall grows from the middle to the screen's sides
+    (0-117 ms), opens into the band at a steady speed (to 250 ms), then the face slides in
+    from the left with everything on it, easing out (to 433 ms: `OPENING_MS`). Transforms
+    only, plain numbers in the keyframes (Safari and var() in transform keyframes); off for
+    reduced motion. The clip's OK jumps as it lands; the user didn't want the buttons to.
+    Right: tabs Overview (tagline, gist; the fun fact under them) / Features / Numbers /
     Timeline (left/right or click; up/down scroll), from the Project Files' sections.
     Footer: View on GitHub, other links, Close. Every section of every project fits
     without scrolling at 16:9 and on 844 x 390 and 667 x 375 phones: re-check that after

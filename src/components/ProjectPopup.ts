@@ -14,9 +14,10 @@ type Section = (typeof SECTIONS)[number]
 const OPEN_CLASS = 'project-popup-open'
 
 /**
- * The user's experiment: the panel, its tabs, the Fun fact box and the buttons as
- * parallelograms, after a Sonic Mania dialog (ProjectPopup.css, "Experiment: parallelograms").
- * Set to false to put everything back as it was.
+ * The user's experiment: the panel, its tabs and the buttons as parallelograms, after a
+ * Sonic Mania dialog (ProjectPopup.css, "Experiment: parallelograms"):
+ * a blue face with white text, and buttons with the site's pulsing red highlight. Set to
+ * false to put everything back as it was.
  */
 const SLANTED = true
 
@@ -65,9 +66,11 @@ export class ProjectPopup {
     el.innerHTML = `
       <div class="project-popup-panel" role="dialog" aria-modal="true" tabindex="-1">
         <header class="project-popup-header">
-          <div class="project-popup-titles">
-            <h2 class="project-popup-heading"></h2>
-            <div class="project-popup-meta"></div>
+          <div class="project-popup-ident">
+            <div class="project-popup-titles">
+              <h2 class="project-popup-heading"></h2>
+              <div class="project-popup-meta"></div>
+            </div>
           </div>
           <div class="project-popup-langs">
             <div class="project-popup-logos"></div>
@@ -105,8 +108,9 @@ export class ProjectPopup {
     const panel = q<HTMLElement>('.project-popup-panel')
     panel.setAttribute('aria-label', project.title)
 
-    // top: picture and title (the year heads the Timeline tab instead: the user's call, no repeats)
-    if (project.image) q('.project-popup-header').prepend(image(project.image, 'project-popup-icon'))
+    // top: the title with the project's picture beside it, over the TV (centreNameOnTV; the year
+    // heads the Timeline tab instead: the user's call, no repeats)
+    if (project.image) q('.project-popup-ident').prepend(image(project.image, 'project-popup-icon'))
     q('.project-popup-heading').append(label(project.title))
 
     // left: the screenshot, on the pixel-art TV's screen (static when there isn't one)
@@ -176,6 +180,12 @@ export class ProjectPopup {
       a.append(label(link.label))
       close.before(a)
     }
+    // the experiment's buttons: the pink layer of their pulsing red highlight (ProjectPopup.css)
+    if (SLANTED) {
+      for (const btn of el.querySelectorAll('.project-popup-btn')) {
+        btn.prepend(Object.assign(document.createElement('span'), { className: 'project-popup-btn-pulse' }))
+      }
+    }
     // bottom, under the TV: what it was built with (tools as well as languages), on one line
     if (project.tech?.length) {
       const built = document.createElement('div')
@@ -196,9 +206,9 @@ export class ProjectPopup {
     document.documentElement.classList.add(OPEN_CLASS)
     this.el = el
     this.section = 'Overview'
-    this.tuneTV(0, { minimum: OPEN_TUNE_MS }) // switches on like a TV: static, then the first picture
-    this.showSection('Overview')
-    this.centreOnTV()
+    // switches on like a TV: static, then the first picture (after the opening has landed)
+    this.tuneTV(0, { minimum: (SLANTED ? OPENING_MS : 0) + OPEN_TUNE_MS })
+    this.showSection('Overview') // (and lines its text up with the TV: centreOnTV)
     window.addEventListener('resize', () => this.centreOnTV(), { signal: this.listeners.signal })
     panel.focus({ preventScroll: true })
   }
@@ -299,38 +309,70 @@ export class ProjectPopup {
       parts.append(part)
     })
     box.replaceChildren(parts)
+    box.dataset.section = name // (the Overview's text sits right under the tabs: ProjectPopup.css)
     box.scrollTop = 0
+    // the Overview's fun fact: under the section, at the bottom of the column, right above the
+    // footer's rule (the user's call); the section, shorter for it, centres the rest on the TV
+    this.el.querySelector('.project-popup-main > .project-popup-fact')?.remove()
+    if (name === 'Overview' && project.funFact) box.after(funFact(project.funFact))
+    this.centreOnTV()
   }
 
   /**
    * Lines the section's text up with the TV: its middle level with the TV's middle (the
-   * user's call), as far as the room under the tabs allows. The section centres its block
-   * over a space at its bottom (ProjectPopup.css), as tall as twice the drop from the TV's
-   * middle to the section's: so measured from the boxes alone, not the text (which only
-   * settles once its labels have wrapped). Long text squeezes the space away first.
+   * user's call), as far as the room in the section allows. The section centres its block
+   * between a space at its top and one at its bottom (ProjectPopup.css), one of them as tall
+   * as twice the distance between the TV's middle and the section's: so measured from the
+   * boxes alone, not the text (which only settles once its labels have wrapped). Long text
+   * squeezes the space away first. Again on every tab: the fun fact makes the section shorter.
+   * (The Overview's text ignores it, right under the tabs: ProjectPopup.css.)
    */
   private centreOnTV(): void {
     const box = this.el?.querySelector<HTMLElement>('.project-popup-section')
     const tv = this.el?.querySelector<HTMLElement>('.project-popup-shot')
-    if (!box || !tv) return
-    const s = box.getBoundingClientRect(), t = tv.getBoundingClientRect()
+    const main = this.el?.querySelector<HTMLElement>('.project-popup-main')
+    if (!box || !tv || !main) return
+    this.centreNameOnTV(tv) // (first: a longer line under the title can make the middle shorter)
+    const t = tv.getBoundingClientRect()
+    // the fun fact's bottom level with the TV's (the user's call): up off the column's bottom
+    // by the room under the TV (ProjectPopup.css); set first, as it makes the section shorter
+    main.style.setProperty('--tv-under', `${Math.max(0, main.getBoundingClientRect().bottom - t.bottom)}px`)
+    const s = box.getBoundingClientRect()
     const drop = (s.top + s.bottom) / 2 - (t.top + t.bottom) / 2
     box.style.setProperty('--tv-centre', `${Math.max(0, 2 * drop)}px`)
+    box.style.setProperty('--tv-raise', `${Math.max(0, -2 * drop)}px`)
   }
+
+  /**
+   * Centres the project's name over the TV's antennas (the user's call), with its picture
+   * beside it and the line under it: they move right together as far as that takes, never
+   * left of the panel's edge (a long name, or a narrow phone's TV). Twice: moving them can wrap
+   * the line under the title, making the middle, and so the TV, a little smaller.
+   */
+  private centreNameOnTV(tv: HTMLElement): void {
+    const ident = this.el?.querySelector<HTMLElement>('.project-popup-ident')
+    const name = this.el?.querySelector<HTMLElement>('.project-popup-heading')
+    if (!ident || !name) return
+    for (let pass = 0; pass < 2; pass++) {
+      const n = name.getBoundingClientRect(), t = tv.getBoundingClientRect()
+      const shift = (t.left + t.right) / 2 - (n.left + n.right) / 2
+      ident.style.marginLeft = `${Math.max(0, (parseFloat(ident.style.marginLeft) || 0) + shift)}px`
+    }
+  }
+}
+
+/** The Overview's fun fact, in its box (ProjectPopup.css). */
+function funFact(text: string): HTMLElement {
+  const fact = document.createElement('div')
+  fact.className = 'project-popup-fact'
+  fact.append(label('Fun fact!!', 'project-popup-fact-title'), paragraph(text, 'project-popup-text'))
+  return fact
 }
 
 function sectionContent(project: Project, name: Section): HTMLElement[] {
   switch (name) {
-    case 'Overview': {
-      const parts = [paragraph(project.tagline, 'project-popup-tagline'), paragraph(project.gist, 'project-popup-text')]
-      if (project.funFact) {
-        const fact = document.createElement('div')
-        fact.className = 'project-popup-fact'
-        fact.append(label('Fun fact', 'project-popup-fact-title'), paragraph(project.funFact, 'project-popup-text'))
-        parts.push(fact)
-      }
-      return parts
-    }
+    case 'Overview':
+      return [paragraph(project.tagline, 'project-popup-tagline'), paragraph(project.gist, 'project-popup-text')]
     case 'Features': {
       const list = document.createElement('ul')
       list.className = 'project-popup-points'
@@ -648,6 +690,12 @@ function yearFlag(year: number): HTMLElement {
 const TUNE_MS = 260
 /** The same when the pop-up opens: a little longer, like a set warming up. */
 const OPEN_TUNE_MS = 420
+
+/**
+ * The experiment's opening (ProjectPopup.css, "The opening"): the band opens (250 ms), then the
+ * panel slides in (183 ms) and has landed. Keep this in step with the CSS.
+ */
+const OPENING_MS = 433
 
 /** Resolves once the image at `src` is loaded and decoded (or failed to), so showing it is instant. */
 function decodeImage(src: string): Promise<void> {

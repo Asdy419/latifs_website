@@ -1,5 +1,6 @@
 import menuAcceptUrl from '../assets/shared/MenuAccept.mp3'
 import menuBleepUrl from '../assets/shared/MenuBleep.wav'
+import menuWooshUrl from '../assets/shared/MenuWoosh.wav'
 
 /**
  * Sound effects, played through the Web Audio API:
@@ -25,6 +26,8 @@ export const sfx = {
   accept: effect(menuAcceptUrl),
   /** Selection moved */
   bleep: effect(menuBleepUrl),
+  /** A project's details opening (the user's pick; its silent tail trimmed off) */
+  woosh: effect(menuWooshUrl),
 }
 
 // Decoding happens in an OfflineAudioContext so nothing audible is created

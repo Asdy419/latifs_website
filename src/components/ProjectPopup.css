@@ -76,7 +76,8 @@
   gap: var(--gap-m);
   /* as wide as leaves the same margin at the sides as above and below (the dimmed page shows
      an even frame round it), up to a width that keeps lines readable on very wide screens */
-  width: min(calc(100vw - (1 - var(--scale)) * var(--screen-h)), calc(560 * var(--pp)));
+  --width: min(calc(100vw - (1 - var(--scale)) * var(--screen-h)), calc(560 * var(--pp)));
+  width: var(--width);
   height: calc(var(--scale) * var(--screen-h));
   padding: var(--gap-l);
   border: calc(2 * var(--pp)) solid #000;
@@ -108,6 +109,16 @@
   .project-popup-panel .project-popup-flag {
     font-size: 1.6em;
   }
+
+  /* no height to spare: the TV level with the tabs, and the fun fact at the column's bottom,
+     not level with the TV's (the narrowest phones' TV leaves ~27 pp under it) */
+  .project-popup-panel .project-popup-side {
+    margin-top: 0;
+  }
+
+  .project-popup-panel .project-popup-fact {
+    margin-bottom: 0;
+  }
 }
 
 @media (orientation: landscape) and (max-height: 500px) and (max-aspect-ratio: 2 / 1) {
@@ -123,7 +134,8 @@
     --column-gap: var(--gap-l);
   }
 
-  .project-popup-panel .project-popup-section {
+  .project-popup-panel .project-popup-section,
+  .project-popup-panel .project-popup-fact {
     --pixel-line-height: 1.3;
   }
 
@@ -150,11 +162,23 @@
   border-bottom: var(--rule);
 }
 
-/* the project's own picture (Project.image), as on its box, as tall as the title and the line under it */
+/* the picture and the titles beside it: moved right by ProjectPopup.centreNameOnTV, so the
+   name sits centred over the TV's antennas (the user's call) */
+.project-popup-ident {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--gap-m);
+}
+
+/* the project's own picture (Project.image), as on its box, centred beside the title and the
+   line under it (the user's call, after trying it level with the title), a little taller than
+   the two (the user's call): the negative margin keeps the header as tall as they are */
 .project-popup-icon {
   flex: none;
-  width: calc(20 * var(--pp));
-  height: calc(20 * var(--pp));
+  width: calc(24 * var(--pp));
+  height: calc(24 * var(--pp));
+  margin-block: calc(-2 * var(--pp));
   object-fit: contain;
   image-rendering: pixelated;
 }
@@ -167,13 +191,14 @@
 }
 
 .project-popup-heading {
+  align-self: flex-start; /* (as wide as the name: ProjectPopup.centreNameOnTV centres it) */
   margin: 0;
   font-size: 2.2em;
   font-weight: normal;
   line-height: 0;
 }
 
-/* under the title: what kind of project (in red), and when */
+/* under the title, lined up with it (the user's call): what kind of project (in red), and when */
 .project-popup-meta {
   display: flex;
   flex-wrap: wrap;
@@ -210,6 +235,13 @@
 .project-popup-side {
   overflow: hidden;
   container-type: size;
+  margin-top: calc(-4 * var(--pp)); /* the TV a little higher than the tabs (the user's call) */
+}
+
+/* the text column's blocks close together: the Overview's text right under the tabs (the
+   user's call), the room the fun fact's line-up with the TV takes made up */
+.project-popup-main {
+  gap: var(--gap-s);
 }
 
 .project-popup-side .project-popup-shot {
@@ -278,8 +310,14 @@
   flex: none;
   margin-left: auto;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--gap-s);
+}
+
+/* the logos' middle level with the bar's (the user's call): the bar, 6 pp tall, tops its
+   column; a logo is 16 */
+.project-popup-langs:has(.project-popup-langs-bar) .project-popup-logos {
+  margin-top: calc((6 - 16) / 2 * var(--pp));
 }
 
 .project-popup-langs-bar {
@@ -367,7 +405,8 @@
   background: var(--dot);
 }
 
-/* The section tabs: the selected one is black with the menu's red highlight */
+/* The section tabs: the selected one is black with the menu's red highlight. Big, to fill the
+   room over the text (the user's call) */
 .project-popup-tabs {
   flex: none;
   display: flex;
@@ -376,12 +415,12 @@
 }
 
 .project-popup-tab {
-  padding: var(--gap-xs) var(--gap-s);
+  padding: calc(3 * var(--pp)) calc(6 * var(--pp));
   border: none;
   background: #ddd6e0;
   color: #000;
   font: inherit;
-  font-size: 0.9em;
+  font-size: 1.25em;
   line-height: 0;
   cursor: pointer;
   --pixel-shadow: #b9b0be;
@@ -395,9 +434,10 @@
 }
 
 /* The section shows its parts as one block (.project-popup-section-parts), centred on the TV's
-   middle (the user's call): centred over a space at the bottom as tall as twice the drop from
-   the TV's middle to the section's (--tv-centre, set by ProjectPopup.centreOnTV). The space
-   gives way first when the text is long, and the text then starts right under the tabs. */
+   middle (the user's call): centred between a space at the top and one at the bottom, one of
+   them as tall as twice the distance between the TV's middle and the section's (--tv-raise when
+   the section's is higher, as over the Overview's fun fact, --tv-centre when it's lower; set by
+   ProjectPopup.centreOnTV). The spaces give way first when the text is long. */
 .project-popup-section {
   flex: 1;
   min-height: 0;
@@ -410,12 +450,38 @@
   scrollbar-width: thin;
   scrollbar-color: #000 transparent;
   font-size: max(8px, calc(4.4 * var(--pp))); /* a touch under the panel's 5 pp, beside the bigger TV */
+  --text-lower: calc(4 * var(--pp)); /* (the spaces below give it up first when a tab is short of room) */
+}
+
+.project-popup-section::before,
+.project-popup-section::after {
+  content: '';
+  flex: 0 1000 0px; /* (shrinks long before the text's own spacing does) */
+  min-height: 0;
+}
+
+/* the text a little lower than that (--text-lower, set on the section: the user's call): the
+   top space twice that much taller moves the centred block down by it */
+.project-popup-section::before {
+  flex-basis: calc(var(--tv-raise, 0px) + 2 * var(--text-lower));
 }
 
 .project-popup-section::after {
-  content: '';
-  flex: 0 1000 var(--tv-centre, 0px); /* (shrinks long before the text's own spacing does) */
-  min-height: 0;
+  flex-basis: var(--tv-centre, 0px);
+}
+
+/* except the Overview's: under the tabs (the user's call), --text-lower below them, its fun
+   fact under the section */
+.project-popup-section[data-section='Overview'] {
+  justify-content: flex-start;
+}
+
+.project-popup-section[data-section='Overview']::before {
+  flex-basis: var(--text-lower);
+}
+
+.project-popup-section[data-section='Overview']::after {
+  flex-basis: 0;
 }
 
 .project-popup-section-parts {
@@ -429,8 +495,8 @@
   flex: none;
 }
 
-/* between the parts (the Overview's tagline, gist and fun fact): --gap-m, closing to --gap-xs
-   where the tab is short of room */
+/* between the parts (the Overview's tagline and gist): --gap-m, closing to --gap-xs where the
+   tab is short of room */
 .project-popup-section-parts > .project-popup-parts-space {
   flex: 0 1 var(--gap-m);
   min-height: var(--gap-xs);
@@ -443,10 +509,16 @@
   --pixel-line-height: 1.3;
 }
 
+/* the fun fact: under the section, its bottom level with the TV's (--tv-under: the room under
+   the TV, set by ProjectPopup.centreOnTV; the user's call), its text the section's size (it's
+   no longer inside it), its title much bigger (the user's call) */
 .project-popup-fact {
+  flex: none;
+  margin-bottom: var(--tv-under, 0px);
   display: flex;
   flex-direction: column;
   gap: var(--gap-s);
+  font-size: max(8px, calc(4.4 * var(--pp)));
   padding: var(--gap-s) var(--gap-m);
   border: var(--gap-xs) solid #000;
   background: #efc400;
@@ -455,7 +527,7 @@
 }
 
 .project-popup-fact-title {
-  font-size: 0.85em;
+  font-size: 1.7em; /* (as big as the tagline) */
   color: #b00206;
 }
 
@@ -690,47 +762,77 @@
 }
 
 /* ── Experiment: parallelograms ───────────────────────────────────────────
-   The user's experiment, after a Sonic Mania dialog: the pop-up becomes a dark rectangle
-   over the whole screen with a light parallelogram across it, its slanted sides cutting off
-   the top-left and bottom-right corners; the panel's content stays exactly where it is (the
-   user's call: nothing moves, just more room round it). The tabs, the Fun fact box and the
-   buttons are parallelograms too, all leaning at the same angle like "/" (--lean), each
-   with a flat shadow offset down and right; the buttons black with a pink shadow, like the
-   reference's OK. Everything is under .project-popup-slanted, which SLANTED in
+   The user's experiment, after a Sonic Mania dialog: the panel becomes a dark band across
+   the screen's whole width, as tall as the panel always was (the dimmed page shows above
+   and below it: the user's call, after trying it over the whole screen), with a blue
+   parallelogram along it (the user's blue), its slanted sides cutting off the band's
+   top-left and bottom-right corners, and white text on it; the panel's content stays
+   exactly where it is (the user's call: nothing moves, just more room either side). The
+   tabs and the buttons are parallelograms too, all leaning at the same angle like "/"
+   (--lean), each with a flat shadow offset down and right; the buttons black like the
+   reference's OK, their shadow the pulsing red highlight every selected thing on the site
+   has. (The Fun fact was one too; the user went back to its yellow box.) Everything is
+   under .project-popup-slanted, which SLANTED in
    ProjectPopup.ts puts on the pop-up: set it to false (or delete this block) to go back. */
 .project-popup-slanted {
   --lean: 26.565deg; /* atan(--tan) */
   --tan: 0.5;
-  background: #29212b; /* the whole screen */
 }
 
-/* The face: across the whole screen, its corners cut as far in as the content allows: the
-   slanted sides pass --gap-s clear of the content's corners (--corner: the margin round the
-   panel plus its padding). The panel keeps its box (its border only turns invisible, so
-   nothing inside moves). */
+/* The band (::before) and the face on it (::after): the panel's box stretched to the
+   screen's sides (its border only turns invisible, so nothing inside moves). The face's
+   corners are cut as far in as the content allows: the slanted sides pass --gap-s clear of
+   the content's corners (--corner-x/y: the content's top-left corner, from the band's), and
+   the two cuts never meet (very wide screens, where the panel stops widening). */
 .project-popup-slanted .project-popup-panel {
-  --corner: calc((1 - var(--scale)) * var(--screen-h) / 2 + var(--gap-l));
-  --leg: calc(var(--corner) + (var(--corner) - var(--gap-s)) / var(--tan)); /* the cut's height */
+  --corner-x: calc((100vw - var(--width)) / 2 + 2 * var(--pp) + var(--gap-l));
+  --corner-y: calc(2 * var(--pp) + var(--gap-l));
+  --leg: min(calc(var(--corner-y) + (var(--corner-x) - var(--gap-s)) / var(--tan)),
+    calc(0.45 * var(--scale) * var(--screen-h))); /* the cut's height */
+  position: relative;
   border-color: transparent;
   background: none;
   box-shadow: none;
+  color: #f7f3f7; /* (with PixelText's shadow under light text, the reference's #4a496b) */
+}
+
+/* (part of the panel, so a click on them doesn't close it, as one on the page does) */
+.project-popup-slanted .project-popup-panel::before,
+.project-popup-slanted .project-popup-panel::after {
+  content: '';
+  position: absolute;
+  inset: calc(-2 * var(--pp)) calc(50% - 50vw); /* the panel's height (with its border), the screen's width */
+  z-index: -1;
 }
 
 .project-popup-slanted .project-popup-panel::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  background: #f7f3f7;
+  background: #29212b;
+}
+
+.project-popup-slanted .project-popup-panel::after {
+  background: #259cfb;
   clip-path: polygon(calc(var(--tan) * var(--leg)) 0, 100% 0, 100% calc(100% - var(--leg)),
     calc(100% - var(--tan) * var(--leg)) 100%, 0 100%, 0 var(--leg));
-  pointer-events: none;
+}
+
+/* the text on the face white (the panel's colour, above), the coloured labels too; text on a
+   box of its own keeps its colours (the tabs and buttons set theirs) */
+.project-popup-slanted .project-popup-kind,
+.project-popup-slanted .project-popup-when,
+.project-popup-slanted .project-popup-builtwith-title,
+.project-popup-slanted .project-popup-tech {
+  color: inherit;
+  --pixel-shadow: #4a496b;
+}
+
+.project-popup-slanted .project-popup-fact,
+.project-popup-slanted .project-popup-number {
+  color: #000;
 }
 
 /* The small shapes: layers behind upright content, skewed to the lean (a taller shape
    leans further, at the same angle): ::after the face, ::before the shadow */
 .project-popup-slanted .project-popup-tab,
-.project-popup-slanted .project-popup-fact,
 .project-popup-slanted .project-popup-btn {
   position: relative;
   isolation: isolate;
@@ -741,8 +843,6 @@
 
 .project-popup-slanted .project-popup-tab::before,
 .project-popup-slanted .project-popup-tab::after,
-.project-popup-slanted .project-popup-fact::before,
-.project-popup-slanted .project-popup-fact::after,
 .project-popup-slanted .project-popup-btn::before,
 .project-popup-slanted .project-popup-btn::after {
   content: '';
@@ -753,21 +853,19 @@
   pointer-events: none;
 }
 
-.project-popup-slanted .project-popup-tab::before,
-.project-popup-slanted .project-popup-fact::before {
+.project-popup-slanted .project-popup-tab::before {
   transform: translate(var(--gap-xs), var(--gap-xs)) skewX(calc(-1 * var(--lean)));
 }
 
-/* the tabs: grey, the selected one black with the red shadow (a little further apart: their
-   leaning ends reach past their boxes) */
+/* the tabs: grey, the selected one black with the red shadow (further apart: their leaning
+   ends reach past their boxes, and the user wanted more room between them) */
 .project-popup-slanted .project-popup-tabs {
-  gap: calc(6 * var(--pp));
+  gap: calc(9 * var(--pp));
 }
 
 .project-popup-slanted .project-popup-tab::after {
   background: #ddd6e0;
 }
-
 .project-popup-slanted .project-popup-tab.selected::after {
   background: #000;
 }
@@ -781,31 +879,58 @@
   background: #b00206;
 }
 
-/* the Fun fact: yellow, with a black shadow; inset from the section's sides, which would
-   otherwise cut its leaning corners (and the section never scrolls for them) */
-.project-popup-slanted .project-popup-fact {
-  margin-inline: var(--gap-m);
-  padding-inline: calc(var(--gap-m) + var(--gap-xs));
-}
-
-.project-popup-slanted .project-popup-fact::after {
-  background: #efc400;
-}
-
-.project-popup-slanted .project-popup-fact::before {
-  background: #000;
-}
-
 .project-popup-slanted .project-popup-section {
   overflow-x: hidden;
   padding-bottom: var(--gap-xs);
 }
 
-/* the buttons: black bars, white letters, a pink shadow; just the word */
+/* the buttons, like the reference's OK: big black bars (the user's call), the words in big
+   white letters well inside them (the user tried them standing out of the bar's top, and
+   preferred them inside). The bar's shadow is the pulsing red highlight every selected thing
+   on the site has (ProjectCarousel.css: red, with a pink layer fading in and out over it,
+   .project-popup-btn-pulse, added with SLANTED). Spaced a little apart, and in from the right
+   (the user's call). The negative margin takes back what the bigger bar adds to the plain
+   buttons' height (a label is 1.09em tall, with its shadow: so 1.09 of the panel's font size,
+   plus 5 pp), so the footer keeps its height and the TV and text theirs: the bars reach into
+   the room round the footer. */
+.project-popup-slanted .project-popup-buttons {
+  gap: var(--gap-l);
+  margin-right: var(--gap-l);
+}
+
+/* the footer's two sides, the buttons and "Built with", midway between the footer's rule and
+   the band's bottom (the user's call): there's less room above them (the footer's padding)
+   than below (the panel's padding and border), so down by half the difference (2 pp on the
+   narrower phones, whose panel padding is 10 pp) */
+.project-popup-slanted .project-popup-buttons,
+.project-popup-slanted .project-popup-builtwith {
+  position: relative;
+  top: calc((var(--gap-l) + 2 * var(--pp) - var(--gap-m)) / 2);
+}
+
+@media (orientation: landscape) and (max-height: 500px) and (max-aspect-ratio: 2 / 1) {
+  .project-popup-slanted .project-popup-buttons,
+  .project-popup-slanted .project-popup-builtwith {
+    top: calc((10 * var(--pp) + 2 * var(--pp) - var(--gap-m)) / 2);
+  }
+}
+
+/* three buttons (a project with another link: Unity Clash's Devlog) only fit in one row on a
+   16:9 screen a little closer together and narrower */
+.project-popup-slanted .project-popup-buttons:has(> :nth-child(3)) {
+  gap: calc(10 * var(--pp));
+  margin-right: calc(6 * var(--pp));
+}
+
+.project-popup-slanted .project-popup-buttons:has(> :nth-child(3)) > .project-popup-btn {
+  padding-inline: calc(8 * var(--pp));
+}
+
 .project-popup-slanted .project-popup-btn {
-  padding: calc(2.5 * var(--pp)) calc(var(--gap-m) + var(--gap-xs));
+  padding: calc(3.5 * var(--pp)) calc(14 * var(--pp));
+  margin-block: calc(-0.156em - var(--pp)); /* (half of 0.436 of the panel's font size, plus 2 pp: in this em, 1.4 times as big) */
   color: #f7f3f7;
-  font-size: 1em;
+  font-size: 1.4em;
   --pixel-shadow: #4a496b;
 }
 
@@ -813,11 +938,72 @@
   background: #000;
 }
 
+/* (the shadow is the highlight below instead) */
 .project-popup-slanted .project-popup-btn::before {
-  transform: translate(calc(1.5 * var(--pp)), calc(2 * var(--pp))) skewX(calc(-1 * var(--lean)));
-  background: #d47fa6;
+  content: none;
+}
+
+/* the highlight (.project-popup-btn-pulse, added with SLANTED), under the face (the button's
+   ::after comes after it): red, with a pink layer fading in and out over it */
+.project-popup-slanted .project-popup-btn-pulse {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: #b00206;
+  transform: translate(calc(2 * var(--pp)), calc(2.5 * var(--pp))) skewX(calc(-1 * var(--lean)));
+  pointer-events: none;
+}
+
+.project-popup-slanted .project-popup-btn-pulse::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: #e8ace7;
+  opacity: 0;
+  animation: popup-btn-pulse 0.267s linear infinite alternate; /* (the boxes' timing) */
+}
+
+@keyframes popup-btn-pulse {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
 .project-popup-slanted .project-popup-btn b {
   display: none;
+}
+
+/* The opening, after the user's clip of the reference (reference/Desktop 2026.11.16…, measured
+   frame by frame at 60 fps), played whenever a box is opened (each opening makes a new pop-up):
+   a line about one art pixel tall grows out from the middle to the screen's sides (0 to 117 ms),
+   opens into the band at a steady speed (to 250 ms), then the face slides in from the left with
+   everything on it (183 ms, easing out like the clip's: ProjectPopup.ts OPENING_MS, kept in step
+   with these). The buttons ride in with the rest (the clip's OK jumps as it lands; the user
+   didn't want that). Plain numbers in the keyframes, no var(): Safari sizes var() in transform
+   keyframes wrongly (utils/selectJump.ts). Transforms only, so the compositor plays it. */
+.project-popup-slanted .project-popup-panel::before {
+  animation: popup-band-open 250ms linear both;
+}
+
+.project-popup-slanted .project-popup-panel::after,
+.project-popup-slanted .project-popup-panel > * {
+  animation: popup-slide-in 183ms cubic-bezier(0.5, 1, 0.89, 1) 250ms both;
+}
+
+@keyframes popup-band-open {
+  0%   { transform: scale(0.3, 0.005); } /* (0.005 of the band's height: about an art pixel) */
+  47%  { transform: scale(1, 0.005); }
+  100% { transform: none; }
+}
+
+@keyframes popup-slide-in {
+  from { transform: translateX(-100vw); }
+  to   { transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .project-popup-slanted .project-popup-panel::before,
+  .project-popup-slanted .project-popup-panel::after,
+  .project-popup-slanted .project-popup-panel > * {
+    animation: none;
+  }
 }
