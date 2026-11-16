@@ -5,10 +5,10 @@ import { drawColorGrid } from '../utils/pixelArt'
  * The sleepy Zs: the main menu TV's picture while Exit is highlighted (the user's call: the sleepy
  * cat that used to be here is gone; "just a bunch of big zs floating around after the room goes
  * dark"). On the GitHub hop's grey, with a floor, nothing stirs for a moment; then the grey fades
- * slowly to a really dark grey (not black), the floor with it, and once it's fully dark Zs rise
- * slowly from low on the screen, swaying as they go and growing the higher they float (the user's
- * call), each dim as it appears, bright through the middle of its life and dim again before it
- * goes. Only the Zs loop; the room darkens again
+ * slowly to a really dark grey (not black), the floor with it, and once it's fully dark Zs drift
+ * slowly up from the bottom left towards the top right, swaying as they go and growing the higher
+ * they float (the user's calls), each dim as it appears, bright through the middle of its life
+ * and dim again before it goes. Only the Zs loop; the room darkens again
  * only when the TV tunes back to Exit. Flat pixel art with dark outlines, like the other shows.
  * With reduced motion: the dark room with a few Zs, still.
  *
@@ -93,7 +93,8 @@ export class SleepyZs implements TvShow {
       const u = age / Z_LIFE
       const step = Math.min(SIZES.length - 1, Math.floor(u * SIZES.length))
       const sprite = this.zs[step][age < DIM_FOR || age > Z_LIFE - DIM_FOR ? 0 : 1]
-      const cx = 50 + hash(k * 3 + 2) * 200 + Math.sin(u * 9 + hash(k * 3 + 3) * 6.3) * 9
+      // from the bottom left up towards the top right (the user's call), with a little sway
+      const cx = 45 + hash(k * 3 + 2) * 95 + u * 115 + Math.sin(u * 9 + hash(k * 3 + 3) * 6.3) * 7
       const cy = 160 - u * 150
       ctx.drawImage(sprite, Math.round(cx - sprite.width / 2), Math.round(cy - sprite.height / 2))
     }
