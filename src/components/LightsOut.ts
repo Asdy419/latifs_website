@@ -9,7 +9,8 @@ import type { TvShow } from './TvOverlay'
  * and the moon between pink curtains, a wooden floor and a round pink rug. Nothing stirs for a
  * moment; then the lights go down slowly (the room fades to near black, the window still
  * moonlit), and that's it: the dark room until the TV tunes back to Exit, only the stars in the
- * window twinkling (the user's call). Flat pixel art with dark outlines, like the other shows.
+ * window twinkling (the user's call). Flat pixel art, its edges tones of their own colours rather
+ * than black outlines (the user found the outlined take too heavy).
  * With reduced motion: the dark room from the start, still.
  *
  * Drawn in code, one pixel per art pixel like the TV's static; the room is drawn once, and once
@@ -19,7 +20,6 @@ import type { TvShow } from './TvOverlay'
  * the left and the window high up.
  */
 
-const OUT = '#15171b'
 /** The room's lights going down: how dark it gets (nearly black: the user wanted it darker), and the window pane, which stays moonlit but dims a little. */
 const NIGHT = 'rgb(5 4 12 / 0.94)', NIGHT_PANE = 'rgb(5 4 12 / 0.35)'
 /** The fairy lights' colours, round and round the string. */
@@ -132,8 +132,8 @@ function roomCanvas(): HTMLCanvasElement {
       if (x1 >= x0) ctx.fillRect(x0, y, x1 - x0 + 1, 1)
     }
   }
-  /** A box with a dark outline just outside it. */
-  const boxed = (x0: number, y0: number, x1: number, y1: number, c: string) => { rect(x0 - 1, y0 - 1, x1 + 1, y1 + 1, OUT); rect(x0, y0, x1, y1, c) }
+  /** A box with a one-pixel edge of a darker (or lighter) tone of itself, not a black line. */
+  const edged = (x0: number, y0: number, x1: number, y1: number, c: string, edge: string) => { rect(x0, y0, x1, y1, edge); rect(x0 + 1, y0 + 1, x1 - 1, y1 - 1, c) }
 
   // the wall and the floor (boards, their joints staggered), the skirting between
   rect(0, 0, W, 115, '#7a68b4')
@@ -142,54 +142,81 @@ function roomCanvas(): HTMLCanvasElement {
     rect(0, y, W, y, '#83573a')
     for (let x = (y / 12) % 2 ? 20 : 50; x < W; x += 60) rect(x, y + 1, x, y + 11, '#83573a')
   }
-  rect(0, 113, W, 115, '#4e4178')
+  rect(0, 113, W, 115, '#5f518c')
   // the fairy lights' string along the top of the wall (its bulbs are drawn live)
   for (let x = 37; x < W; x++) rect(x, stringY(x), x, stringY(x), '#d9d2f0')
 
-  // the window: a frame round the night sky, a crescent moon and stars, a bar across; curtains and a rod
+  // the window: a pale frame round the night sky, a crescent moon (the stars are drawn live), a
+  // bar across; curtains hanging from a rod, their folds darker pink
   rect(196, 26, 308, 27, '#6b4327')
-  boxed(PANE.x0 - 4, PANE.y0 - 4, PANE.x1 + 4, PANE.y1 + 4, '#efe9f4')
+  edged(PANE.x0 - 4, PANE.y0 - 4, PANE.x1 + 4, PANE.y1 + 4, '#efe9f4', '#cfc6d8')
   rect(PANE.x0, PANE.y0, PANE.x1, PANE.y1, '#1a2350')
   disc(268, 50, 8, 8, '#fff2c0')
   disc(272, 47, 7, 7, '#1a2350')
   rect(251, PANE.y0, 252, PANE.y1, '#efe9f4')
   rect(PANE.x0, 56, PANE.x1, 57, '#efe9f4')
   for (const x0 of [200, 292]) {
-    boxed(x0, 28, x0 + 12, 96, '#e98db8')
+    rect(x0, 28, x0 + 12, 96, '#e98db8')
     for (let x = x0 + 3; x < x0 + 12; x += 4) rect(x, 29, x, 95, '#cf6f9c')
+    rect(x0, 96, x0 + 12, 97, '#cf6f9c')
   }
 
-  // two posters and a clock on the wall
-  boxed(110, 40, 142, 76, '#26233f')
+  // two posters (a thin frame of their own colours) and a clock on the wall
+  edged(110, 40, 142, 76, '#26233f', '#3a3552')
   disc(126, 54, 7, 7, '#ffd54a')
-  rect(111, 64, 141, 69, '#e0608a')
-  boxed(152, 46, 180, 72, '#f0ead8')
+  rect(112, 64, 140, 69, '#e0608a')
+  edged(152, 46, 180, 72, '#f0ead8', '#d8cfbd')
   rect(156, 50, 166, 60, '#4a7ab8')
   rect(168, 56, 176, 68, '#c94b4b')
-  disc(190, 56, 8, 8, OUT)
+  disc(190, 56, 8, 8, '#4a4660')
   disc(190, 56, 7, 7, '#f6f3f8')
-  rect(190, 50, 190, 56, OUT)
-  rect(190, 56, 194, 56, OUT)
+  rect(190, 50, 190, 56, '#4a4660')
+  rect(190, 56, 194, 56, '#4a4660')
 
-  // the bed, side on, its head at the left: headboard, mattress under a blue blanket, the pillow, the frame and legs
-  boxed(44, 86, 52, 138, '#6b4327')
-  boxed(52, 112, 176, 136, '#4068b8')
-  rect(52, 112, 176, 115, '#6a8cd6')
-  rect(53, 116, 100, 118, '#e9edf5')
-  boxed(56, 102, 86, 113, '#f4f2f8')
-  rect(52, 137, 176, 142, '#5a3a22')
-  rect(54, 143, 58, 150, '#5a3a22')
-  rect(170, 143, 174, 150, '#5a3a22')
+  // the bed, side on, its head at the left: a headboard with a rounded top and a lighter inner
+  // panel; the duvet, lit along its top and darker at its edge, the sheet turned down at the head,
+  // a folded blanket at the foot; a plump pillow; the mattress's white side; the frame and legs
+  rect(45, 86, 53, 132, '#6b4327')
+  rect(46, 84, 52, 85, '#6b4327')
+  rect(47, 83, 51, 83, '#6b4327')
+  rect(47, 88, 51, 128, '#7d5232')
+  rect(46, 84, 52, 84, '#8a5c38')
+  rect(54, 108, 178, 123, '#4a74c8')
+  rect(54, 108, 178, 110, '#6f94dd')
+  rect(54, 123, 178, 124, '#3a5ca6')
+  for (const [x0, x1] of [[104, 112], [128, 136]]) rect(x0, 113, x1 + 10, 113, '#3f64b4') // folds
+  rect(54, 108, 98, 113, '#f3f1f6')
+  rect(54, 113, 98, 114, '#d9d6de')
+  rect(140, 110, 176, 122, '#d9775a')
+  rect(140, 110, 176, 111, '#e8927a')
+  rect(140, 116, 176, 116, '#b85e44')
+  rect(140, 122, 176, 122, '#b85e44')
+  rect(58, 97, 92, 108, '#f6f4f8')
+  rect(59, 96, 91, 96, '#f6f4f8')
+  rect(57, 98, 57, 107, '#f6f4f8')
+  rect(93, 98, 93, 107, '#f6f4f8')
+  rect(74, 99, 74, 106, '#e4e1ea') // its crease
+  rect(58, 108, 92, 108, '#dad7e0')
+  rect(54, 125, 178, 133, '#e8e4ec')
+  rect(54, 133, 178, 133, '#cfc9d6')
+  rect(52, 134, 180, 139, '#5a3a22')
+  rect(52, 134, 180, 134, '#7a5232')
+  rect(54, 140, 59, 150, '#5a3a22')
+  rect(173, 140, 178, 150, '#5a3a22')
+  rect(58, 140, 59, 150, '#46301c')
+  rect(177, 140, 178, 150, '#46301c')
 
-  // the bedside table with a lamp
-  boxed(184, 118, 208, 142, '#7a4b2c')
-  rect(184, 118, 208, 121, '#8e5a36')
+  // the bedside table (a lighter top, a darker underside) with a lamp
+  rect(184, 118, 208, 142, '#7a4b2c')
+  rect(184, 118, 208, 121, '#9a6240')
+  rect(184, 122, 208, 122, '#5e3a22')
   rect(195, 123, 197, 142, '#5a3a22')
   rect(193, 109, 199, 117, '#4a3a4a')
-  boxed(186, 97, 206, 108, '#f3d26b')
+  rect(186, 97, 206, 108, '#f3d26b')
+  rect(186, 107, 206, 108, '#d8b452')
+  rect(187, 96, 205, 96, '#f3d26b')
 
   // the round rug in front of the bed
-  disc(140, 160, 44, 9, OUT)
   disc(140, 160, 43, 8, '#e089b8')
   disc(140, 160, 36, 6, '#cc6fa0')
   disc(140, 160, 28, 4, '#e089b8')

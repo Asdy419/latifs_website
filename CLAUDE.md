@@ -338,11 +338,14 @@ Component/scene CSS sits next to its `.ts` file and is imported by it.
     With reduced motion: the first frame, still.
   - Exit's show is lights out (`LightsOut.ts`; the user's calls, in turn: a sleepy cat, then
     Zs floating up through the dark, then "remove the zs, just keep the background turning dark
-    and that's it"). A cosy pixel-art bedroom drawn once, flat with dark outlines, laid out for
+    and that's it"). A cosy pixel-art bedroom drawn once, flat, its edges tones of their own
+    colours rather than black outlines (the user found the outlined take "stroke heavy"), laid out for
     what shows of the screen (wide at the top, narrow at the floor): a lavender wall with a string
     of fairy lights twinkling along its top (drawn live; a pink LED strip above them was
     removed: the user's call), a bed with its
-    pillow at the left end, a bedside table with a lamp, two posters and a clock, a window on the
+    plump pillow at the left end (a rounded headboard, the duvet lit along its top, the sheet turned
+    down at the head, a folded blanket at the foot, the mattress's white side on a wooden frame), a
+    bedside table with a lamp, two posters and a clock, a window on the
     night sky and the moon between pink curtains up on the right, a wooden floor and a round pink
     rug. After 1.3 s the lights go down over 2.6 s (a near-black overlay, 94%, over everything
     but the window pane, which stays moonlit under a 35% one: the user wanted it "more darker"), and that's it, but for the ten stars in the window
