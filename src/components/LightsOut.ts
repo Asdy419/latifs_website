@@ -3,8 +3,8 @@ import type { TvShow } from './TvOverlay'
 /*
  * Lights out: the main menu TV's picture while Exit is highlighted (the user's calls: a sleepy cat
  * came first, then Zs floating up through the dark, then "remove the zs, just keep the background
- * turning dark and that's it"). A cosy pixel-art bedroom, lit: a lavender wall with a pink LED
- * strip along its top and a string of fairy lights twinkling, a bed with its pillow at the left
+ * turning dark and that's it"). A cosy pixel-art bedroom, lit: a lavender wall with a string of
+ * fairy lights twinkling along its top (a pink LED strip above them went: the user's call), a bed with its pillow at the left
  * end, a bedside table with a lamp, two posters and a clock on the wall, a window on the night sky
  * and the moon between pink curtains, a wooden floor and a round pink rug. Nothing stirs for a
  * moment; then the lights go down slowly (the room fades to near black, the window still
@@ -22,8 +22,6 @@ import type { TvShow } from './TvOverlay'
 const OUT = '#15171b'
 /** The room's lights going down: how dark it gets (nearly black: the user wanted it darker), and the window pane, which stays moonlit but dims a little. */
 const NIGHT = 'rgb(5 4 12 / 0.94)', NIGHT_PANE = 'rgb(5 4 12 / 0.35)'
-/** The LED strip's pink, lit and after dark. */
-const LED = ['#ff7ac0', '#5a2a48']
 /** The fairy lights' colours, round and round the string. */
 const BULBS = ['#ffd84a', '#ff8a7a', '#7ef0ff', '#c7ff7a']
 /** The window pane (kept moonlit after dark), and the stars in it, each twinkling on its own period (ms). */
@@ -101,10 +99,6 @@ export class LightsOut implements TvShow {
       ctx.fillStyle = NIGHT_PANE
       ctx.fillRect(PANE.x0, PANE.y0, PANE.x1 - PANE.x0 + 1, PANE.y1 - PANE.y0 + 1)
       ctx.restore()
-      ctx.fillStyle = LED[1]
-      ctx.globalAlpha = dark
-      ctx.fillRect(0, 11, width, 2)
-      ctx.globalAlpha = 1
     }
     // the stars in the window, twinkling (the user's call): each bright for most of its period, then dim
     for (const [x, y, period] of STARS) {
@@ -149,8 +143,7 @@ function roomCanvas(): HTMLCanvasElement {
     for (let x = (y / 12) % 2 ? 20 : 50; x < W; x += 60) rect(x, y + 1, x, y + 11, '#83573a')
   }
   rect(0, 113, W, 115, '#4e4178')
-  // the LED strip along the top of the wall, and the fairy lights' string (its bulbs are drawn live)
-  rect(0, 11, W, 12, LED[0])
+  // the fairy lights' string along the top of the wall (its bulbs are drawn live)
   for (let x = 37; x < W; x++) rect(x, stringY(x), x, stringY(x), '#d9d2f0')
 
   // the window: a frame round the night sky, a crescent moon and stars, a bar across; curtains and a rod
