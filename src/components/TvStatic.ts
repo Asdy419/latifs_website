@@ -13,6 +13,14 @@ import './TvStatic.css'
 /** Frames in a strip (TvStatic.css rolls through them: keep the two in step). */
 export const STATIC_FRAMES = 4
 
+/**
+ * How long a TV shows rolling static, at least, when it tunes to another picture: the Projects
+ * pop-up's (ProjectPopup.tuneTV) and the main menu's (TvOverlay.tune).
+ */
+export const TUNE_MS = 260
+/** The same when a TV first comes on: a little longer, like a set warming up. */
+export const OPEN_TUNE_MS = 420
+
 /** An opaque colour as one pixel of ImageData, read as 32 bits (in the platform's byte order). */
 const pixel = (red: number, green: number, blue: number) => new Uint32Array(new Uint8ClampedArray([red, green, blue, 255]).buffer)[0]
 const DARK = pixel(0x5f, 0x70, 0x8d)

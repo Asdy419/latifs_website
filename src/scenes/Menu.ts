@@ -1,14 +1,17 @@
 import './Menu.css'
 import menuLogo from '../assets/menu/menu_logo.png'
-import tvOverlay from '../assets/menu/tv_overlay.png'
 import { SUBPAGES } from '../config'
 import { Scene, transitionTo } from '../core/Scene'
 import { navigateTo } from '../core/pageTransition'
 import { ButtonMenu } from '../components/ButtonMenu'
+import { CameraFlash } from '../components/CameraFlash'
+import { SleepyCat } from '../components/SleepyCat'
+import { SocialDrift } from '../components/SocialDrift'
 import { CircleAnimation } from '../components/CircleAnimation'
+import { GithubHop } from '../components/GithubHop'
 import { Hud, HUD_IMAGES } from '../components/Hud'
-import { TvOverlay } from '../components/TvOverlay'
-import { prepareStatic } from '../components/TvStatic'
+import { TvOverlay, type TvShow } from '../components/TvOverlay'
+import { OPEN_TUNE_MS, prepareStatic } from '../components/TvStatic'
 import { showNowPlaying } from '../components/NowPlaying'
 import { sfx, playSfx } from '../utils/audio'
 import { startMusic, stopMusic } from '../utils/music'
@@ -19,8 +22,8 @@ const NOW_PLAYING_DELAY_MS = 1000
 
 /**
  * The TV's screen in art px, the static's resolution (one speckle per art
- * pixel): #tv-wrap is 336.9 art px wide (Menu.css), the frame image 1980 x 1080,
- * and the screen 98% of the frame (TvOverlay.css).
+ * pixel), and the shows': at the top left of #tv-wrap (Menu.css), which
+ * TvOverlay.ts draws the stepped screen and frame in.
  */
 const TV_SCREEN = { width: 330, height: 180 }
 
@@ -47,7 +50,7 @@ export class Menu extends Scene {
    */
   static preload(): void {
     if (preloaded.length) return
-    const decoded = [menuLogo, tvOverlay, ...HUD_IMAGES].map(src => { // the menu buttons are drawn in code
+    const decoded = [menuLogo, ...HUD_IMAGES].map(src => { // the menu buttons and the TV are drawn in code
       const img = new Image()
       img.decoding = 'async'
       img.src = src
@@ -62,6 +65,10 @@ export class Menu extends Scene {
 
   private readonly circles = new CircleAnimation()
   private readonly tv      = new TvOverlay(TV_SCREEN)
+  private readonly hop     = new GithubHop(TV_SCREEN)
+  private readonly camera  = new CameraFlash(TV_SCREEN)
+  private readonly drift   = new SocialDrift(TV_SCREEN)
+  private readonly cat     = new SleepyCat(TV_SCREEN)
   private readonly hud     = new Hud()
   private readonly buttons: ButtonMenu
 
@@ -98,8 +105,16 @@ export class Menu extends Scene {
     const list = this.app.querySelector<HTMLUListElement>('#menu-buttons')!
 
     this.circles.start()
-    this.tv.mount(this.app)
+    this.tv.mount(this.app, signal)
     this.buttons.mount(list, signal)
+
+    // The TV previews the highlighted button, as in the game's menu (the user's picks): Projects has
+    // the GitHub hop, Socials the logo drift, Photo Gallery the camera flash, Exit (after the
+    // sub-pages) the cat falling asleep; About me static for now
+    const shows: Partial<Record<string, TvShow>> = { projects: this.hop, socials: this.drift, gallery: this.camera }
+    const preview = (i: number) => (i === SUBPAGES.length ? this.cat : shows[SUBPAGES[i]?.id ?? ''] ?? null)
+    this.buttons.onChange = i => this.tv.tune(preview(i))
+    this.tv.tune(preview(this.buttons.selected), OPEN_TUNE_MS)
 
     // [↵] CONFIRM = Enter (the button list handles the key itself);
     // [B] BACK / B / Escape = back to the title screen, like Exit

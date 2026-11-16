@@ -1,32 +1,31 @@
-#tv-wrap {
-  display: grid;
-}
-
+/* The TV (TvOverlay.ts): its black frame filling its box (#tv-wrap, placed by the scene's CSS),
+   and the screen at the box's top left, one pixel per art pixel (its size set inline). Both are
+   cut by stepped clip-paths from TvOverlay.ts: straight along the top, bottom and left, a pixel a
+   row down their 45° right edge, like the menu's buttons. */
 #tv-frame {
-  display: block;
-  width: 100%;
-  height: auto;
-  position: relative;
-  z-index: 0;
+  position: absolute;
+  inset: 0;
+  background: #000;
 }
 
-/* The screen: same shape as the frame image (used as a mask), slightly smaller
-   so the frame shows around it. */
 #tv-white {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50.3%, -49.9%) scale(0.98);
+  left: 0;
+  top: 0;
+  /* No filter here: CSS applies filters *before* clip-paths, so a drop-shadow on this element
+     would be cut away (never visible) while still being re-computed on every frame. */
+  z-index: 2;
+}
+
+/* A show on the screen instead of static (TvOverlay.tune): its canvas, one pixel per art pixel, over the static */
+.tv-show {
+  position: absolute;
+  inset: 0;
+}
+
+.tv-show > canvas {
+  display: block;
   width: 100%;
   height: 100%;
-  /* --tv-mask is set by TvOverlay.ts from the imported (WebP) frame image,
-     so the mask and the frame share one download */
-  -webkit-mask-image: var(--tv-mask);
-  mask-image: var(--tv-mask);
-  -webkit-mask-size: 100% 100%;
-  mask-size: 100% 100%;
-  /* No filter here: CSS applies filters *before* masks, so a drop-shadow on
-     this element gets cut away by the mask (never visible) while still being
-     re-computed on every frame of the static. */
-  z-index: 2;
+  image-rendering: pixelated;
 }

@@ -8,15 +8,16 @@
 /* The logo (#menu-logo) is a .page-banner: base.css places it, like every page's
    banner, and drops "Now Playing" just below it */
 
-/* The TV, sized and placed like the reference menu's (art px, base.css): its
-   screen from row 63 to 224, its slanted right edge passing (295, 63) at 45°.
-   (tv_overlay.png's frame fills rows 5.9%–94.1% of the image, its top-right
-   corner at 99.2% across.) */
+/* The TV, sized and placed like the reference menu's (art px, base.css), on whole art pixels so
+   its stepped edge and its screen's pixels line up with everything else: its frame from row 63 to
+   224, its slanted right edge passing (295, 63) at 45° (TvOverlay.ts draws them in this box, the
+   screen's 330 × 180 pixels at its top left). */
 #tv-wrap {
   position: absolute;
-  left: calc(-39.2 * var(--art-px));
-  top: calc(52.1 * var(--art-px));
-  width: calc(336.9 * var(--art-px));
+  left: calc(-37 * var(--art-px));
+  top: calc(54 * var(--art-px));
+  width: calc(336 * var(--art-px));
+  height: calc(180 * var(--art-px));
   z-index: 2;
 }
 

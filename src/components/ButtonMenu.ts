@@ -42,6 +42,8 @@ export class ButtonMenu {
   private jump: Animation[] = []
   /** 'mouse', 'touch' or 'pen': what pressed the list last */
   private lastPointer = 'mouse'
+  /** Another button was highlighted (its index). */
+  onChange: ((index: number) => void) | null = null
 
   /** `selected`: the button highlighted when it opens (out-of-range values mean the first). */
   constructor(items: MenuItem[], { selected = 0 } = {}) {
@@ -130,6 +132,7 @@ export class ButtonMenu {
     this.updateHighlight()
     this.playSplit()
     playSfx(sfx.bleep)
+    this.onChange?.(index)
   }
 
   /** Confirm the highlighted button (Enter/Z, clicking it again, or the CONFIRM badge). */
