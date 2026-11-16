@@ -327,8 +327,9 @@ Component/scene CSS sits next to its `.ts` file and is imported by it.
     few ms/s of static.
   - Socials' show is the logo drift (`SocialDrift.ts`, the user's idea, in place of a phone
     scrolling a video feed with a floating thumb in a cosy bedroom, which is gone): the Socials
-    page's four box pictures (socialArt.ts) and Instagram's glyph (`instagramArt`, a flat
-    magenta tile with the frame, lens and dot in white; the user asked for it) drift about the
+    page's box pictures (socialArt.ts, the envelope included) and Instagram's glyph (`instagramArt`,
+    a flat magenta tile with the frame, lens and dot in white; the user asked for it), drawn at
+    0.82 of their size for room (the user's call), drift about the
     screen like a DVD screensaver, each turning slowly, bouncing off the screen's edges (the
     slanted right edge is the line x + y = 337) and off each other (an elastic bounce of equal
     weights, as discs the sprites' half-size). The same start every time, no randomness; 30 fps

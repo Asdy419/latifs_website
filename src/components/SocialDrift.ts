@@ -4,9 +4,9 @@ import { instagramArt } from './socialArt'
 
 /*
  * Logo drift: the main menu TV's picture while Socials is highlighted (the user's idea, in place
- * of the phone feed). The Socials page's four box pictures (socialArt.ts: GitHub's mark, the
- * bust, the camera, TikTok's note) and Instagram's glyph (the user asked for it too) drift about
- * the screen like a DVD screensaver, each turning slowly, bouncing off the screen's edges (the
+ * of the phone feed). The Socials page's box pictures (socialArt.ts: GitHub's mark, the bust,
+ * the camera, TikTok's note, the envelope) and Instagram's glyph (the user asked for it too),
+ * drawn a little smaller than on the page for room, drift about the screen like a DVD screensaver, each turning slowly, bouncing off the screen's edges (the
  * slanted right edge too) and off each other.
  * Behind them something plain and abstract (the user's call): a pale screen with three big,
  * slightly darker discs drifting slowly across it. Flat pixel art, one pixel per art pixel like
@@ -17,12 +17,14 @@ import { instagramArt } from './socialArt'
 /** What shows of the TV's 330 × 180 screen: rows 11–168, from column 37 to the slant, column 337 − row. */
 const VIEW = { left: 37, top: 11, bottom: 168, slant: 337 }
 const FPS = 30
+/** The logos are drawn a little smaller than their sprites, for room (the user's call). */
+const LOGO_SCALE = 0.82
 /** The drifting discs' tones on the pale screen (flat, no shading). */
 const SCREEN = '#d6dde8', TONES = ['#c3cddc', '#b0bdd0', '#c3cddc']
 
 interface Logo {
   sprite: HTMLCanvasElement
-  /** Half the sprite's size: it bounces as a disc this big. */
+  /** Half the sprite's drawn size: it bounces as a disc this big. */
   r: number
   x: number
   y: number
@@ -40,6 +42,7 @@ const STARTS = [
   { x: 100, y: 135, vx: 19, vy: -17, spin: 0.3 },
   { x: 165, y: 130, vx: -24, vy: -9, spin: -0.48 },
   { x: 150, y: 70, vx: 12, vy: 22, spin: 0.38 },
+  { x: 195, y: 96, vx: -14, vy: -18, spin: 0.34 },
 ]
 const DISC_STARTS = [
   { x: 70, y: 40, r: 58, vx: 5, vy: 3.5 },
@@ -78,7 +81,7 @@ export class SocialDrift implements TvShow {
   /** Plays from the start, for good; with reduced motion, the first frame, still. */
   start(): void {
     this.stop()
-    this.logos = this.sprites.map((sprite, i) => ({ sprite, r: Math.max(sprite.width, sprite.height) / 2, angle: 0, ...STARTS[i % STARTS.length] }))
+    this.logos = this.sprites.map((sprite, i) => ({ sprite, r: (Math.max(sprite.width, sprite.height) * LOGO_SCALE) / 2, angle: 0, ...STARTS[i % STARTS.length] }))
     this.discs = DISC_STARTS.map((d, i) => ({ ...d, tone: TONES[i % TONES.length] }))
     this.draw()
     if (reducedMotion.matches) return
@@ -156,7 +159,8 @@ export class SocialDrift implements TvShow {
       ctx.save()
       ctx.translate(Math.round(l.x), Math.round(l.y))
       ctx.rotate(l.angle)
-      ctx.drawImage(l.sprite, -Math.round(l.sprite.width / 2), -Math.round(l.sprite.height / 2))
+      const w = Math.round(l.sprite.width * LOGO_SCALE), h = Math.round(l.sprite.height * LOGO_SCALE)
+      ctx.drawImage(l.sprite, -Math.round(w / 2), -Math.round(h / 2), w, h)
       ctx.restore()
     }
   }
