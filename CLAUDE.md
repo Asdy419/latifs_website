@@ -116,6 +116,14 @@ Component/scene CSS sits next to its `.ts` file and is imported by it.
     imports go through this; sound effects keep their original levels.
   - Adding or changing files in `bg_music` makes the dev server reload the page, which
     breaks browser tests that are mid-run.
+  - Keeping it going: the sound effects' AudioContext (audio.ts) never suspends itself while a
+    track plays (suspending it can interrupt the music on iOS, whose audio session is shared), and
+    a track paused by anything but the site itself (iOS interrupting it for a sound effect) plays
+    straight on again (the pause listener in music.ts; the site's own pauses come at the end of
+    a fade, once the track is unwanted). The user heard the music cut out a few seconds in.
+    Testing the music: scratchpad/music-check.cjs (its states second by second, who paused it).
+    Don't launch Chrome with --mute-audio for that: the flag itself pauses media about 3 s after
+    play() and looks exactly like the bug; the script mutes the elements instead.
   - Fades: animation frames drive them, with a timer backup so they still finish in
     hidden tabs. A `wanted` set records the latest play/pause request, so a fade-out
     can't pause music the visitor has just unmuted.
@@ -309,10 +317,12 @@ Component/scene CSS sits next to its `.ts` file and is imported by it.
     harder and faster (1→4 px). At the climax a burst from the lamp whites out the screen,
     which fades back; 3.3 s a loop.
   - It's drawn flat (three silvers, flat black leather, flat glow rings): the user found a
-    shaded take too busy. No brand name, only marks. It's set against a starry night: a
-    banded sky, twinkling stars, a crescent moon top left, a treeline, and a lake with
-    the moon's path shimmering. With reduced motion it holds the camera at rest: no
-    shake, no flash. Its cost on a 4x-throttled phone is within a few ms/s of static.
+    shaded take too busy. No brand name, only marks. Behind it, a starry night sky and nothing
+    else (the user's call; a lake with the moon's path on it and a treeline came first): bands
+    dark at the top and lighter towards the bottom, 190 stars twinkling between white and a dim
+    blue on their own periods, every ninth flaring into a little cross. With reduced motion it
+    holds the camera at rest: no shake, no flash. Its cost on a 4x-throttled phone is within a
+    few ms/s of static.
   - Socials' show is the logo drift (`SocialDrift.ts`, the user's idea, in place of a phone
     scrolling a video feed with a floating thumb in a cosy bedroom, which is gone): the Socials
     page's four box pictures (socialArt.ts) and Instagram's glyph (`instagramArt`, a flat

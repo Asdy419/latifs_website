@@ -8,9 +8,10 @@ import { drawColorGrid } from '../utils/pixelArt'
  * (the small round lamp the user circled): the lamp brightens from amber to white in flat steps and
  * golden sparks stream into it while the camera shakes harder and faster. At the climax a burst
  * from the lamp whites out the screen, which fades back to the camera at rest. One charge is one
- * seamless loop. It's set against a starry night over a lake, the moon's path glistening on the
- * water (the user wanted scenes behind the shows, not all the hop's grey). With reduced motion
- * it's just the camera at rest: no shaking, no flash.
+ * seamless loop. It's set against a starry night sky and nothing else (the user's call: a lake
+ * with the moon's path on it and a treeline came first; "just make it a starry night sky as the
+ * background and that's it", "add more stars"). With reduced motion it's just the camera at
+ * rest: no shaking, no flash.
  *
  * Drawn in code, one pixel per art pixel like the TV's static; the camera itself is drawn once.
  */
@@ -123,57 +124,29 @@ export class CameraFlash implements TvShow {
 }
 
 /*
- * The night behind it, over the TV's whole screen (its visible part: rows 11–168, columns 37 to
- * 337 − row): a banded sky with twinkling stars and a crescent moon top left, a dark treeline, and
- * a lake with the moon's path shimmering on it and a few stars glinting.
+ * The night sky behind it, over the TV's whole screen (its visible part: rows 11–168, columns 37
+ * to 337 − row): bands dark at the top and lighter towards the bottom, thick with stars that
+ * twinkle between white and a dim blue on their own periods, every ninth flaring into a little
+ * cross while bright. Nothing else (the user's call).
  */
-const SKY = [[0, 44, '#0b1433'], [44, 40, '#111d4a'], [84, 34, '#1a2a63']] as const
-const LAKE = '#0d1840', TREES = '#070c22'
-const MOON = { x: 78, y: 28, r: 9 }
-const STARS = Array.from({ length: 74 }, (_, i) => ({
+const SKY = [[0, 44, '#0b1433'], [44, 44, '#111d4a'], [88, 46, '#1a2a63'], [134, 46, '#22367a']] as const
+const STARS = Array.from({ length: 190 }, (_, i) => ({
   x: 37 + Math.floor(hash(i * 3 + 1) * 293),
-  y: 2 + Math.floor(hash(i * 3 + 2) * 108),
+  y: 2 + Math.floor(hash(i * 3 + 2) * 164),
   period: 900 + Math.floor(hash(i * 3 + 3) * 1600),
   big: i % 9 === 0,
-}))
-const GLINTS = Array.from({ length: 14 }, (_, i) => ({
-  x: 40 + Math.floor(hash(i * 5 + 101) * 200), y: 128 + Math.floor(hash(i * 5 + 102) * 40), period: 700 + Math.floor(hash(i * 5 + 103) * 900),
 }))
 
 function drawNight(ctx: CanvasRenderingContext2D, now: number): void {
   for (const [y, h, colour] of SKY) { ctx.fillStyle = colour; ctx.fillRect(0, y, 330, h) }
   for (const s of STARS) {
-    const phase = ((now + s.x * 37) % s.period) / s.period
-    const bright = phase < 0.55
-    if (Math.hypot(s.x - MOON.x, s.y - MOON.y) < MOON.r + 3) continue
+    const bright = ((now + s.x * 37) % s.period) / s.period < 0.55
     ctx.fillStyle = bright ? '#ffffff' : '#7f93c9'
     ctx.fillRect(s.x, s.y, 1, 1)
     if (s.big && bright) { // a bigger one twinkles into a little cross
       ctx.fillStyle = '#c9d6ff'
       ctx.fillRect(s.x - 1, s.y, 1, 1); ctx.fillRect(s.x + 1, s.y, 1, 1); ctx.fillRect(s.x, s.y - 1, 1, 1); ctx.fillRect(s.x, s.y + 1, 1, 1)
     }
-  }
-  // the moon: a crescent (its shadowed part the sky's colour)
-  fillDisc(ctx, MOON.x, MOON.y, MOON.r, '#f6f0c8')
-  fillDisc(ctx, MOON.x + 4, MOON.y - 3, MOON.r - 1, SKY[0][2])
-  // the treeline across the far shore, then the lake
-  ctx.fillStyle = TREES
-  for (let x = 0; x < 330; x++) {
-    const h = Math.round(5 + 3 * Math.sin(x / 13) + 2 * Math.sin(x / 5.3 + 1))
-    ctx.fillRect(x, 122 - h, 1, h)
-  }
-  ctx.fillStyle = LAKE
-  ctx.fillRect(0, 122, 330, 58)
-  // the moon's path on the water: dashes under it, narrowing towards the shore, shimmering
-  const shimmer = Math.floor(now / 220)
-  for (let y = 124; y < 172; y += 2) {
-    const half = Math.max(1, Math.round(7 - (y - 124) * 0.08))
-    const shift = (y / 2 + shimmer) % 3 - 1
-    ctx.fillStyle = (y / 2 + shimmer) % 4 ? '#f4e7a1' : '#a9a27a'
-    ctx.fillRect(MOON.x - half + shift, y, half * 2, 1)
-  }
-  for (const g of GLINTS) {
-    if (((now + g.x * 53) % g.period) / g.period < 0.3) { ctx.fillStyle = '#dfe8ff'; ctx.fillRect(g.x, g.y, 2, 1) }
   }
 }
 

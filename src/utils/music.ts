@@ -56,11 +56,21 @@ export function startMusic(): Promise<string | null> {
   const audio = new Audio(TRACKS[path])
   audio.loop = true
   audio.preload = 'auto'
+  // Paused by something other than us (iOS interrupting it for a sound effect, say) while
+  // it's wanted: straight back on. Our own pauses come at the end of a fade, once it's unwanted.
+  audio.addEventListener('pause', () => {
+    if (wanted.has(audio) && !fadingOut.has(audio) && !audio.ended) audio.play().catch(() => {})
+  })
   const title = trackTitle(path)
   wanted.add(audio)
   const track: Track = { audio, title, started: playWhenAllowed(audio).then(() => title) }
   current = track
   return track.started
+}
+
+/** Whether a track is playing right now (audio.ts keeps its context awake meanwhile). */
+export function isMusicPlaying(): boolean {
+  return !!current && !current.audio.paused
 }
 
 /** Fade out and pause, keeping the place in the track (mute). */

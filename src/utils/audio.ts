@@ -1,6 +1,7 @@
 import menuAcceptUrl from '../assets/shared/MenuAccept.mp3'
 import menuBleepUrl from '../assets/shared/MenuBleep.wav'
 import menuWooshUrl from '../assets/shared/MenuWoosh.wav'
+import { isMusicPlaying } from './music'
 
 /**
  * Sound effects, played through the Web Audio API:
@@ -54,11 +55,18 @@ export function loadSounds(timeoutMs = 1500): Promise<void> {
 }
 
 // The playback context is created on the first play (always inside a tap/key
-// handler) and suspended again when idle, so the audio hardware can sleep.
+// handler) and suspended again when idle, so the audio hardware can sleep: but
+// never while the background music plays. Suspending it then can interrupt the
+// music on iOS (its audio session is shared), and the user heard the music cut
+// out a few seconds after each sound effect.
 let context: AudioContext | null = null
 let output: GainNode | null = null
 let idleTimer = 0
 const IDLE_SUSPEND_MS = 5000
+const idle = () => {
+  if (isMusicPlaying()) { idleTimer = window.setTimeout(idle, IDLE_SUSPEND_MS); return }
+  context?.suspend().catch(() => {})
+}
 
 function playbackContext(): { ctx: AudioContext; out: GainNode } | null {
   if (!context) {
@@ -71,7 +79,7 @@ function playbackContext(): { ctx: AudioContext; out: GainNode } | null {
   }
   if (context.state !== 'running') context.resume().catch(() => {})
   clearTimeout(idleTimer)
-  idleTimer = window.setTimeout(() => { context?.suspend().catch(() => {}) }, IDLE_SUSPEND_MS)
+  idleTimer = window.setTimeout(idle, IDLE_SUSPEND_MS)
   return { ctx: context, out: output! }
 }
 
