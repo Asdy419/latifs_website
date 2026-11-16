@@ -28,18 +28,23 @@ src/
     pageTransition.ts  navigateTo() / pageReveal() / MENU_URL (three-band wipe between pages)
     screenGuard.ts   blocking overlay: rotate phone / screen too small / maximise window
     inputLock.ts     lockInput(): swallow key/click input during transitions
-  scenes/            TitleScreen → Menu (screens inside index.html)
+  scenes/            TitleScreen (the titleEmblem medal over TitleBackground's spinning island) → Menu (screens inside index.html)
   components/        Hud (corner HUD) + HudButton (one badge), ButtonMenu, NowPlaying,
-                     CircleAnimation, TvOverlay, PixelCanvas + PixelText, ProjectCarousel + ProjectCard,
-                     ProjectPopup, PhotoGrid + Polaroid (the Photo Gallery)
+                     CircleAnimation, TvOverlay + its shows (GithubHop, SocialDrift, CameraFlash,
+                     SleepyCat: the menu TV), pfpArt (the user's pfp sprite),
+                     TitleBackground + titleEmblem + titleArt + pressArt (the title screen),
+                     PixelCanvas + PixelText,
+                     ProjectCarousel + ProjectCard,
+                     ProjectPopup, PhotoGrid + Polaroid (the Photo Gallery),
+                     SocialSelect + socialArt (the Socials page; its data in src/socials.ts)
   utils/             audio.ts (sound effects + mute flag), music.ts (background music),
                      cloudinary.ts (the gallery's photo list + image URLs),
                      alphaMask.ts (pixel-perfect hit tests), pixelArt.ts (drawing pixel art),
                      menuFont.ts (menu buttons), textFont.ts (ordinary text + corner
                      prompts), hudArt.ts (corner prompts' text, via textFont),
                      pixelFont.ts (project boxes),
-                     selectJump.ts (the menu's select jump, shared with the project boxes
-                     and the gallery's photos), confirmFlash.ts (the confirm flash)
+                     selectJump.ts (the menu's select jump, shared with the project
+                     boxes), confirmFlash.ts (the confirm flash)
   styles/base.css    global CSS (reset, #app, .page, colours, --art-px, .page-banner)
   assets/            organised by page/screen: shared/ (sounds, BACK badge, site_icon.png),
                      title/, menu/, projects/, about/, socials/, gallery/, bg_music/
@@ -153,7 +158,21 @@ Component/scene CSS sits next to its `.ts` file and is imported by it.
     drawn at most ~70 art px, and the exports reach 3000 x 3000. That took them from
     ~2.5 MB / ~67 MB decoded to ~0.5 MB / ~10 MB. The directive carries a version
     (`cardArt: 'v2'`): bump it whenever cardArt changes, or imagetools' cache serves
-    stale copies (it keys on directives + source bytes).
+    stale copies (it keys on directives + source bytes). `horses_from_noise.png` (the
+    neural network) had its balls' white glints toned down to 30% of their whiteness, each
+    to its own ball's colour (the user found them too shiny; edited as raw RGBA through
+    ffmpeg, as a canvas round trip would shift the semi-transparent glow; the original is
+    in git history). `kinemechanics.png` (the physics logo) was flattened the same way (the
+    user's call: no shading, no black borders): flat bright red arrows, the diagonal one
+    the original's darker red (#af000b, the user's call), a flat purple ball, the outline
+    filled with the colour of the shape it bordered (shapes keep their size), the grey
+    hatching and stray specks gone; the trajectory's black dashes stay (a path, not a
+    border). `tsp_solvers.png` lost most of its nodes' shading and gleam (the user's call:
+    each red keeps 25% of its difference from the base red, the glints and their pale edges
+    15%; outlines, lines and ring untouched). Per-picture fixes are data, not new art:
+    `Project.imageCentre` (where the subject sits), `imageScale` (bigger in the pop-up's
+    header: Horses, Mystic, Kinemechanics, TSP) and `cardImageScale` (bigger on its box:
+    Kinemechanics, TSP).
   - Project pictures are lossless WebP, except photo-like ones listed in `LOSSY_SHOTS`
     (vite.config.ts: photos, shaded art, dense graphs), which get the banners' lossy q92
     with exact alpha (55-80% smaller); line diagrams stay lossless.
@@ -184,7 +203,10 @@ Component/scene CSS sits next to its `.ts` file and is imported by it.
     never its STUDENT_ID line or the AI-acknowledgement block).
   - Unity Clash's: the title screen and the user's two Unity-editor captures (menu, stage),
     each fitted with its own flat edge colours (per-row sides, or a band of the editor's top
-    strip), then `PlayerMovement.cs`'s jump logic (from the repo) in an editor view.
+    strip), then `PlayerMovement.cs`'s jump logic (from the repo) in an editor view. The
+    title screen is shown whole, the globe strip under PLAY included (the user's call: "the
+    full menu"): its 1 px border columns trimmed, then each row widened with its own edge
+    colour. (A character-select capture, `reference/image (13).png`, is unused so far.)
   - Kinemechanics' are its own screens (`reference/expanded_imgs/menu.png`, `collisions.png`,
     and the original projectile shot) without the Windows title bar, brought to 1.92:1
     without cutting anything (the menu: a window of its empty black rows; the others: the
@@ -231,12 +253,12 @@ Component/scene CSS sits next to its `.ts` file and is imported by it.
     user wants the rings moving round it (it only pauses the selected box's pulse).
     `PixelLabel` skips redrawing a picture it already shows (a wrapped label is
     always measured twice). Use images through JS imports, not CSS `url()` (that
-    would ship a second PNG copy). Masks take the URL from a CSS variable set in TS
-    (`--tv-mask`).
+    would ship a second PNG copy). Masks take the URL from a CSS variable set in TS.
   - Audio isn't converted automatically: `MenuAccept` is MP3, and short UI blips stay WAV
     (MP3 adds start latency). Encode new sounds the same way. `MenuWoosh` (WAV) plays when a
     project's details open, in place of the confirm sound (the user's pick: copied from
     `reference/` with its silent last 0.23 s trimmed); Enter again (GitHub) still confirms.
+    Opening a gallery photo big plays it too (the user wanted it the same as a project).
   - TV static is drawn in code, not a video (`TvStatic.ts`): the same static on every TV
     (the menu's and the Projects pop-up's, as the user asked), one speckle per art pixel,
     drawn once into a 4-frame canvas strip and rolled at 30fps by a CSS transform (on the
@@ -246,9 +268,72 @@ Component/scene CSS sits next to its `.ts` file and is imported by it.
     idle time on the title screen (`prepareStatic`) and the menu only copies it (~1ms).
     Compare perf runs only within one session/page: dev-server restarts shift the
     baseline by tens of ms/s.
-  - Loading order on the home page: title image (fetchpriority high) → sounds
-    (`loadSounds()`) → menu images (`Menu.preload()`, which must list every menu image).
-    Keep big downloads out of the title screen's first paint.
+  - The menu TV is drawn in code (`TvOverlay.ts`; the old `tv_overlay.png` frame is no
+    longer used). Its black frame and its screen are stepped clip-paths: straight along
+    the top, bottom and left, and a pixel a row down the 45° right edge, like the
+    buttons (the user's call: the image sloped smoothly). `#tv-wrap` sits on whole art
+    pixels, (−37, 54) at 336 × 180 (Menu.css). The screen is its top-left 330 × 180, one
+    pixel per art pixel exactly (it used to be the image's 98%, ~1.0005 art px). It
+    shows rows 11–168 and, on row y, columns to 337 − y; the frame is 2 px wider round
+    it (3 across the slant), rows 63–224 on the page.
+  - The menu TV previews the highlighted button, as the game's does (`TvOverlay.tune`,
+    from Menu.ts via `ButtonMenu.onChange`). Changing buttons rolls static for `TUNE_MS`,
+    or `OPEN_TUNE_MS` as the menu opens; both are shared with the Projects pop-up's TV,
+    in TvStatic.ts. Then the button's show plays from the top; a button with no show
+    stays on static (About me, for now), and the static stops rolling under a show.
+  - The shows' backgrounds differ on purpose. The user wanted scenes, not the hop's grey
+    everywhere: the hop keeps its grey; Socials gets a pale abstract screen, Photo Gallery a
+    starry night, and Exit the hop's grey fading to a really dark grey, with a floor. Each
+    show reads `performance.now()` in its frame loop, not the frame's timestamp
+    (Playwright's fake clock gives the two different origins).
+  - Projects' show is the GitHub hop (`GithubHop.ts`, the user's pick, from the video
+    they approved: `reference/github-hop.mp4`). Their pfp, in a circle as GitHub shows
+    it, hops along GitHub's contribution squares. It only moves up and down while the
+    squares scroll; it lands on grey, pauses, and the square fades up through GitHub's
+    greens (the user's corrections). The screen is `#afb8c1`: the first light grey was too
+    pale to make out the squares (the user's call). The pfp is a Metal Sonic sprite, its
+    29 × 40 pixels recovered from the blown-up JPEG they gave
+    (`reference/m338fedwl2c51.jpg`) and kept in GithubHop.ts. It's drawn in code at one pixel per art
+    pixel on the TV's 330 × 180 screen, and redrawn only when something moves. Only rows
+    11–168 show, from column 37 (the window's edge) to the slant (column 337 − row),
+    measured at five sizes. Its cost on a 4x-throttled phone is within noise of static.
+  - Photo Gallery's show is the camera flash (`CameraFlash.ts`, the user's pick, from the
+    video they approved: `reference/camera-flash.mp4`). A pixel-art Fujifilm X100VI after
+    the user's photo charges up at its AF-assist lamp, the small round lamp they circled.
+    The lamp steps from amber to white and golden sparks stream in while the camera shakes
+    harder and faster (1→4 px). At the climax a burst from the lamp whites out the screen,
+    which fades back; 3.3 s a loop.
+  - It's drawn flat (three silvers, flat black leather, flat glow rings): the user found a
+    shaded take too busy. No brand name, only marks. It's set against a starry night: a
+    banded sky, twinkling stars, a crescent moon top left, a treeline, and a lake with
+    the moon's path shimmering. With reduced motion it holds the camera at rest: no
+    shake, no flash. Its cost on a 4x-throttled phone is within a few ms/s of static.
+  - Socials' show is the logo drift (`SocialDrift.ts`, the user's idea, in place of a phone
+    scrolling a video feed with a floating thumb in a cosy bedroom, which is gone): the Socials
+    page's four box pictures (socialArt.ts) and Instagram's glyph (`instagramArt`, a flat
+    magenta tile with the frame, lens and dot in white; the user asked for it) drift about the
+    screen like a DVD screensaver, each turning slowly, bouncing off the screen's edges (the
+    slanted right edge is the line x + y = 337) and off each other (an elastic bounce of equal
+    weights, as discs the sprites' half-size). The same start every time, no randomness; 30 fps
+    draws, with the step clamped to 50 ms so a hidden tab doesn't fling them.
+  - Behind them, something plain and abstract (the user's call): a pale blue-grey screen with
+    three big, slightly darker flat discs drifting slowly, wandering a little past the sides.
+    With reduced motion: the first frame, still.
+  - Exit's show is the sleepy cat (`SleepyCat.ts`, the user's idea), all the user's
+    calls. An orange cat sits on a floor, its body side on and its face to the screen,
+    swishing its tail. The hop's grey fades slowly (2.6 s) to a really dark grey
+    `#1e2024`, not black, the floor with it.
+  - Only once it's dark does the cat yawn, crouch and lie down. It rests its head forward
+    on its paws, side on, and sleeps, breathing. Zs drift up slowly, one every 1.1 s,
+    each for 3 s.
+  - Only the sleeping loops; the intro replays only when the TV tunes back to Exit.
+  - The cat is designed on a 64 × 56 grid and drawn 1.4× (each shape tested in the
+    design's units), so its outline and details stay single art pixels. Doubled pixel
+    for pixel it was too big; it's centred in the TV's visible part.
+  - Loading order on the home page: "press any button" image (fetchpriority high; the logo
+    and backdrop are drawn in code) → sounds (`loadSounds()`) → menu images
+    (`Menu.preload()`, which must list every menu image). Keep big downloads out of the
+    title screen's first paint.
   - Rings (`CircleAnimation(timeOffset, { colors })`; colours are shader uniforms, set
     once): drawn by a WebGL fragment shader (one draw call per
     frame, aliased edges like `crispEdges`), with the original SVG as an automatic fallback
@@ -275,6 +360,103 @@ Component/scene CSS sits next to its `.ts` file and is imported by it.
   the height). The menu's numbers were measured from `reference/Sonic Mania Plus - main
   menu.mp4` by resampling frames back onto the 424×240 grid; re-measure that way rather
   than eyeballing.
+- **Title screen** (TitleScreen.ts/.css): laid out after the Sonic Mania title the user
+  sent (`reference/88ecef….gif`: a 424×240 screen scaled 1.1745×, 42 frames at 70 ms, and
+  quantised afresh every frame, so one frame's colours jitter; measure it by sampling at
+  art-pixel centres and taking each pixel's most frequent colour over frames 2–42, frame 1
+  having a poorer global palette). The user asked for its banner and medal (not the wings)
+  "1-to-1", so they are the GIF's own pixels, lifted by `scratchpad/islandref/lift.cjs`
+  into `src/components/medalPixels.ts` (generated by `gen-ts.cjs` there: a palette of 79
+  colours and run-length rows, unpacked by `decodeRuns` in utils/pixelArt.ts; rerun both
+  after changing the lift). The GIF's SONIC, MANIA, Sonic and wings are left out: the
+  user's own things go there.
+  - The medal (`titleEmblem.ts`, 410 × 200 cells, 1 cell = 1 art px; the reference's cells
+    less (7, 12), its ring's middle at `CX, CY` = (205, 97)):
+    - Wings: the user's own, kept exactly as they like them (sharp, upturned feather tips,
+      lavender undersides); designed in 1.35 px cells and rendered through a scale transform.
+    - The ring (flat gold, blue bands, studs and gems), the red plate and the black lower
+      tier with its navy end-blocks: lifted. The ring where Sonic covers it in most frames
+      comes from frame 2 (he arrives in frame 3). The ribbon tails hanging from the plate's
+      ends wave in the GIF (8 distinct poses that never repeat cleanly within its 42 frames,
+      a game sprite loop sampled at 14 fps); the user wanted them frozen, so they are frame
+      1's pose, drawn under the still parts (the plate's ends and the tier go over their
+      tops). The user's tidying: the plate's navy end panels and their white stars are gone
+      (plate red there), and one white band (rows 138–152 of the reference: 15 of the
+      plate's 44 rows, "around a third", in its middle) runs the plate's full width behind
+      the lettering, like the tails' stripes; the lower tier is a bowl, not
+      a rectangle (rows 168–183 of the reference, flat across the middle, its bottom curving
+      up into the outer edges over the end-blocks: "make the bottom curve inwards"), its
+      end-blocks flat navy (no dots or stripes) and nothing lifted under it; the fold where
+      each tail turns back behind the tier is two tones (dark red and red); the tails' edges
+      lose 1-px specks and notches; stray specks are smoothed away; where the ribbon turns
+      down from the plate's ends, the pale edge highlights the lift left see-through are
+      plate red ("fix the empty pixels side to side"), and the white runs on from the band's
+      ends down that turn into the tails' stripes, whose shaded rise is plain white ("connect
+      the white a bit better"): the band's top corner rounds off into a 4 px white line
+      (`turnX(y)` in lift.cjs) that leans outward on its way down, with the plate's red only
+      inside it and nothing outside it ("make the connection curved not rectangular", "not
+      completely straight", "remove the red line"); 1–2 px see-through slits inside the ribbon
+      are closed. All of that is the user wanting "the
+      unneeded pixels around the bottom of the logo" gone. Last, the whole plate with its band
+      and the tier bows upward: each column's cells move up by 4 px in the middle, tapering to
+      nothing at the plate's ends (`bow(x)` in lift.cjs; "the entire flag actually should be
+      slightly curved upwards"), so the pfp is cut 4 px shorter and LATIF'S sits 2 rows and
+      PORTFOLIO 3 rows higher than before.
+    - The user's pfp (`pfpArt.ts`, the Metal Sonic sprite, 4× by Scale2x twice) bursts out of
+      the ring's top, over the ring; his waist sits at the plate's top so only head and torso
+      show, his chest's middle (sprite column 16) on the ring's middle (the user's call).
+    - LATIF'S (`titleGrid` in titleArt.ts) sits where SONIC was (its outline's top on row 123
+      of the reference, 2 above SONIC's as the plate bows up; 125 px wide): 26 px letters in the "SONIC" style,
+      square corners, lit top/left and deeper bottom/right, in a 4 px bevelled blue outline
+      (dark line, blue, a lighter rim along the top but navy below, dark edge) that runs on
+      between the letters; letters spaced by their shapes (3 px average edge gap, never under
+      2; rows a glyph is empty in, as under the apostrophe, don't count). SONIC's two rows of
+      darker red shadow are drawn under each column. The apostrophe and S are the site's own
+      designs to the same rules.
+    - PORTFOLIO (`spikyGrid`, 15 px tall) is centred on the lower tier between its blocks
+      (x 165–258 of the reference): angular red letters with flared, pointed feet and pointed
+      bar ends, edged gold with a dark rim. The reference has "MANIA" there, far bigger; this
+      is the site's name and my call: drop it if the user doesn't want a second line.
+  - The plate's middle (row 131 of the medal) sits 55% down the screen; the sea's horizon
+    (63.7%) passes just under the plate, behind the tails, as in the reference.
+  - "Press any button" (`pressArt.ts`) is rebuilt from the reference's pixels: capitals 6 px
+    tall and 6 wide with 2 px stems, 8 px apart (12 at a space), banded orange / gold / cream /
+    cream / gold / deep gold, in a 1 px dark brown outline that fills their holes, with a
+    darker shadow row. The user's `title/press_any_button.png` is kept but unused. It flashes,
+    and sits halfway between the bottom of the tails and the bottom of the screen (the user's
+    call), over the island.
+  - The old logo (`title/801d7d18-….png`) and the user's earlier tries in `title/` are kept
+    but unused.
+  - Backdrop (`TitleBackground.ts`): an island in the sea seen from the sky, turning once every
+    18 s. It's drawn Mode 7 style by a WebGL fragment shader at 1 px per art px.
+    - The whole island shows (the user didn't want it cropped by the bottom of the screen) and
+      is as big as fits (they asked for it bigger). It fills the band under the medal's tails
+      (`HORIZON`, `PIVOT`, `TEXELS`): its far shore just below the tails, its near shore just
+      inside the bottom (rows ~190 to ~238 of 240).
+    - The island is a 512² top-down map. Its coast has bays, beaches, cliffs and foam-streaked
+      shallows; inland are grass patches, bushes, dirt paths from a central clearing, and a
+      lake whose river falls off a cliff.
+    - Billboard palms and cone trees stand on it, scaled with distance.
+    - The sea is a 64² wave-and-glint tile.
+    - The sky is a 1600 px wrapping strip (bands, puffy and wispy clouds, far islands) that
+      scrolls left slower than the island turns, as in the reference.
+    - Fine texture detail turns to speckle in perspective: keep the island's features broad.
+    - It runs at 30 fps, waking only for frames it draws (about 20–30 ms of main-thread work
+      per second on a 4×-throttled phone). It skips frames while hidden or under the screen
+      guard.
+    - Without fast WebGL it's one still frame drawn in JS (the same maths). Reduced motion
+      gives one still frame too.
+    - The maps are made once (~180 ms on a 4×-throttled phone, at the title's first mount).
+    - The page colour is the sea's (`TITLE_BACKGROUND`), also inlined in index.html for the
+      first paint.
+  - Testing it: `scratchpad/title-spin.cjs` (GPU flags on, 4 shots 1.5 s apart),
+    `title-measure.cjs` (the press text's position against the tails and the bottom),
+    `press-shot.cjs` (a close-up while the text shows), `title-rafcost.cjs` (cost),
+    `title-nogl.cjs` (the stills), `title-roundtrip.cjs`. The reference GIF's frames
+    (`f0001.png`…), the lift (`extract.cjs` samples the frames into `frames.bin`, `lift.cjs`
+    lifts the medal and writes `medal.json` plus check pictures, `gen-ts.cjs` writes
+    medalPixels.ts), the tails' pose analysis (`tails.cjs`) and the measuring scripts
+    (`asciimap.cjs`, `analyse.cjs`, `pressmask2.cjs`) are in `scratchpad/islandref/`.
 - **Main menu buttons** (ButtonMenu.ts/.css): drawn in code, matching the reference clip
   to within about 1 art px at every frame.
   - Bars: stepped 45° parallelograms (clip-path), 25×175, with a 36px diagonal pitch.
@@ -352,11 +534,15 @@ Component/scene CSS sits next to its `.ts` file and is imported by it.
     of four steps (`--gap-xs/s/m/l`: 2, 4, 8, 12; 16 between the TV and the text), with one
     layout for every project (no per-project variants). Header: the project's picture
     (24 pp, centred beside both lines, reaching 2 pp past them without making the header
-    taller), the title (large text-font text) over a subtitle line lined up with it (kind,
-    when; it wraps to a second line when long, as CompanionAI's and Horses' do beside the
-    bars). The title is centred over the TV's antennas (`centreNameOnTV`: it moves the
-    picture and both lines right together, never past the panel's edge, so long names on
-    the narrowest phones stop short; twice, as a rewrapped subtitle can shrink the TV). At
+    taller; `Project.imageCentre` says where a picture's subject is, so Mars Allocator's
+    rover is centred on its box, not its mast: the user's call), the title (large text-font text, 2.6em) over a smaller subtitle line lined up
+    with it (0.7em, 6 px at least; the kind of project; no date, as the Timeline tab has the
+    dates: the user's call; `when` stays in the data, unused). The title is centred over the
+    TV's antennas (`centreNameOnTV`: it moves the picture and both lines right together,
+    never past the panel's edge, so the longest names stop short of centred: at 2.6em the
+    five longest by up to ~11 pp on a desktop, most of them on the narrowest phones; the
+    panel's padding can't take the picture, as the face's corner cut runs through it;
+    twice, as a rewrapped subtitle can shrink the TV). At
     the right, the language logos, their middle level with the bar's (the user's call), and
     the language bar, a pixel-art meter (in pp: black frame with
     notched corners, each segment with a lit top row and a shaded bottom row, 1 pp black
@@ -426,6 +612,10 @@ Component/scene CSS sits next to its `.ts` file and is imported by it.
     from the left with everything on it, easing out (to 433 ms: `OPENING_MS`). Transforms
     only, plain numbers in the keyframes (Safari and var() in transform keyframes); off for
     reduced motion. The clip's OK jumps as it lands; the user didn't want the buttons to.
+    Filled `backwards`, not `both`, so the animations let go once they're over. Held
+    forwards, the band, the face and the panel's parts stayed GPU layers for good. The
+    user saw the band and face flicker over each other when switching tabs fast; I
+    couldn't reproduce it, even on their GPU, so this removes the likeliest cause.
     Right: tabs Overview (tagline, gist; the fun fact under them) / Features / Numbers /
     Timeline (left/right or click; up/down scroll), from the Project Files' sections.
     Footer: View on GitHub, other links, Close. Every section of every project fits
@@ -447,10 +637,35 @@ Component/scene CSS sits next to its `.ts` file and is imported by it.
   - `PhotoGrid`: a CSS grid of 68 × 78 art px `Polaroid`s (5 across at 16:9, more on
     phones) in a scroller that starts under the banner. Selection: arrows (2D, scrolls
     into view), mouse hover, tap. Each polaroid hangs at a slight tilt (hashed from
-    its ID, `--tilt`); selected, it gets the menu's highlight, does the menu's select
-    jump and a quick little wobble on its pin as it straightens (`WOBBLE`/`WOBBLE_MS`
-    in Polaroid.ts: the user had the old 500ms swing toned right down). The pin is
-    9 × 9 pixel art (one data URL per colour).
+    its ID, `--tilt`); selected, it gets the menu's highlight and a quick little wobble
+    on its pin as it straightens (`WOBBLE`/`WOBBLE_MS` in Polaroid.ts: the user had the
+    old 500ms swing toned right down). No select jump: the user didn't want the frame
+    and its highlight parting and rejoining on every move. Its edges always step like
+    pixel art, even the selected one's and mid-turn (the user's call). Polaroid.ts turns
+    it a frame at a time (an inline rotate, not a CSS transition). At every angle it cuts
+    the visible pieces to the screen's art pixels: the frame and its drop shadow (its own
+    element, `.polaroid-shadow`), or, selected, the lifted frame and the highlight. The
+    cut is `staircase()`, a clip-path of the art pixels whose middles the turned box
+    covers, untilted into the box's own coordinates. The pin is 9 × 9 pixel art (one
+    data URL per colour), beside the frame so its clip can't cut it.
+- **Socials**: four boxes (`SocialSelect`, data in src/socials.ts) after the user's clip
+  of a character-select screen (`reference/Desktop 2026.11.16 - 05.41.25.04.mp4`),
+  measured frame by frame (4 screen px per art px): 96 × 96 art px boxes (16 apart in
+  the clip; 8 here, as four don't fit the 424 px screen otherwise), tops 92 down; a
+  3px frame round a see-through panel (white at 43%: the rings show through), a 3px
+  see-through dark shadow inside along the top and left, a drop shadow outside only
+  where it sticks out (the panel is see-through), the picture over the top 68 rows,
+  then a black 16-row name strip (the small text font, white with a #4a486b shadow).
+  Selected: the frame pulses red #c20f00 ↔ pink #eab9e7 in the clip's 8 steps
+  (`steps(7, jump-none)` on the border's own colour: a layer over a border rounded to
+  whole screen pixels left a sliver), red/steel/blue bands grow out of the corners in
+  117 ms, and the picture lifts 2px up-left over a #153e65 shadow of itself. The panel
+  sits inside the frame's border, not beside it (the same rounding showed the page
+  between them). ← → / tap selects; tapping the selected one, Enter or CONFIRM opens it
+  in a new tab. Pictures are drawn in code, flat (`socialArt.ts`): GitHub's mark, the
+  user's own account (a plain bust and their name: "LATIF"), a camera for "Latif's Lens"
+  (photography), TikTok's note. The user kept the bust: their GitHub pfp was tried there
+  and they asked for the bust back. Screen-reader names say "Latif", never handles.
   - `PhotoViewer` (CONFIRM / Enter / clicking the selected photo; Enter again, BACK or
     any click closes): the whole photo in a frame with an even white border (the user
     didn't want a polaroid here), growing out of the polaroid with an overshoot
