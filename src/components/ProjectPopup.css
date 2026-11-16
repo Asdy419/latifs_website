@@ -619,6 +619,7 @@
 /* drawn in the digits' own font pixels (ProjectPopup.ts: yearFlag), its pole over the line */
 .project-popup-flag {
   position: relative;
+  flex: none; /* never squashed by a long timeline below it (its digits sit at fixed offsets and were left poking out of the cloth on phones) */
   font-size: 2em;
   background: var(--flag-art) 0 0 / 100% 100% no-repeat;
   image-rendering: pixelated;

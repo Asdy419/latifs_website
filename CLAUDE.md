@@ -575,7 +575,9 @@ Component/scene CSS sits next to its `.ts` file and is imported by it.
     languages' legend on one line: 158 pp; 164 on phones; 108 on the narrower phones,
     which have no height for a wrapped subtitle). No year in the header (the user's call:
     no repeats): it heads the Timeline tab, big, on a pixel-art pennant (`yearFlag`, drawn
-    in the digits' own font pixels; its pole stands on the timeline's line).
+    in the digits' own font pixels; its pole stands on the timeline's line; `flex: none`, as a
+    long timeline used to squash the flag while its digits stayed put, leaving the year poking
+    out of the cloth on phones).
     Footer, on the middle's two columns: "Built with" and the tools (`tech`) under the TV,
     the buttons at the right (white with a black outline and the red pixel shadow; GitHub
     yellow with a black shadow; keys ↵ and B in small black caps).
