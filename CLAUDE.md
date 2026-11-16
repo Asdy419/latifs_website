@@ -345,9 +345,10 @@ Component/scene CSS sits next to its `.ts` file and is imported by it.
     night sky and the moon between pink curtains up on the right, a wooden floor and a round pink
     rug. After 1.3 s the lights go down over 2.6 s (a near-black overlay, 94%, over everything
     but the window pane, which stays moonlit under a 35% one; the LED strip dims to a dull pink:
-    the user wanted it "more darker"), and that's it: the
-    frame loop stops once it's dark, and the room lights up again only when the TV tunes back to
-    Exit. With reduced motion: the dark room from the start.
+    the user wanted it "more darker"), and that's it, but for the ten stars in the window
+    twinkling on their own periods (the user's call; once it's dark the picture is redrawn only
+    every 100 ms, for them). The room lights up again only when the TV tunes back to Exit. With
+    reduced motion: the dark room from the start, still.
   - Loading order on the home page: "press any button" image (fetchpriority high; the logo
     and backdrop are drawn in code) → sounds (`loadSounds()`) → menu images
     (`Menu.preload()`, which must list every menu image). Keep big downloads out of the

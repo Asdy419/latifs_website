@@ -7,12 +7,14 @@ import type { TvShow } from './TvOverlay'
  * strip along its top and a string of fairy lights twinkling, a bed with its pillow at the left
  * end, a bedside table with a lamp, two posters and a clock on the wall, a window on the night sky
  * and the moon between pink curtains, a wooden floor and a round pink rug. Nothing stirs for a
- * moment; then the lights go down slowly (the room fades to a dark blue-grey, the window still
- * moonlit), and that's it: the dark room, still, until the TV tunes back to Exit. Flat pixel art
- * with dark outlines, like the other shows. With reduced motion: the dark room from the start.
+ * moment; then the lights go down slowly (the room fades to near black, the window still
+ * moonlit), and that's it: the dark room until the TV tunes back to Exit, only the stars in the
+ * window twinkling (the user's call). Flat pixel art with dark outlines, like the other shows.
+ * With reduced motion: the dark room from the start, still.
  *
- * Drawn in code, one pixel per art pixel like the TV's static; the room is drawn once, and the
- * frame loop stops once it's dark. The room is laid out for what shows of the screen (rows 11–168,
+ * Drawn in code, one pixel per art pixel like the TV's static; the room is drawn once, and once
+ * it's dark the picture is redrawn only a few times a second, for the stars. The room is laid out
+ * for what shows of the screen (rows 11–168,
  * columns 37 to 337 − row: wide at the top, narrow at the floor), so the bed and rug sit low on
  * the left and the window high up.
  */
@@ -24,8 +26,11 @@ const NIGHT = 'rgb(5 4 12 / 0.94)', NIGHT_PANE = 'rgb(5 4 12 / 0.35)'
 const LED = ['#ff7ac0', '#5a2a48']
 /** The fairy lights' colours, round and round the string. */
 const BULBS = ['#ffd84a', '#ff8a7a', '#7ef0ff', '#c7ff7a']
-/** The window pane (kept moonlit after dark). */
+/** The window pane (kept moonlit after dark), and the stars in it, each twinkling on its own period (ms). */
 const PANE = { x0: 216, y0: 34, x1: 288, y1: 80 }
+const STARS = [[224, 42, 1300], [236, 50, 1700], [230, 66, 2100], [246, 40, 1500], [258, 72, 1900], [282, 46, 1100], [276, 62, 2300], [262, 58, 1600], [240, 74, 1400], [286, 70, 1800]]
+/** How often the picture is redrawn once it's dark, when only the stars twinkle. */
+const TWINKLE_MS = 100
 
 /** In ms: the lit room, then the lights going down slowly. */
 const AWAKE = 1300, FADE = 2600
@@ -48,16 +53,18 @@ export class LightsOut implements TvShow {
     this.ctx = this.canvas.getContext('2d')
   }
 
-  /** Plays from the top (the lit room) until it's dark; with reduced motion, the dark room straight away. */
+  /** Plays from the top (the lit room); with reduced motion, the dark room, still. */
   start(): void {
     this.stop()
     if (reducedMotion.matches) return this.drawAt(DARK)
     this.started = performance.now()
     this.drawAt(0)
+    let drawn = this.started
     const tick = () => {
-      const t = performance.now() - this.started
-      this.drawAt(t)
-      if (t < DARK) this.frame = requestAnimationFrame(tick) // dark: nothing moves any more
+      const now = performance.now(), t = now - this.started
+      // every frame while the lights go down; once it's dark only the stars twinkle, a few times a second
+      if (t < DARK || now - drawn >= TWINKLE_MS) { this.drawAt(t); drawn = now }
+      this.frame = requestAnimationFrame(tick)
     }
     this.frame = requestAnimationFrame(tick)
   }
@@ -98,6 +105,11 @@ export class LightsOut implements TvShow {
       ctx.globalAlpha = dark
       ctx.fillRect(0, 11, width, 2)
       ctx.globalAlpha = 1
+    }
+    // the stars in the window, twinkling (the user's call): each bright for most of its period, then dim
+    for (const [x, y, period] of STARS) {
+      ctx.fillStyle = ((t + x * 37) % period) / period < 0.6 ? '#ffffff' : '#7f8cc0'
+      ctx.fillRect(x, y, 1, 1)
     }
   }
 }
@@ -145,7 +157,6 @@ function roomCanvas(): HTMLCanvasElement {
   rect(196, 26, 308, 27, '#6b4327')
   boxed(PANE.x0 - 4, PANE.y0 - 4, PANE.x1 + 4, PANE.y1 + 4, '#efe9f4')
   rect(PANE.x0, PANE.y0, PANE.x1, PANE.y1, '#1a2350')
-  for (const [x, y] of [[224, 42], [236, 50], [230, 66], [246, 40], [258, 72], [282, 46], [276, 62], [262, 58]]) rect(x, y, x, y, '#ffffff')
   disc(268, 50, 8, 8, '#fff2c0')
   disc(272, 47, 7, 7, '#1a2350')
   rect(251, PANE.y0, 252, PANE.y1, '#efe9f4')
