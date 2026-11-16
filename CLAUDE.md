@@ -343,8 +343,8 @@ Component/scene CSS sits next to its `.ts` file and is imported by it.
     what shows of the screen (wide at the top, narrow at the floor): a lavender wall with a string
     of fairy lights twinkling along its top (drawn live; a pink LED strip above them was
     removed: the user's call), a bed with its
-    plump pale blue pillow at the left end (a wooden rounded headboard and frame, the mattress's
-    pale blue sheet on top and its side below, and the blanket, blue, laid over the far part of
+    plump pale blue pillow at the left end (a wooden rounded headboard and frame, the mattress one
+    light blue all over, top and side, and the blanket, blue, laid over the far part of
     the bed only, from past the pillow to a little beyond the foot, where the user drew it: lit
     along its top, the top corner of its end rounded and its bottom cut off square), a
     bedside table with a lamp, two posters and a clock, a window on the

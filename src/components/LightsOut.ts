@@ -174,7 +174,7 @@ function roomCanvas(): HTMLCanvasElement {
   rect(190, 56, 194, 56, '#4a4660')
 
   // the bed, side on, its head at the left: a wooden headboard with a rounded top and a lighter
-  // inner panel; the mattress with its pale blue sheet on top and its side below; the blanket laid
+  // inner panel; the mattress one light blue all over (the user's call); the blanket laid
   // over the far part of the bed only, from past the pillow to a little beyond the foot (the user
   // drew where), lit along its top, darker at its edges, a few folds, the top corner of its end
   // rounded and its bottom cut off square; a plump pale pillow; the frame and legs wood
@@ -183,9 +183,7 @@ function roomCanvas(): HTMLCanvasElement {
   rect(47, 83, 51, 83, '#6b4327')
   rect(47, 88, 51, 128, '#7d5232')
   rect(46, 84, 52, 84, '#8a5c38')
-  rect(54, 108, 178, 124, '#b3c8ee')
-  rect(54, 124, 178, 124, '#8fa9d8')
-  rect(54, 125, 178, 133, '#8fb0e6')
+  rect(54, 108, 178, 133, '#8fb0e6')
   rect(54, 133, 178, 133, '#6a8cd0')
   rect(88, 108, 181, 124, '#4a74c8')
   rect(88, 108, 181, 110, '#6f94dd')
@@ -199,7 +197,6 @@ function roomCanvas(): HTMLCanvasElement {
   rect(57, 98, 57, 107, '#d7e4f7')
   rect(93, 98, 93, 107, '#d7e4f7')
   rect(74, 99, 74, 106, '#bcd0ee') // its crease
-  rect(58, 108, 92, 108, '#a9c0ea')
   rect(52, 134, 180, 139, '#5a3a22')
   rect(52, 134, 180, 134, '#7a5232')
   rect(54, 140, 59, 150, '#5a3a22')
