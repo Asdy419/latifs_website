@@ -174,35 +174,32 @@ function roomCanvas(): HTMLCanvasElement {
   rect(190, 56, 194, 56, '#4a4660')
 
   // the bed, side on, its head at the left: a wooden headboard with a rounded top and a lighter
-  // inner panel, the frame and legs wood too; everything on it blue (the user's calls): the duvet,
-  // lit along its top and darker at its edge, running past the foot, the pale sheet turned down
-  // at the head, a plump pale pillow, the mattress's side
+  // inner panel; the mattress with its pale blue sheet on top and its side below; the blanket laid
+  // over the far part of the bed only, from past the pillow to a little beyond the foot (the user
+  // drew where), lit along its top, darker at its edges, a few folds, the top corner of its end
+  // rounded and its bottom cut off square; a plump pale pillow; the frame and legs wood
   rect(45, 86, 53, 132, '#6b4327')
   rect(46, 84, 52, 85, '#6b4327')
   rect(47, 83, 51, 83, '#6b4327')
   rect(47, 88, 51, 128, '#7d5232')
   rect(46, 84, 52, 84, '#8a5c38')
-  rect(54, 108, 178, 123, '#4a74c8')
-  rect(54, 108, 178, 110, '#6f94dd')
-  rect(54, 123, 175, 124, '#3a5ca6')
+  rect(54, 108, 178, 124, '#b3c8ee')
+  rect(54, 124, 178, 124, '#8fa9d8')
+  rect(54, 125, 178, 133, '#8fb0e6')
+  rect(54, 133, 178, 133, '#6a8cd0')
+  rect(88, 108, 181, 124, '#4a74c8')
+  rect(88, 108, 181, 110, '#6f94dd')
+  rect(88, 123, 181, 124, '#3a5ca6')
+  rect(88, 108, 88, 124, '#3f64b4')
   for (const [x0, x1] of [[104, 112], [128, 136]]) rect(x0, 113, x1 + 10, 113, '#3f64b4') // folds
-  rect(54, 108, 98, 113, '#b3c8ee')
-  rect(54, 113, 98, 114, '#8fa9d8')
+  rect(179, 113, 179, 121, '#3f64b4')
+  for (const [x, y] of [[181, 108], [180, 108], [181, 109]]) rect(x, y, x, y, '#7a68b4')
   rect(58, 97, 92, 108, '#d7e4f7')
   rect(59, 96, 91, 96, '#d7e4f7')
   rect(57, 98, 57, 107, '#d7e4f7')
   rect(93, 98, 93, 107, '#d7e4f7')
   rect(74, 99, 74, 106, '#bcd0ee') // its crease
   rect(58, 108, 92, 108, '#a9c0ea')
-  rect(54, 125, 178, 133, '#8fb0e6')
-  rect(54, 133, 178, 133, '#6a8cd0')
-  // the duvet laid on top, running past the foot of the bed at its own level, its end's top corner
-  // rounded but its bottom cut off square (the user's calls)
-  rect(176, 108, 181, 124, '#4a74c8')
-  rect(176, 108, 181, 110, '#6f94dd')
-  rect(176, 123, 181, 124, '#3a5ca6')
-  rect(179, 113, 179, 121, '#3f64b4') // a fold at the end
-  for (const [x, y] of [[181, 108], [180, 108], [181, 109]]) rect(x, y, x, y, '#7a68b4')
   rect(52, 134, 180, 139, '#5a3a22')
   rect(52, 134, 180, 134, '#7a5232')
   rect(54, 140, 59, 150, '#5a3a22')
