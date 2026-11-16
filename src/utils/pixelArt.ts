@@ -33,3 +33,22 @@ export function drawColorGrid(
     }
   })
 }
+
+/** The letters that stand for colours in run-packed rows (`decodeRuns`); digits are counts. */
+const RUN_LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!#$%&()*+,-/:;<=>?@[]^_{|}~'
+
+/**
+ * Unpacks rows of pixel art stored as runs: a letter per colour (its place in RUN_LETTERS is
+ * its index in `palette`), "." for see-through, and a count after a letter for a run of it
+ * ("A3.2B" is A A A . . B). Returns rows of colours, null for see-through.
+ */
+export function decodeRuns(rows: readonly string[], palette: readonly string[]): (string | null)[][] {
+  return rows.map(row => {
+    const out: (string | null)[] = []
+    for (const [, letter, count] of row.matchAll(/([^0-9])(\d*)/g)) {
+      const colour = letter === '.' ? null : palette[RUN_LETTERS.indexOf(letter)]
+      for (let n = count ? Number(count) : 1; n > 0; n--) out.push(colour)
+    }
+    return out
+  })
+}
