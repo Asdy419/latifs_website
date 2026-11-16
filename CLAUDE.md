@@ -248,6 +248,11 @@ Component/scene CSS sits next to its `.ts` file and is imported by it.
     on this machine: it was built with Zig's (`pip install ziglang` in a scratchpad venv,
     `python -m ziglang cc -std=c11 -O2 -target x86_64-windows-gnu`) and a small C11
     `<threads.h>` shim over Win32 (MinGW has none), the repo's code unchanged.
+  - The Portfolio's are the site's own screens (title, main menu, Socials, Photo Gallery),
+    shot headless by `scratchpad/site-shots.cjs` at a 960 x 499 viewport (the TV's shape) with
+    touch emulation (so the screen guard lets the page in) at 2x, downscaled; the gallery one
+    is lossy (photos). Retake them after visual changes. The card's language shares come from
+    `gh api repos/Asdy419/latifs_website/languages`.
   - `CircleAnimation.paused`: the rings stop drawing (no frames at all) while something
     opaque covers the whole page. The project pop-up deliberately doesn't use it: the
     user wants the rings moving round it (it only pauses the selected box's pulse).

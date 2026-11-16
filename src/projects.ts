@@ -76,6 +76,12 @@ import toxicityBiasAuditImage from './assets/projects/container_imgs/toxicity_bi
 import horsesFromNoiseImage from './assets/projects/container_imgs/horses_from_noise.png'
 import kinemechanicsImage from './assets/projects/container_imgs/kinemechanics.png'
 import portfolioImage from './assets/projects/container_imgs/portfolio_site.png'
+// The Portfolio: the site's own screens (title, main menu, Socials, Photo Gallery), shot headless
+// at the TV screen's shape (scratchpad/site-shots.cjs; retake them after visual changes):
+import portfolioTitle from './assets/projects/shots/portfolio_title.png'
+import portfolioMenu from './assets/projects/shots/portfolio_menu.png'
+import portfolioSocials from './assets/projects/shots/portfolio_socials.png'
+import portfolioGallery from './assets/projects/shots/portfolio_gallery.png'
 import unityClashImage from './assets/projects/container_imgs/unity_clash.png'
 
 /**
@@ -159,35 +165,38 @@ export const PROJECTS: Project[] = [
     name: 'Portfolio',
     title: 'Portfolio Site',
     image: portfolioImage,
+    shots: [portfolioTitle, portfolioMenu, portfolioSocials, portfolioGallery],
     year: 2026,
     tagline: "The retro game menu you're scrolling right now.",
     kind: 'Web, front end',
     when: 'Nov 2026, personal',
-    tech: ['TypeScript', 'CSS', 'Vite', 'WebGL'],
-    gist: "A portfolio website that behaves like the menu of a retro console game: navigate with the arrow keys, Enter and B, or just mouse and touch. It's built with Vite and plain TypeScript, no framework, with smooth performance on mid-range phones as a priority. All the pixel art and UI graphics are my own.",
+    tech: ['TypeScript', 'Vite', 'Canvas', 'WebGL', 'Web Audio', 'REST'],
+    gist: "A portfolio website that behaves like the menu of a retro console game: navigate with the arrow keys, Enter and B, or just mouse and touch. Vite and plain TypeScript, no framework, with smooth performance on mid-range phones as the first priority. The pixel art is drawn in code or my own; the photos come from Cloudinary over its REST API, and the language stats on these cards from GitHub's.",
     funFact: 'The menus are inspired by Sonic Mania, and so is the soundtrack.',
     features: [
-      'Game-style menu. Slanted pixel-art buttons bounce when selected; the label hops a touch ahead of its button and flashes on confirm.',
-      'Corner key prompts. Back, mute and confirm work by keyboard, click or tap.',
-      'Soundtrack. A random track per screen with a "Now Playing" pop-up; mute is remembered between visits.',
-      'Shader backdrop. Two pulsing rings drawn by a WebGL fragment shader in a single draw call, with an SVG fallback, roughly halving main-thread work.',
-      'Projects carousel, with a details pop-up for every card, in pixel fonts rebuilt frame by frame from a reference clip.',
-      'Built for phones. WebP images at build time, assets loaded in order of need, and Web Audio for instant sound effects.',
+      'Game-style menu. Slanted pixel-art buttons that bounce, and a TV previewing each page with its own little show.',
+      "REST APIs. Photos listed from Cloudinary's JSON endpoint and fetched at fixed sizes via URL transforms; language shares from GitHub's repository API.",
+      'Build pipeline. Vite and imagetools make WebP from every PNG, FFmpeg normalises the soundtrack, and a service worker caches the hashed assets.',
+      'Rendering. Canvas pixel art at one pixel per art pixel; a Mode 7 island and the rings in WebGL shaders, with plain fallbacks.',
+      'Tested headless. Playwright drives Chrome at phone and desktop sizes: screenshots, round trips, and main-thread cost on a throttled phone.',
+      'Built for phones. Assets in order of need, transform-only animations, Web Audio effects, and mute remembered between visits.',
     ],
     numbers: [
       { value: '0', label: 'frameworks' },
-      { value: '1', label: 'draw call per frame for the rings' },
+      { value: '2', label: 'REST APIs (Cloudinary, GitHub)' },
+      { value: '20 ms', label: 'of main-thread work a second for the spinning island on a slow phone' },
       { value: '12', label: 'project cards so far' },
     ],
     milestones: [
       { when: 'Nov 13, 2026', text: 'Title screen and main menu.' },
       { when: 'Same day', text: 'Projects carousel, pixel font and page banners; the menu, prompts and page wipe matched to the reference clip.' },
-      { when: 'Nov 14', text: 'README screenshots refreshed; the Photo Gallery pinned up.' },
-      { when: 'Next', text: 'About Me and Socials pages.' },
+      { when: 'Nov 14', text: 'The Photo Gallery pinned up over Cloudinary; README screenshots refreshed.' },
+      { when: 'Nov 15 to 16', text: "Project pop-ups as game dialogs with a TV of pictures each; the Socials page as a character select; a show per menu button; the title screen rebuilt around the reference's medal over a spinning island." },
+      { when: 'Next', text: 'About Me page.' },
     ],
     languages: [
-      { name: 'TypeScript', share: 79.6, color: '#3178c6' }, { name: 'CSS', share: 18.4, color: '#663399' },
-      { name: 'HTML', share: 1.1, color: '#e34c26' }, { name: 'JavaScript', share: 0.8, color: '#f1e05a' },
+      { name: 'TypeScript', share: 77.5, color: '#3178c6' }, { name: 'CSS', share: 21.3, color: '#663399' },
+      { name: 'HTML', share: 0.7, color: '#e34c26' }, { name: 'JavaScript', share: 0.5, color: '#f1e05a' },
     ],
     logos: [typescript, css],
     url: 'https://github.com/Asdy419/latifs_website',
@@ -387,8 +396,8 @@ export const PROJECTS: Project[] = [
     kind: 'Optimisation, metaheuristics',
     when: 'Jan to Feb 2026, coursework',
     tech: ['Python standard library only'],
-    gist: "The Travelling Salesman Problem asks for the shortest route that visits every city once and returns home. The number of possible routes explodes factorially, so brute force is hopeless. This project built two nature-inspired solvers inside a strict coursework skeleton, a Genetic Algorithm and a discrete Particle Swarm Optimiser, then pushed both well beyond their lecture versions with custom operators and local search. Both run under time limits on nothing but Python's standard library.",
-    funFact: 'Particle swarms were designed for smooth, continuous spaces. The travelling salesman is a discrete problem, so we need to make some adjustments. Here the particles "fly" through permutations, so a velocity is really a to-do list of city swaps.',
+    gist: "The Travelling Salesman Problem asks for the shortest route that visits every city once and returns home; the number of routes explodes factorially, so brute force is hopeless. This project built two nature-inspired solvers, a Genetic Algorithm and a discrete Particle Swarm Optimiser, and pushed both well beyond their lecture versions with custom operators and local search, under time limits, on Python's standard library alone.",
+    funFact: 'Particle swarms were made for smooth, continuous spaces; the travelling salesman is discrete. Here the particles "fly" through permutations, so a velocity is really a to-do list of city swaps.',
     features: [
       'Breeding. OX4 crossover and tournament selection make good tours from good parents.',
       'Two-phase mutation. Improving 2-opt moves paired with inverted displacement.',

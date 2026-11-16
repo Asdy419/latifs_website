@@ -101,6 +101,7 @@ const LOSSY_SHOTS = [
   'tsp_pso_swarm.png', 'bitcoin_voronoi.png', 'mars_speed_sketch.png', 'horses_samples.png',
   'clash_title.png', 'clash_menu.png', 'clash_stage.png',
   'xray_restored.png', 'xray_geometry.png', 'xray_inpaint.png',
+  'portfolio_title.png', 'portfolio_menu.png', 'portfolio_socials.png', 'portfolio_gallery.png',
 ]
 const LOSSY = new RegExp(`/\\w+_banner\\.png$|/shots/(${LOSSY_SHOTS.map(n => n.replace('.', '\\.')).join('|')})$`)
 
