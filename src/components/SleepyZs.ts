@@ -6,9 +6,10 @@ import { drawColorGrid } from '../utils/pixelArt'
  * cat that used to be here is gone; "just a bunch of big zs floating around after the room goes
  * dark"). On the GitHub hop's grey, with a floor, nothing stirs for a moment; then the grey fades
  * slowly to a really dark grey (not black), the floor with it, and once it's fully dark Zs drift
- * slowly up from the bottom left towards the top right, swaying as they go and growing the higher
- * they float (the user's calls), each dim as it appears, bright through the middle of its life
- * and dim again before it goes. Only the Zs loop; the room darkens again
+ * slowly up from low on the left towards the screen's top right corner, each along its own arc so
+ * the paths fan out, swaying as they go and growing the higher they float (the user's calls),
+ * each dim as it appears, bright through the middle of its life and dim again before it goes.
+ * Only the Zs loop; the room darkens again
  * only when the TV tunes back to Exit. Flat pixel art with dark outlines, like the other shows.
  * With reduced motion: the dark room with a few Zs, still.
  *
@@ -30,8 +31,8 @@ const FLOOR_TOP = 116
 /** In ms: the grey room, then its slow fade to the dark, then the Zs. */
 const AWAKE = 1300, FADE = 2600
 const DARK = AWAKE + FADE
-/** One Z every Z_EVERY ms, each rising for Z_LIFE ms, dim for its first and last DIM_FOR. */
-const Z_EVERY = 700, Z_LIFE = 4500, DIM_FOR = 600
+/** One Z every Z_EVERY ms, each rising for Z_LIFE ms (slowly: the user's call), dim for its first and last DIM_FOR. */
+const Z_EVERY = 1100, Z_LIFE = 7500, DIM_FOR = 900
 
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)')
 
@@ -93,11 +94,16 @@ export class SleepyZs implements TvShow {
       const u = age / Z_LIFE
       const step = Math.min(SIZES.length - 1, Math.floor(u * SIZES.length))
       const sprite = this.zs[step][age < DIM_FOR || age > Z_LIFE - DIM_FOR ? 0 : 1]
-      // from low on the left, each aimed loosely at the screen's top right corner (the user's
-      // call; the visible screen's corner is at about (326, 11)), with a little sway
-      const x0 = 45 + hash(k * 3 + 2) * 70, x1 = 285 + hash(k * 3 + 1) * 35
-      const cx = x0 + u * (x1 - x0) + Math.sin(u * 9 + hash(k * 3 + 3) * 6.3) * 7
-      const cy = 160 - u * 150
+      // from low on the left to the screen's top right corner (about (326, 11)), each along its
+      // own arc, bowing one way or the other of the straight line so the paths fan out towards
+      // the corner (the user's call), with a little sway
+      const x0 = 45 + hash(k * 3 + 2) * 70, y0 = 160, x1 = 288 + hash(k * 3 + 1) * 25, y1 = 14
+      const bend = (hash(k * 7 + 5) - 0.5) * 130
+      const len = Math.hypot(x1 - x0, y1 - y0), nx = -(y1 - y0) / len, ny = (x1 - x0) / len
+      const px = (x0 + x1) / 2 + nx * bend, py = (y0 + y1) / 2 + ny * bend // the arc's control point
+      const w0 = (1 - u) * (1 - u), w1 = 2 * (1 - u) * u, w2 = u * u
+      const cx = w0 * x0 + w1 * px + w2 * x1 + Math.sin(u * 7 + hash(k * 3 + 3) * 6.3) * 5
+      const cy = w0 * y0 + w1 * py + w2 * y1
       ctx.drawImage(sprite, Math.round(cx - sprite.width / 2), Math.round(cy - sprite.height / 2))
     }
   }

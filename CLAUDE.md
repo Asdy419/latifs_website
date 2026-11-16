@@ -341,9 +341,11 @@ Component/scene CSS sits next to its `.ts` file and is imported by it.
     room is the sleepy cat's (now deleted): the hop's grey with a floor, fading slowly (2.6 s
     after 1.3 s awake) to a really dark grey `#1e2024`, not black, the floor with it. Only once
     it's dark do the Zs come: pixel-art Zs (a dark outline) drifting slowly up from low on the
-    left, each aimed loosely at the screen's top right corner, swaying as they go and growing
-    the higher they float (10 to 38 px in eight steps: the user's calls), each dim as it appears, bright in the middle of its life and dim again
-    before it goes, one every 700 ms for 4.5 s, so about six float at once.
+    left to the screen's top right corner, each along its own arc (a quadratic curve bowing
+    one way or the other of the straight line) so the paths fan out, swaying as they go and
+    growing the higher they float (10 to 38 px in eight steps: the user's calls), each dim as
+    it appears, bright in the middle of its life and dim again before it goes, one every 1.1 s
+    for 7.5 s (slowly: the user's call), so about seven float at once.
     Only the Zs loop; the room darkens again only when the TV tunes back to Exit. With reduced
     motion: the dark room with a few Zs, still.
   - Loading order on the home page: "press any button" image (fetchpriority high; the logo
