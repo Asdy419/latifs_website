@@ -130,9 +130,10 @@ export class CameraFlash implements TvShow {
  * periods, every ninth flaring into a little cross while bright; a third are faint, far ones.
  */
 const SKY = '#0b1433'
+// scattered evenly but not on a grid (the R2 sequence; hashed positions bunched up top left)
 const STARS = Array.from({ length: 230 }, (_, i) => ({
-  x: 37 + Math.floor(hash(i * 3 + 1) * 293),
-  y: 2 + Math.floor(hash(i * 3 + 2) * 164),
+  x: Math.floor(((0.5 + i * 0.7548776662) % 1) * 330),
+  y: Math.floor(((0.5 + i * 0.5698402910) % 1) * 180),
   period: 900 + Math.floor(hash(i * 3 + 3) * 1600),
   big: i % 9 === 0,
   faint: i % 3 === 1,

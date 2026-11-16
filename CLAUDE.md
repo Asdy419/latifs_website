@@ -319,7 +319,8 @@ Component/scene CSS sits next to its `.ts` file and is imported by it.
   - It's drawn flat (three silvers, flat black leather, flat glow rings): the user found a
     shaded take too busy. No brand name, only marks. Behind it, a starry night sky and nothing
     else, as if looking straight up (the user's calls; a lake with the moon's path on it and a
-    treeline came first, then a banded sky): one deep blue, 230 stars everywhere, most twinkling
+    treeline came first, then a banded sky): one deep blue, 230 stars scattered evenly by the R2
+    sequence (hashed positions bunched up top left), most twinkling
     between white and a dim blue on their own periods, every ninth flaring into a little cross,
     a third of them faint. With reduced motion it
     holds the camera at rest: no shake, no flash. Its cost on a 4x-throttled phone is within a
