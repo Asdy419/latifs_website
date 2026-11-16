@@ -344,7 +344,7 @@ Component/scene CSS sits next to its `.ts` file and is imported by it.
     of fairy lights twinkling along its top (drawn live; a pink LED strip above them was
     removed: the user's call), a bed with its
     plump pale blue pillow at the left end (a wooden rounded headboard and frame, the mattress one
-    light blue all over, top and side, and the blanket, blue, laid over the far part of
+    light blue all over, its top lower than the blanket's with the pillow sitting on it, and the blanket, blue, laid over the far part of
     the bed only, from past the pillow to a little beyond the foot, where the user drew it: lit
     along its top, the top corner of its end rounded and its bottom cut off square), a
     bedside table with a lamp, two posters and a clock, a window on the

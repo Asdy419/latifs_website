@@ -174,7 +174,8 @@ function roomCanvas(): HTMLCanvasElement {
   rect(190, 56, 194, 56, '#4a4660')
 
   // the bed, side on, its head at the left: a wooden headboard with a rounded top and a lighter
-  // inner panel; the mattress one light blue all over (the user's call); the blanket laid
+  // inner panel; the mattress one light blue all over, its top lower than the blanket's (the user's
+  // calls), the pillow sitting on it; the blanket laid
   // over the far part of the bed only, from past the pillow to a little beyond the foot (the user
   // drew where), lit along its top, darker at its edges, a few folds, the top corner of its end
   // rounded and its bottom cut off square; a plump pale pillow; the frame and legs wood
@@ -183,7 +184,7 @@ function roomCanvas(): HTMLCanvasElement {
   rect(47, 83, 51, 83, '#6b4327')
   rect(47, 88, 51, 128, '#7d5232')
   rect(46, 84, 52, 84, '#8a5c38')
-  rect(54, 108, 178, 133, '#8fb0e6')
+  rect(54, 114, 178, 133, '#8fb0e6')
   rect(54, 133, 178, 133, '#6a8cd0')
   rect(88, 108, 181, 124, '#4a74c8')
   rect(88, 108, 181, 110, '#6f94dd')
@@ -192,11 +193,11 @@ function roomCanvas(): HTMLCanvasElement {
   for (const [x0, x1] of [[104, 112], [128, 136]]) rect(x0, 113, x1 + 10, 113, '#3f64b4') // folds
   rect(179, 113, 179, 121, '#3f64b4')
   for (const [x, y] of [[181, 108], [180, 108], [181, 109]]) rect(x, y, x, y, '#7a68b4')
-  rect(58, 97, 92, 108, '#d7e4f7')
-  rect(59, 96, 91, 96, '#d7e4f7')
-  rect(57, 98, 57, 107, '#d7e4f7')
-  rect(93, 98, 93, 107, '#d7e4f7')
-  rect(74, 99, 74, 106, '#bcd0ee') // its crease
+  rect(58, 103, 92, 114, '#d7e4f7')
+  rect(59, 102, 91, 102, '#d7e4f7')
+  rect(57, 104, 57, 113, '#d7e4f7')
+  rect(93, 104, 93, 113, '#d7e4f7')
+  rect(74, 105, 74, 112, '#bcd0ee') // its crease
   rect(52, 134, 180, 139, '#5a3a22')
   rect(52, 134, 180, 134, '#7a5232')
   rect(54, 140, 59, 150, '#5a3a22')
