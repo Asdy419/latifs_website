@@ -173,9 +173,10 @@ function roomCanvas(): HTMLCanvasElement {
   rect(190, 50, 190, 56, '#4a4660')
   rect(190, 56, 194, 56, '#4a4660')
 
-  // the bed, side on, its head at the left: a headboard with a rounded top and a lighter inner
-  // panel; the duvet, lit along its top and darker at its edge, the sheet turned down at the head,
-  // a folded blanket at the foot; a plump pillow; the mattress's white side; the frame and legs
+  // the bed, side on, its head at the left: a wooden headboard with a rounded top and a lighter
+  // inner panel, the frame and legs wood too; everything on it blue (the user's calls): the duvet,
+  // lit along its top and darker at its edge, the pale sheet turned down at the head, a plump pale
+  // pillow, the mattress's side
   rect(45, 86, 53, 132, '#6b4327')
   rect(46, 84, 52, 85, '#6b4327')
   rect(47, 83, 51, 83, '#6b4327')
@@ -185,20 +186,16 @@ function roomCanvas(): HTMLCanvasElement {
   rect(54, 108, 178, 110, '#6f94dd')
   rect(54, 123, 178, 124, '#3a5ca6')
   for (const [x0, x1] of [[104, 112], [128, 136]]) rect(x0, 113, x1 + 10, 113, '#3f64b4') // folds
-  rect(54, 108, 98, 113, '#f3f1f6')
-  rect(54, 113, 98, 114, '#d9d6de')
-  rect(140, 110, 176, 122, '#d9775a')
-  rect(140, 110, 176, 111, '#e8927a')
-  rect(140, 116, 176, 116, '#b85e44')
-  rect(140, 122, 176, 122, '#b85e44')
-  rect(58, 97, 92, 108, '#f6f4f8')
-  rect(59, 96, 91, 96, '#f6f4f8')
-  rect(57, 98, 57, 107, '#f6f4f8')
-  rect(93, 98, 93, 107, '#f6f4f8')
-  rect(74, 99, 74, 106, '#e4e1ea') // its crease
-  rect(58, 108, 92, 108, '#dad7e0')
-  rect(54, 125, 178, 133, '#e8e4ec')
-  rect(54, 133, 178, 133, '#cfc9d6')
+  rect(54, 108, 98, 113, '#b3c8ee')
+  rect(54, 113, 98, 114, '#8fa9d8')
+  rect(58, 97, 92, 108, '#d7e4f7')
+  rect(59, 96, 91, 96, '#d7e4f7')
+  rect(57, 98, 57, 107, '#d7e4f7')
+  rect(93, 98, 93, 107, '#d7e4f7')
+  rect(74, 99, 74, 106, '#bcd0ee') // its crease
+  rect(58, 108, 92, 108, '#a9c0ea')
+  rect(54, 125, 178, 133, '#8fb0e6')
+  rect(54, 133, 178, 133, '#6a8cd0')
   rect(52, 134, 180, 139, '#5a3a22')
   rect(52, 134, 180, 134, '#7a5232')
   rect(54, 140, 59, 150, '#5a3a22')
