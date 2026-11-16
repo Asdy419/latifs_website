@@ -340,12 +340,12 @@ Component/scene CSS sits next to its `.ts` file and is imported by it.
     instead just make it a bunch of big zs floating around after the room goes dark"). The
     room is the sleepy cat's (now deleted): the hop's grey with a floor, fading slowly (2.6 s
     after 1.3 s awake) to a really dark grey `#1e2024`, not black, the floor with it. Only once
-    it's dark do the Zs come: pixel-art Zs (a dark outline) drifting slowly up from low on the
-    left to the screen's top right corner, each along its own arc (a quadratic curve bowing
-    one way or the other of the straight line) so the paths fan out, swaying as they go and
-    growing the higher they float (10 to 38 px in eight steps: the user's calls), each dim as
-    it appears, bright in the middle of its life and dim again before it goes, one every 1.1 s
-    for 7.5 s (slowly: the user's call), so about seven float at once.
+    it's dark do the Zs come: pixel-art Zs (a dark outline) setting off from the bottom left
+    corner, each on its own straight heading anywhere between 13 and 56 degrees above horizontal
+    (the user drew the two bounds on a screenshot), flying slowly (22 px/s, a little sway),
+    growing as they go (10 to 38 px in eight steps over the longest flight), dim for their
+    first 0.9 s, and off the screen past the top or the slanted right edge (the user's calls),
+    one every 1.1 s.
     Only the Zs loop; the room darkens again only when the TV tunes back to Exit. With reduced
     motion: the dark room with a few Zs, still.
   - Loading order on the home page: "press any button" image (fetchpriority high; the logo
