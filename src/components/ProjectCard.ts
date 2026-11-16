@@ -11,10 +11,13 @@ import { playSelectJump } from '../utils/selectJump'
  */
 const ART = { CENTER_X: 43, CENTER_Y: 38, MAX_W: 74, MAX_H: 64, AREA: 54 * 54 }
 
-/** A picture's size in art px: AREA in its own proportions, shrunk to fit MAX_W × MAX_H. */
-function artSize(naturalWidth: number, naturalHeight: number): { width: number; height: number } {
+/**
+ * A picture's size in art px: AREA in its own proportions (`scale` times as big each way:
+ * Project.cardImageScale), shrunk to fit MAX_W × MAX_H.
+ */
+function artSize(naturalWidth: number, naturalHeight: number, scale = 1): { width: number; height: number } {
   const ratio = naturalWidth > 0 && naturalHeight > 0 ? naturalWidth / naturalHeight : 1
-  let width = Math.sqrt(ART.AREA * ratio)
+  let width = Math.sqrt(ART.AREA * ratio) * scale
   let height = width / ratio
   const fit = Math.min(1, ART.MAX_W / width, ART.MAX_H / height)
   width *= fit
@@ -39,9 +42,30 @@ export interface Project {
   year: number
   /** One fun line (opens the Overview). */
   tagline: string
+  /**
+   * Where the picture's subject is, top to bottom, as a fraction of its height (0.5 if not
+   * given) as served, after the build trims its empty edges (cardArt, vite.config.ts): the
+   * pop-up's header centres that on the title and the line under it (Mars Allocator's rover
+   * is centred on its box, not its mast: the user's call).
+   */
+  imageCentre?: number
+  /**
+   * How much bigger the pop-up's header draws the picture than its 24 pp slot (1 if not
+   * given): it grows round its middle, over the slot's edges, so the title stays put. For
+   * pictures far from square, which fill less of the slot (Horses From Noise's and Mystic
+   * Messaging's: the user's call).
+   */
+  imageScale?: number
+  /**
+   * How much bigger the box draws the picture, each way, than the area every picture gets
+   * (ART; 1 if not given; still inside the panel's limits): for a sparse drawing that looks
+   * small at that area (Kinemechanics': the user's call).
+   */
+  cardImageScale?: number
   /** What kind of project, under the picture ("Systems programming"). */
   kind: string
-  /** When, and what sort ("Dec 2025, coursework"), under that. */
+  /** When, and what sort ("Dec 2025, coursework"). Not shown at the moment: the pop-up's header
+   *  dropped it, as the Timeline tab has the dates (the user's call). */
   when: string
   /** Tools and libraries, under that (optional). */
   tech?: string[]
@@ -115,7 +139,7 @@ export class ProjectCard {
       const img = el.querySelector<HTMLImageElement>('.project-card-image')!
       // shown once it has loaded and been given its size (see ART)
       const place = () => {
-        const { width, height } = artSize(img.naturalWidth, img.naturalHeight)
+        const { width, height } = artSize(img.naturalWidth, img.naturalHeight, project.cardImageScale)
         const px = (n: number) => `calc(${+n.toFixed(2)} * var(--px))`
         img.style.width = px(width)
         img.style.height = px(height)

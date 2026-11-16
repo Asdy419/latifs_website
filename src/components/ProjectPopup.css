@@ -9,7 +9,7 @@
  *
  *   ┌──────────────────────────────────────────────────────────────┐
  *   │ [pic] TITLE                       [logos] [▮▮▮▮▮▮▮▮▮▯▯] │
- *   │       kind · when                         legend        │
+ *   │       kind                                legend        │
  *   ├──────────────────────────────────────────────────────────────┤
  *   │   \  /              [OVERVIEW] [FEATURES] [NUMBERS] [TIMELINE] │
  *   │ ┌──────────────────┐                                          │
@@ -179,6 +179,11 @@
   width: calc(24 * var(--pp));
   height: calc(24 * var(--pp));
   margin-block: calc(-2 * var(--pp));
+  /* its subject's middle (Project.imageCentre, as a fraction of its height) where its own would
+     be; bigger for a picture far from square (Project.imageScale), round its middle, so the
+     title doesn't move */
+  translate: 0 calc((0.5 - var(--image-centre, 0.5)) * 24 * var(--image-scale, 1) * var(--pp));
+  scale: var(--image-scale, 1);
   object-fit: contain;
   image-rendering: pixelated;
 }
@@ -193,17 +198,18 @@
 .project-popup-heading {
   align-self: flex-start; /* (as wide as the name: ProjectPopup.centreNameOnTV centres it) */
   margin: 0;
-  font-size: 2.2em;
+  font-size: 2.6em; /* (the user's call: bigger, the line under it smaller) */
   font-weight: normal;
   line-height: 0;
 }
 
-/* under the title, lined up with it (the user's call): what kind of project (in red), and when */
+/* under the title, lined up with it (the user's call): what kind of project (in red; no date:
+   the Timeline tab has it, the user's call) */
 .project-popup-meta {
   display: flex;
   flex-wrap: wrap;
   gap: var(--gap-xs) var(--gap-m);
-  font-size: 0.85em;
+  font-size: max(6px, 0.7em); /* (small, the user's call; not below 6 px on phones, where 0.7em is 5.6) */
 }
 
 /* ── Middle: the picture side and the sections ────────────────────────── */
@@ -979,14 +985,18 @@
    everything on it (183 ms, easing out like the clip's: ProjectPopup.ts OPENING_MS, kept in step
    with these). The buttons ride in with the rest (the clip's OK jumps as it lands; the user
    didn't want that). Plain numbers in the keyframes, no var(): Safari sizes var() in transform
-   keyframes wrongly (utils/selectJump.ts). Transforms only, so the compositor plays it. */
+   keyframes wrongly (utils/selectJump.ts). Transforms only, so the compositor plays it.
+   Filled backwards only (the start held through the face's delay): their end is how they look
+   anyway, and once they're over the band, the face and the panel's parts can paint as one again.
+   Filled forwards too they stayed GPU layers for good, and switching tabs quickly (their content
+   changing) made the band and the face flicker over each other (the user saw it). */
 .project-popup-slanted .project-popup-panel::before {
-  animation: popup-band-open 250ms linear both;
+  animation: popup-band-open 250ms linear backwards;
 }
 
 .project-popup-slanted .project-popup-panel::after,
 .project-popup-slanted .project-popup-panel > * {
-  animation: popup-slide-in 183ms cubic-bezier(0.5, 1, 0.89, 1) 250ms both;
+  animation: popup-slide-in 183ms cubic-bezier(0.5, 1, 0.89, 1) 250ms backwards;
 }
 
 @keyframes popup-band-open {

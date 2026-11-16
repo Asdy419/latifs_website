@@ -1,7 +1,7 @@
 import './ProjectPopup.css'
 import { PixelLabel } from './PixelText'
 import { languageBar, languageLabel, type Project } from './ProjectCard'
-import { staticCanvas } from './TvStatic'
+import { OPEN_TUNE_MS, staticCanvas, TUNE_MS } from './TvStatic'
 import { sfx, playSfx } from '../utils/audio'
 import { drawColorGrid } from '../utils/pixelArt'
 import { measureText, TEXT_FONT_HEIGHT } from '../utils/textFont'
@@ -32,7 +32,7 @@ const SLANTED = true
  *  - on the left: the project's pictures (`shots`) on the screen of a
  *    pixel-art TV (tvArt, below), one per tab: switching tabs tunes it in
  *    (static, then the next picture; still static with none), what kind of
- *    project it is and when, and its languages
+ *    project it is, and its languages
  *  - on the right: the write-up in sections (Overview, Features, Numbers,
  *    Timeline), switched with ← → or the tabs; ↑ ↓ scroll a long one
  *  - along the bottom: links and Close
@@ -110,7 +110,12 @@ export class ProjectPopup {
 
     // top: the title with the project's picture beside it, over the TV (centreNameOnTV; the year
     // heads the Timeline tab instead: the user's call, no repeats)
-    if (project.image) q('.project-popup-ident').prepend(image(project.image, 'project-popup-icon'))
+    if (project.image) {
+      const icon = image(project.image, 'project-popup-icon')
+      if (project.imageCentre !== undefined) icon.style.setProperty('--image-centre', String(project.imageCentre))
+      if (project.imageScale !== undefined) icon.style.setProperty('--image-scale', String(project.imageScale))
+      q('.project-popup-ident').prepend(icon)
+    }
     q('.project-popup-heading').append(label(project.title))
 
     // left: the screenshot, on the pixel-art TV's screen (static when there isn't one)
@@ -128,8 +133,8 @@ export class ProjectPopup {
     screen.style.height = pct(TV_SCREEN.height + 2, TV.height)
     q('.project-popup-static').append(staticCanvas(TV_SCREEN.width, TV_SCREEN.height))
     q<HTMLImageElement>('.project-popup-picture').alt = `${project.title} project image`
-    // under the title: what kind of project, and when
-    q('.project-popup-meta').append(label(project.kind, 'project-popup-kind'), label(project.when))
+    // under the title: what kind of project (not when: the Timeline tab has that; the user's call)
+    q('.project-popup-meta').append(label(project.kind, 'project-popup-kind'))
     // top right, before the year: the language logos, then the languages' bar with its legend
     q('.project-popup-logos').append(...project.logos.map(src => image(src)))
     q('.project-popup-legend').append(...project.languages.map(l => {
@@ -685,11 +690,6 @@ function yearFlag(year: number): HTMLElement {
   flag.append(digits)
   return flag
 }
-
-/** How long the TV shows static, at least, when it tunes to another tab's picture (ProjectPopup.tuneTV). */
-const TUNE_MS = 260
-/** The same when the pop-up opens: a little longer, like a set warming up. */
-const OPEN_TUNE_MS = 420
 
 /**
  * The experiment's opening (ProjectPopup.css, "The opening"): the band opens (250 ms), then the
