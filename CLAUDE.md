@@ -219,6 +219,17 @@ Component/scene CSS sits next to its `.ts` file and is imported by it.
     and the original projectile shot) without the Windows title bar, brought to 1.92:1
     without cutting anything (the menu: a window of its empty black rows; the others: the
     left edge padded with the app's own flat colours, per row), then a SUVAT diagram.
+  - The CHIP-8 Emulator's come from the user's screen recording of it (`reference/Chip 8
+    Emulator.mp4`: silent, 1280 x 720, Visual Studio 2022 with the emulator's 1024 x 512 window;
+    no public repo, so no GitHub button and no language shares). Pong and the IBM logo are the
+    emulator's own 64 x 32 pixels read back off the frames (each 16 x 16 block sampled at its
+    middle; the window's client area starts at (128, 105) in a frame) and drawn 15x on black,
+    padded 9 rows above and 10 below to 960 x 499. cycle()'s first lines and the PUZZLE ROM's
+    first 304 bytes are typed out from the frames and drawn as a VS Code Dark+ editor view
+    (`scratchpad/chip8-editor.cjs`, Playwright: a JSON spec of tabs and lines). The frames show
+    the user's full name in file paths and the taskbar's clock: never use a raw frame. The box's
+    picture is the user's own "C8" tile (white on black, kept opaque: it reads as a tiny CHIP-8
+    screen), and the box is called "Emulator" (the user's call).
   - Pictures from the user's own write-ups (`reference/expanded_imgs/`, e.g. the
     Zero-Shot EEG report): figures rendered from the PDF with PyMuPDF (in a scratchpad
     venv), each figure's bounds taken from the page's vector drawings and text so no

@@ -143,6 +143,8 @@ src/
   game's other composers). They're used in this non-commercial personal project, and all
   rights belong to their owners.
 - Language logos on the project cards: made from [Devicon](https://devicon.dev/) (MIT).
+- The CHIP-8 Emulator's TV pictures are its own screens, from my recording of it running
+  public-domain CHIP-8 programs (Pong, the IBM logo, Puzzle), and its code.
 - Pictures on the Projects page's TV, from Wikimedia Commons (in `src/assets/projects/shots/`).
   Each is cropped or fitted to the TV screen's shape (on its own background colour) and resized;
   the adaptations of CC BY-SA works are shared under the same licence:

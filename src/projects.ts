@@ -40,6 +40,13 @@ import physicsMenu from './assets/projects/shots/physics_menu.png'
 import physicsCollisions from './assets/projects/shots/physics_collisions.png'
 import physicsProjectile from './assets/projects/shots/physics_projectile.png'
 import physicsSuvat from './assets/projects/shots/physics_suvat.png'
+// The CHIP-8 emulator, from the user's screen recording (reference/Chip 8 Emulator.mp4): Pong and
+// the IBM logo as the emulator drew them (its 64 x 32 pixels read back off the video), cycle()'s
+// fetch-and-decode and a ROM's bytes re-set as editor views (scratchpad/chip8-editor.cjs):
+import chip8Pong from './assets/projects/shots/chip8_pong.png'
+import chip8Code from './assets/projects/shots/chip8_code.png'
+import chip8Rom from './assets/projects/shots/chip8_rom.png'
+import chip8Ibm from './assets/projects/shots/chip8_ibm.png'
 // Unity Clash: its title screen, menu and stage (the last two in the Unity editor), each widened
 // or heightened with its own edge colours, then PlayerMovement.cs's jump logic in an editor:
 import clashTitle from './assets/projects/shots/clash_title.png'
@@ -75,6 +82,7 @@ import tspImage from './assets/projects/container_imgs/tsp_solvers.png'
 import toxicityBiasAuditImage from './assets/projects/container_imgs/toxicity_bias_audit.png'
 import horsesFromNoiseImage from './assets/projects/container_imgs/horses_from_noise.png'
 import kinemechanicsImage from './assets/projects/container_imgs/kinemechanics.png'
+import chip8Image from './assets/projects/container_imgs/chip8.png'
 import portfolioImage from './assets/projects/container_imgs/portfolio_site.png'
 // The Portfolio: the site's own screens (title, main menu, Socials, Photo Gallery), shot headless
 // at the TV screen's shape (scratchpad/site-shots.cjs; retake them after visual changes):
@@ -383,6 +391,42 @@ export const PROJECTS: Project[] = [
     languages: [{ name: 'C++', share: 98.9, color: '#f34b7d' }, { name: 'CMake', share: 1.1, color: '#DA3434' }],
     logos: [cpp],
     url: 'https://github.com/Asdy419/SFMLPhysicsProject',
+  },
+  {
+    name: 'Emulator',
+    title: 'CHIP-8 Emulator',
+    image: chip8Image, // (the user's "C8" tile: white on black, like the emulator's screen)
+    shots: [chip8Pong, chip8Code, chip8Rom, chip8Ibm],
+    year: 2022,
+    tagline: 'A 1970s virtual machine, rebuilt in C++ so Pong can run on it again.',
+    kind: 'Emulation, systems programming',
+    when: 'Oct 2022, personal project',
+    tech: ['C++', 'SDL2', 'Visual Studio'],
+    gist: 'An interpreter for CHIP-8, the tiny 1970s virtual machine that hobbyist games were written for. It gives a program 4 KB of memory, 16 registers, a 16-level stack, two 60 Hz timers and a 64 x 32 monochrome screen, then runs it one opcode at a time: fetch two bytes, decode them, execute. SDL2 scales the screen 16x and maps the hex keypad onto the keyboard. Pong, Brix, Tetris and Space Invaders all run on it.',
+    funFact: "The ROM loader prints 'success!!!' when a file opens and 'no work :(' when it doesn't. The demo was recorded at ten to four in the morning.",
+    features: [
+      'Fetch, decode, execute. Every cycle reads two bytes, joins them into a 16-bit opcode and switches on its top nibble to decode it.',
+      'Operands from the bits. X, Y, N, NN and NNN are masked and shifted out of the opcode: two registers, a nibble, a byte or a 12-bit address.',
+      'The instruction set. Jumps, calls and skips, register maths with the carry flag, BCD, memory dumps and the font sprites: 35 opcodes in one big switch.',
+      'XOR sprites. Drawing flips pixels and sets VF on a collision, which is how every CHIP-8 game detects a hit.',
+      'SDL2 front end. A 64 x 32 texture streamed to a 1024 x 512 window, the 16-key hex pad mapped onto 1234 / QWER / ASDF / ZXCV.',
+      'ROM loader. Reads any ROM into memory at 0x200, where programs start, and says so if the file is missing.',
+    ],
+    numbers: [
+      { value: '35', label: 'opcodes decoded by one switch' },
+      { value: '4 KB', label: 'of memory, programs loading at 0x200' },
+      { value: '64 x 32', label: 'pixels, scaled 16x on screen' },
+      { value: '16', label: 'registers, keys and stack levels, each' },
+    ],
+    milestones: [
+      { when: '3 Oct 2022', text: 'Started in Visual Studio: the class, a test ROM and the first opcodes. Two earlier CHIP-8 attempts sit beside it in the repos folder.' },
+      { when: '7 to 9 Oct', text: 'Pong and the IBM logo ROMs arrived, then Brix, Tetris, Space Invaders and a particle test.' },
+      { when: '13 Oct', text: 'The interpreter finished: 408 lines, every opcode in one switch.' },
+      { when: '29 Oct 2022', text: 'Demo recorded at ten to four in the morning: Pong, the IBM logo and Brix, and the loader shrugging at a missing ROM.' },
+      { when: 'Nov 2026', text: 'Joined the portfolio as the Emulator card.' },
+    ],
+    languages: [{ name: 'C++', color: '#f34b7d' }],
+    logos: [cpp],
   },
   {
     name: 'TSP',
