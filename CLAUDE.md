@@ -724,9 +724,20 @@ Component/scene CSS sits next to its `.ts` file and is imported by it.
   - To test without the real account: set `cloudName` to anything and answer
     `res.cloudinary.com` requests from Playwright (`page.route`) with a fake list and
     sharp-generated images; set it back afterwards.
-- **Screen guard**: mouse devices must be maximised/full screen; touch devices must be
-  landscape and at least 480px wide. When testing in headless/emulated browsers, emulate
-  touch or use a full-size window, or the guard blocks all input.
+- **Screen guard** (`core/screenGuard.ts`): mouse devices must be maximised/full screen; touch
+  devices must be landscape and at least 480px wide. When testing in headless/emulated browsers,
+  emulate touch or use a full-size window, or the guard blocks all input.
+  - "Maximised" means the Fullscreen API is on, or the window's frame (outerWidth/Height) covers
+    95% of the screen's available size either way round, or, failing that, its viewport covers
+    95% of the width and 70% of the height (a maximised browser's viewport is all but its
+    toolbars; the frame's size is what browsers get wrong between states, and tablets with a
+    trackpad have none to speak of; page zoom shrinks the viewport but not the frame).
+  - It never judges while the page is hidden (stale or zero sizes), judges again when it shows,
+    re-checks a moment after every change (sizes settle late), listens to resize, visibility,
+    focus, pageshow, fullscreenchange and the media queries, and while the message is up looks
+    again every second regardless. The user had the "maximise" message stick with the tab in
+    full screen until a refresh; a verdict can't stick now. Test: `scratchpad/guard-test.cjs`
+    (headless, with the frame size and document.hidden made overridable).
 - **Windows**: the file system ignores case, so to change a file name's case rename it
   via a temp name (`a.ts → tmp → A.ts`). Imports must match the real case or Linux
   builds break.
