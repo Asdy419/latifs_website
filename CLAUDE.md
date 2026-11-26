@@ -166,8 +166,9 @@ Component/scene CSS sits next to its `.ts` file and is imported by it.
     drawn at most ~70 art px, and the exports reach 3000 x 3000. That took them from
     ~2.5 MB / ~67 MB decoded to ~0.5 MB / ~10 MB. The directive carries a version
     (`cardArt: 'v2'`): bump it whenever cardArt changes, or imagetools' cache serves
-    stale copies (it keys on directives + source bytes). `horses_from_noise.png` (the
-    neural network) had its balls' white glints toned down to 30% of their whiteness, each
+    stale copies (it keys on directives + source bytes). `deep_learning.png` (the neural
+    network; `horses_from_noise.png` before the card covered all five practicals) had its
+    balls' white glints toned down to 30% of their whiteness, each
     to its own ball's colour (the user found them too shiny; edited as raw RGBA through
     ffmpeg, as a canvas round trip would shift the semi-transparent glow; the original is
     in git history). `kinemechanics.png` (the physics logo) was flattened the same way (the
@@ -179,7 +180,7 @@ Component/scene CSS sits next to its `.ts` file and is imported by it.
     each red keeps 25% of its difference from the base red, the glints and their pale edges
     15%; outlines, lines and ring untouched). Per-picture fixes are data, not new art:
     `Project.imageCentre` (where the subject sits), `imageScale` (bigger in the pop-up's
-    header: Horses, Mystic, Kinemechanics, TSP) and `cardImageScale` (bigger on its box:
+    header: Deep Learning, Mystic, Kinemechanics, TSP) and `cardImageScale` (bigger on its box:
     Kinemechanics, TSP).
   - Project pictures are lossless WebP, except photo-like ones listed in `LOSSY_SHOTS`
     (vite.config.ts: photos, shaded art, dense graphs), which get the banners' lossy q92
@@ -202,13 +203,21 @@ Component/scene CSS sits next to its `.ts` file and is imported by it.
     tours side by side, a GA diagram, a PSO swarm (an animation's frame), a
     branch-and-bound search. Bitcoin: Bitcoin Block Data, a Voronoi diagram (1-NN
     regions), a Merkle tree, a payment channel.
-  - Horses From Noise's come from the user's Y3 deep learning folder (`asses_1`, its lab-05
-    submission folder: the DCGAN the site describes; lab-06 is a different, flow model; the
-    folder names hold the user's student number, so never write them into the repo, which
-    is public): 325 generated samples tiled
-    25 x 13 (whole 32 px samples: exactly 1.923:1, scaled 1.2x), then `lab-05-code.py`'s model
-    classes, its results file and its abstract in a VS Code editor view (real line numbers;
-    never its STUDENT_ID line or the AI-acknowledgement block).
+  - Deep Learning (the box says "Neural", the user's pick among "deep learning or neural"; it
+    was Horses From Noise, practicals 5 and 6 only, until the user asked for all of them) covers
+    the five practicals (5 to 9) of the public repo `Asdy419/deep-learning-practicals`: its
+    README is the source of the facts and the authority on numbers (the solution.py abstracts
+    hold tuning-run figures that differ). The user's student number is never in it, nor may
+    it be here (their old local folders' names hold it). Its pictures are the README's own
+    figures (`docs/figures/`), one per stage, in practical order: the horses (the first 3
+    columns of each README panel's 6 x 5 samples, starter GAN | my GAN | my flow model; the
+    panels are exact 3x nearest-neighbour upscales, so each 32 px sample is read back and
+    drawn at 100 px, nearest, with 30 px white gaps, 5 rows filling the height; it stays
+    lossless, which is smaller for its blocks); practical 7's spectrograms and practical 8's
+    "what each change bought" chart (the light versions, flattened on white, trimmed and
+    centred on white with a 16 px margin); practical 9's parrot, starter | mine, each at the
+    full 499 px height trimmed equally at the sides, an 8 px white gap (the X-ray pairs'
+    rule). The spectrograms and the parrot are lossy.
   - Unity Clash's: the title screen and the user's two Unity-editor captures (menu, stage),
     each fitted with its own flat edge colours (per-row sides, or a band of the editor's top
     strip), then `PlayerMovement.cs`'s jump logic (from the repo) in an editor view. The

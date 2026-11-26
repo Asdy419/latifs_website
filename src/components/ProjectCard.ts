@@ -52,7 +52,7 @@ export interface Project {
   /**
    * How much bigger the pop-up's header draws the picture than its 24 pp slot (1 if not
    * given): it grows round its middle, over the slot's edges, so the title stays put. For
-   * pictures far from square, which fill less of the slot (Horses From Noise's and Mystic
+   * pictures far from square, which fill less of the slot (Deep Learning's and Mystic
    * Messaging's: the user's call).
    */
   imageScale?: number

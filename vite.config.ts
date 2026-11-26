@@ -92,13 +92,16 @@ function sharedHead(): Plugin {
  *    is ~75 KB and looks the same at the size they're shown (a mean change of
  *    under 1/255 at 1080p); only 1px edge highlights soften, and only at full zoom.
  *    The same goes for photo-like project pictures (LOSSY_SHOTS: X-rays, a 3D
- *    render, a photographed sketch, a dense dot graph, a map of thin lines), 50-85%
- *    smaller; diagrams, slides and flat-colour figures stay lossless, for crisp text.
+ *    render, a photographed sketch, a dense dot graph, a map of thin lines,
+ *    spectrograms, a parrot), 50-85% smaller; diagrams, slides and flat-colour
+ *    figures stay lossless, for crisp text (and pixel grids like the horse samples,
+ *    whose blocks compress better lossless).
  * The source PNGs are never modified.
  */
 const NEAR_LOSSLESS = /\/menu_logo\.png$/
 const LOSSY_SHOTS = [
-  'tsp_pso_swarm.png', 'bitcoin_voronoi.png', 'mars_speed_sketch.png', 'horses_samples.png',
+  'tsp_pso_swarm.png', 'bitcoin_voronoi.png', 'mars_speed_sketch.png',
+  'deep_learning_speech.png', 'deep_learning_parrot.png',
   'clash_title.png', 'clash_menu.png', 'clash_stage.png',
   'xray_restored.png', 'xray_geometry.png', 'xray_inpaint.png',
   'portfolio_title.png', 'portfolio_menu.png', 'portfolio_socials.png', 'portfolio_gallery.png',

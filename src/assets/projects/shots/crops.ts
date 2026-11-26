@@ -19,7 +19,6 @@ export const PROJECT_SHOT_CROPS: Record<string, { left: number; top: number; wid
   'xray_restoration.png': { left: 3, top: 2, width: 480, height: 482 },
   'tsp_genetic_algorithm.png': { left: 22, top: 7, width: 512, height: 538 },
   'toxicity_bias_audit.png': { left: 105, top: 151, width: 748, height: 512 },
-  'horses_from_noise_samples.png': { left: 6, top: 8, width: 912, height: 912 },
   // Only remove the window chrome: the ball, vectors and full bottom stay visible.
   'kinemechanics_projectile_motion.png': { left: 0, top: 34, width: 987, height: 538 },
 }

@@ -28,12 +28,13 @@ import toxicityOverview from './assets/projects/shots/toxicity_overview.png'
 import toxicityRepresentation from './assets/projects/shots/toxicity_representation.png'
 import toxicityMean from './assets/projects/shots/toxicity_mean.png'
 import toxicityVsd from './assets/projects/shots/toxicity_vsd.png'
-// Horses From Noise (Y3 deep learning, lab 5): 325 of its generated horses, then its code and
-// results file in an editor (real line numbers):
-import horsesSamples from './assets/projects/shots/horses_samples.png'
-import horsesModel from './assets/projects/shots/horses_model.png'
-import horsesResults from './assets/projects/shots/horses_results.png'
-import horsesAbstract from './assets/projects/shots/horses_abstract.png'
+// Deep Learning Practicals: figures from its repo's README (docs/figures/), one per stage: the
+// horses (starter GAN, my GAN, my flow model), practical 7's spectrograms, practical 8's chart of
+// what each change bought, and practical 9's parrot (the starter's copy, then mine):
+import deepLearningHorses from './assets/projects/shots/deep_learning_horses.png'
+import deepLearningSpeech from './assets/projects/shots/deep_learning_speech.png'
+import deepLearningGpt from './assets/projects/shots/deep_learning_gpt.png'
+import deepLearningParrot from './assets/projects/shots/deep_learning_parrot.png'
 // Kinemechanics: its menu, collisions and projectile screens (title bar off, shaped to the TV
 // without cutting anything), then a SUVAT diagram from Wikimedia Commons:
 import physicsMenu from './assets/projects/shots/physics_menu.png'
@@ -80,7 +81,7 @@ import mysticMessagingImage from './assets/projects/container_imgs/mystic_messag
 import xrayRestorationImage from './assets/projects/container_imgs/xray_restoration.png'
 import tspImage from './assets/projects/container_imgs/tsp_solvers.png'
 import toxicityBiasAuditImage from './assets/projects/container_imgs/toxicity_bias_audit.png'
-import horsesFromNoiseImage from './assets/projects/container_imgs/horses_from_noise.png'
+import deepLearningImage from './assets/projects/container_imgs/deep_learning.png'
 import kinemechanicsImage from './assets/projects/container_imgs/kinemechanics.png'
 import chip8Image from './assets/projects/container_imgs/chip8.png'
 import portfolioImage from './assets/projects/container_imgs/portfolio_site.png'
@@ -321,38 +322,41 @@ export const PROJECTS: Project[] = [
     logos: [python],
   },
   {
-    name: 'Horses',
-    title: 'Horses From Noise',
-    image: horsesFromNoiseImage,
+    name: 'Neural',
+    title: 'Deep Learning',
+    image: deepLearningImage,
     imageScale: 1.3, // (wide and short: it fills little of the header's slot)
-    shots: [horsesSamples, horsesModel, horsesResults, horsesAbstract],
+    shots: [deepLearningHorses, deepLearningSpeech, deepLearningGpt, deepLearningParrot],
     year: 2026,
-    tagline: 'A generator and a discriminator in an arms race over 32 × 32 horses.',
-    kind: 'Generative models, deep learning coursework',
+    tagline: 'Small networks that draw horses, say digits, write Shakespeare, then become the data.',
+    kind: 'Generative models, GPT, neural compression',
     when: 'Oct to Nov 2026, coursework',
-    tech: ['Python', 'PyTorch', 'torch-fidelity'],
-    gist: 'Two assessed deep learning practicals, the idea being to train from scratch a generative adversarial network on 4000 CIFAR-10 horse photos, whilst staying under a million parameters, and generating my own set of 1000 new 32x32 horses. These horses would then be scored by kernel inception distance (KID, the lower the score the better). First a DCGAN, where a generator and a discriminator train against each other; then the same horses with flow matching.',
-    funFact: 'The flow model deliberately asks a weakened copy of itself what it would draw, then steers the other way.',
+    tech: ['Python', 'PyTorch', 'NumPy', 'LZMA'],
+    gist: 'Five assessed practicals, each with a small starter model and a score to beat under tight limits, like a million-parameter cap and no outside data. With size capped, most gains had to come from ideas. Images came first: horses from a GAN, then by flow matching, which steers noise into a picture. Then sound (spoken digits) and text (a small Shakespeare GPT). Last, compression: photos, a Bach clip and a cat video each stored as a 1 MB network.',
+    funFact: "Same prompt, two Romeos. The starter: 'the of dit shall bodgine thusbare far'. Mine: 'Saint Paris Paris and her suspect from thee'. Getting there.",
     features: [
-      'Wider, smoother DCGAN. 96- and 128-channel networks (925,734 parameters and buffers), with a normalised 8 x 8 projection and nearest-neighbour upsampling in place of transposed convolutions.',
-      'A harder critic to fool. Half the real horses are mirrored, and everything the discriminator sees is shifted by up to 4 pixels, differentiably, so gradients still reach the generator.',
-      'Adaptive augmentation (ADA). Geometric and colour transforms fire with probability p, which rises whenever the discriminator gets too sure of itself on real horses (target 0.3).',
-      'The sequel: a small U-Net for flow matching. Residual blocks with self-attention at 16 x 16 (922,803 parameters), logit-normal training times and averaged (EMA) weights.',
-      'Autoguidance. Sampling steers away from a deliberately weakened copy of the same network, so guidance costs no extra parameters.',
+      'Horses from a GAN. A generator fakes; a discriminator judges. I widened both and fed the judge mirrored, shifted horses, altered more when it grew too sure.',
+      'Horses by flow matching. A U-Net steers noise into a horse; in later steps it pushes away from a weakened copy of itself, guidance that costs no parameters.',
+      'Spoken digits. Played back, the training spectrograms (pictures of sound) hiss in every silence, which the scorer punishes. Cleaning alone cut my score from 244.0 to 69.7.',
+      'Shakespeare, byte by byte. Models memorise the small text, so my GPT averages 64 randomly thinned copies of itself, trains on made-up names and words, and copies new names.',
+      'Compression by network. Each signal becomes number grids plus a tiny network, every byte priced to fill exactly 1 MB. At that size both photos beat JPEG 2000.',
     ],
     numbers: [
-      { value: '203.5', label: 'KID x1000, the unmodified starter GAN (lower is better)' },
-      { value: '35.2', label: 'KID x1000, my GAN, mean of runs (best 29.3)' },
-      { value: '2.7', label: 'KID x1000, the flow model, best of two seeds' },
+      { value: '10x', label: "lower KID than the lecturer's flow model (lower is better)" },
+      { value: '7th', label: 'of 142 submissions on spoken digits: top 5%' },
+      { value: '1.281', label: "loss on unseen Shakespeare, down from the starter's 1.783" },
+      { value: '64.5 dB', label: 'mean PSNR on photos, Bach and cat video, up from 26.7' },
     ],
     milestones: [
-      { when: 'Oct 2026', text: 'Starter GAN as a baseline: KID x1000 of 203.5.' },
-      { when: 'GAN', text: 'Wider nets, mirroring and shifts: 39.0. With ADA added: a mean of 35.2.' },
-      { when: 'Nov 2026', text: 'Flow matching; autoguidance cut KID x1000 from about 18 to about 5.' },
-      { when: 'Best', text: '16 x 16 attention and shifted training times: 2.7 and 3.1 over two seeds.' },
+      { when: 'Practical 5', text: "A GAN: horse score (lower is better) from 263.2 to 34.7, behind the lecturer's 28.8." },
+      { when: 'Practical 6', text: "Flow matching: the same horses from 202.9 to 2.8, beating the lecturer's 30.6." },
+      { when: 'Practical 7', text: 'Spoken digits by flow matching: 695.5 to 69.7, marked 7th of 142 (median 116.6).' },
+      { when: 'Practical 8', text: 'A Shakespeare GPT: eight rounds of changes kept, more ideas tried and dropped.' },
+      { when: 'Practical 9', text: 'Photos, Bach and a cat video in 1 MB each, Bach at the highest score possible. On GitHub 25 Nov 2026.' },
     ],
-    languages: [PYTHON],
+    languages: [{ ...PYTHON, share: 100 }],
     logos: [python],
+    url: 'https://github.com/Asdy419/deep-learning-practicals',
   },
   {
     name: 'Physics',
